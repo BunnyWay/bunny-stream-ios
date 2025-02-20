@@ -24,7 +24,7 @@ public class BunnyStreamSDK {
     self.transport = transport
     
     self.Api = Client(
-      serverURL: try! Servers.server1(),
+      serverURL: try! Servers.Server1.url(),
       configuration: Configuration(dateTranscoder: CustomISO8601DateTranscoder()),
       transport: transport,
       middlewares: [AuthenticationMiddleware(accessKey: accessKey)]

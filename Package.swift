@@ -14,9 +14,9 @@ let package = Package(
     .library(name: "BunnyLiveStream", targets: ["BunnyLiveStream"])
   ],
   dependencies: [
-    .package(url: "https://github.com/apple/swift-openapi-generator", branch: "main"),
-    .package(url: "https://github.com/apple/swift-openapi-runtime", branch: "main"),
-    .package(url: "https://github.com/apple/swift-openapi-urlsession", branch: "main"),
+    .package(url: "https://github.com/apple/swift-openapi-generator", exact: "1.7.0"),
+    .package(url: "https://github.com/apple/swift-openapi-runtime", exact: "1.8.0"),
+    .package(url: "https://github.com/apple/swift-openapi-urlsession", exact: "1.0.2"),
     .package(url: "https://github.com/tus/TUSKit.git", branch: "main"),
     .package(url: "https://github.com/onevcat/Kingfisher.git", branch: "master"),
     .package(url: "https://github.com/dagronf/SwiftSubtitles.git", branch: "main"),

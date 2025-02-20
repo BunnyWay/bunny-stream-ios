@@ -58,7 +58,7 @@ extension BunnyLiveStreamViewModel {
   
   func registerForPublishEvent() {
     rtmpStream.attachAudio(AVCaptureDevice.default(for: .audio))
-    rtmpStream.attachCamera(AVCaptureDevice.default(.builtInWideAngleCamera, for: .video, position: currentPosition))
+    rtmpStream.attachCamera(AVCaptureDevice.default(.builtInWideAngleCamera, for: .video, position: currentPosition), channel: 0)
   }
   
   func unregisterForPublishEvent() {
@@ -146,8 +146,7 @@ extension BunnyLiveStreamViewModel {
     if let connection = rtmpStream.videoCapture(for: 0) {
       connection.isVideoMirrored = position == .front
     }
-    rtmpStream.attachCamera(AVCaptureDevice.default(.builtInWideAngleCamera, for: .video, position: position))
-    
+    rtmpStream.attachCamera(AVCaptureDevice.default(.builtInWideAngleCamera, for: .video, position: position), channel: 0)
     currentPosition = position
   }
   
