@@ -69,11 +69,12 @@ public struct BunnyVideoPlayer: View {
     loadingState = .loading
     do {
       let videoConfigResponse = try await videoPlayerConfigLoader.load(libraryId: libraryId, videoId: videoId)
-      let video = Video(videoConfigResponse: videoConfigResponse.video, cdn: cdn)
+      var video = Video(videoConfigResponse: videoConfigResponse.video, cdn: cdn)
       let heatmap = try? await heatmapLoader.loadHeatmap(videoId: videoId, libraryId: libraryId, cdn: cdn)
       VideoPlayerConfig(response: videoConfigResponse).map { self.videoConfig = $0 }
       let player = MediaPlayer.make(video: video)
       self.player = player
+      video.adjustLength(player.duration)
       self.theme = VideoPlayerTheme(config: videoConfigResponse) ?? theme
       if let playerIcons {
         self.theme.images = playerIcons

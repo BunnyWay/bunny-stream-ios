@@ -63,4 +63,11 @@ extension Video {
               libraryId: videoConfigResponse.videoLibraryId,
               resolutions: computedResolutions)
   }
+
+  mutating func adjustLength(_ length: Double?) {
+    guard let length else { return }
+    self.length = ceil(length)
+    let originalChapters = self.chaptersList?.chapters.filter { $0.type != .gap && $0.type != .rest } ?? []
+    self.chaptersList = ValidatedChapterList(originalChapters: originalChapters, duration: self.length)
+  }
 }

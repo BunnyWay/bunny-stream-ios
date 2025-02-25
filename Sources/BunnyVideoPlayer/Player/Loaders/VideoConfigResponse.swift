@@ -1,7 +1,7 @@
 import Foundation
 
 struct VideoConfigResponse: Decodable {
-  let video: Video
+  var video: Video
   var captionsFontSize: Int
   var captionsFontColor: String
   var captionsBackground: String
