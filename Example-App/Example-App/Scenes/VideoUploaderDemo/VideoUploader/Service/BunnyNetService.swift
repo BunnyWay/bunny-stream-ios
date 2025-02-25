@@ -17,7 +17,7 @@ final class BunnyNetService {
   
   func createVideo(title: String, libraryId: Int) async throws -> String? {
     let output = try await bunnyStreamSDK.Api.Video_CreateVideo(path: .init(libraryId: Int64(libraryId)),
-                                                                body: .json(.init(title: title)))
+                                                                body: .json(.CreateVideoModel(.init(title: title))))
     switch output {
     case .ok(let okResponse):
       if case .json(let viewModel) = okResponse.body {

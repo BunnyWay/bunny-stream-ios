@@ -13,7 +13,7 @@ final class VideoCreator {
   
   func createVideo() async throws -> String? {
     let output = try await bunnyStreamSDK.Api.Video_CreateVideo(path: .init(libraryId: Int64(libraryId)),
-                                                                body: .json(.init(title: "streaming_title")))
+                                                                body: .json(.CreateVideoModel(.init(title: "streaming_title"))))
     switch output {
     case .ok(let okResponse):
       if case .json(let viewModel) = okResponse.body {

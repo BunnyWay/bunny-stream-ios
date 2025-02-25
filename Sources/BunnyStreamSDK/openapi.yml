@@ -8,6 +8,8 @@ info:
     url: 'https://docs.bunny.net'
     email: support@bunny.net
   version: 1.0.0
+servers:
+  - url: 'https://video.bunnycdn.com'
 paths:
   '/library/{libraryId}/collections/{collectionId}':
     get:
@@ -19,25 +21,27 @@ paths:
         - name: libraryId
           in: path
           required: true
-          x-nullable: false
           schema:
             type: integer
             format: int64
+          x-position: 1
         - name: collectionId
           in: path
           required: true
-          x-nullable: false
           schema:
             type: string
+          x-position: 2
+        - name: includeThumbnails
+          in: query
+          schema:
+            type: boolean
+            default: false
+          x-position: 3
       responses:
         '200':
-          x-nullable: false
           description: The details of the requested collection
           content:
             application/json:
-              schema:
-                $ref: '#/components/schemas/CollectionModel'
-            application/xml:
               schema:
                 $ref: '#/components/schemas/CollectionModel'
         '401':
@@ -57,27 +61,31 @@ paths:
         - name: libraryId
           in: path
           required: true
-          x-nullable: false
           schema:
             type: integer
             format: int64
+          x-position: 1
         - name: collectionId
           in: path
           required: true
-          x-nullable: false
           schema:
             type: string
+          x-position: 2
       requestBody:
-        $ref: '#/components/requestBodies/UpdateCollectionModel'
+        x-name: model
+        content:
+          application/json:
+            schema:
+              nullable: true
+              oneOf:
+                - $ref: '#/components/schemas/UpdateCollectionModel'
+        required: true
+        x-position: 3
       responses:
         '200':
-          x-nullable: false
           description: The collection was successfuly updated
           content:
             application/json:
-              schema:
-                $ref: '#/components/schemas/StatusModel'
-            application/xml:
               schema:
                 $ref: '#/components/schemas/StatusModel'
         '401':
@@ -97,25 +105,21 @@ paths:
         - name: libraryId
           in: path
           required: true
-          x-nullable: false
           schema:
             type: integer
             format: int64
+          x-position: 1
         - name: collectionId
           in: path
           required: true
-          x-nullable: false
           schema:
             type: string
+          x-position: 2
       responses:
         '200':
-          x-nullable: false
           description: The collection was successfuly deleted
           content:
             application/json:
-              schema:
-                $ref: '#/components/schemas/StatusModel'
-            application/xml:
               schema:
                 $ref: '#/components/schemas/StatusModel'
         '401':
@@ -136,45 +140,49 @@ paths:
         - name: libraryId
           in: path
           required: true
-          x-nullable: false
           schema:
             type: integer
             format: int64
+          x-position: 1
         - name: page
           in: query
-          x-nullable: false
           schema:
             type: integer
             format: int32
             default: 1
+          x-position: 2
         - name: itemsPerPage
           in: query
-          x-nullable: false
           schema:
             type: integer
             format: int32
             default: 100
+          x-position: 3
         - name: search
           in: query
-          x-nullable: true
           schema:
             type: string
             default: ''
+            nullable: true
+          x-position: 4
         - name: orderBy
           in: query
-          x-nullable: true
           schema:
             type: string
             default: date
+            nullable: true
+          x-position: 5
+        - name: includeThumbnails
+          in: query
+          schema:
+            type: boolean
+            default: false
+          x-position: 6
       responses:
         '200':
-          x-nullable: false
           description: The list of videos for the current parameters
           content:
             application/json:
-              schema:
-                $ref: '#/components/schemas/PaginationListOfCollectionModel'
-            application/xml:
               schema:
                 $ref: '#/components/schemas/PaginationListOfCollectionModel'
         '401':
@@ -192,21 +200,25 @@ paths:
         - name: libraryId
           in: path
           required: true
-          x-nullable: false
           schema:
             type: integer
             format: int64
+          x-position: 1
       requestBody:
-        $ref: '#/components/requestBodies/UpdateCollectionModel'
+        x-name: model
+        content:
+          application/json:
+            schema:
+              nullable: true
+              oneOf:
+                - $ref: '#/components/schemas/UpdateCollectionModel'
+        required: true
+        x-position: 2
       responses:
         '200':
-          x-nullable: false
           description: The collection was successfuly created
           content:
             application/json:
-              schema:
-                $ref: '#/components/schemas/CollectionModel'
-            application/xml:
               schema:
                 $ref: '#/components/schemas/CollectionModel'
         '401':
@@ -225,25 +237,21 @@ paths:
         - name: libraryId
           in: path
           required: true
-          x-nullable: false
           schema:
             type: integer
             format: int64
+          x-position: 1
         - name: videoId
           in: path
           required: true
-          x-nullable: false
           schema:
             type: string
+          x-position: 2
       responses:
         '200':
-          x-nullable: false
           description: The details of the requested video
           content:
             application/json:
-              schema:
-                $ref: '#/components/schemas/VideoModel'
-            application/xml:
               schema:
                 $ref: '#/components/schemas/VideoModel'
         '401':
@@ -263,38 +271,31 @@ paths:
         - name: libraryId
           in: path
           required: true
-          x-nullable: false
           schema:
             type: integer
             format: int64
+          x-position: 1
         - name: videoId
           in: path
           required: true
-          x-nullable: false
           schema:
             type: string
+          x-position: 2
       requestBody:
+        x-name: model
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/UpdateVideoModel'
-          text/json:
-            schema:
-              $ref: '#/components/schemas/UpdateVideoModel'
-          application/*+json:
-            schema:
-              $ref: '#/components/schemas/UpdateVideoModel'
+              nullable: true
+              oneOf:
+                - $ref: '#/components/schemas/UpdateVideoModel'
         required: true
-        x-nullable: false
+        x-position: 3
       responses:
         '200':
-          x-nullable: false
           description: The thumbnail was successfuly set
           content:
             application/json:
-              schema:
-                $ref: '#/components/schemas/StatusModel'
-            application/xml:
               schema:
                 $ref: '#/components/schemas/StatusModel'
         '401':
@@ -314,25 +315,21 @@ paths:
         - name: libraryId
           in: path
           required: true
-          x-nullable: false
           schema:
             type: integer
             format: int64
+          x-position: 1
         - name: videoId
           in: path
           required: true
-          x-nullable: false
           schema:
             type: string
+          x-position: 2
       responses:
         '200':
-          x-nullable: false
           description: The video was successfuly deleted
           content:
             application/json:
-              schema:
-                $ref: '#/components/schemas/StatusModel'
-            application/xml:
               schema:
                 $ref: '#/components/schemas/StatusModel'
         '401':
@@ -352,31 +349,49 @@ paths:
         - name: libraryId
           in: path
           required: true
-          x-nullable: false
           schema:
             type: integer
             format: int64
+          x-position: 1
         - name: videoId
           in: path
           required: true
-          x-nullable: false
           schema:
             type: string
+          x-position: 2
+        - name: jitEnabled
+          in: query
+          description: >-
+            Marks whether JIT encoding should be enabled for this video (works
+            only when Premium Encoding is enabled), overrides library settings
+          schema:
+            type: boolean
+          x-position: 3
         - name: enabledResolutions
           in: query
-          x-nullable: true
+          description: >-
+            Comma separated list of resolutions enabled for encoding, available
+            options: 240p, 360p, 480p, 720p, 1080p, 1440p, 2160p
           schema:
             type: string
             default: ''
+            nullable: true
+          x-position: 4
+        - name: enabledOutputCodecs
+          in: query
+          description: >-
+            List of codecs that will be used to encode the file (overrides
+            library settings). Available values: x264, vp9
+          schema:
+            type: string
+            default: ''
+            nullable: true
+          x-position: 6
       responses:
         '200':
-          x-nullable: false
           description: The video was successfuly uploaded
           content:
             application/json:
-              schema:
-                $ref: '#/components/schemas/StatusModel'
-            application/xml:
               schema:
                 $ref: '#/components/schemas/StatusModel'
         '400':
@@ -399,25 +414,21 @@ paths:
         - name: libraryId
           in: path
           required: true
-          x-nullable: false
           schema:
             type: integer
             format: int64
+          x-position: 1
         - name: videoId
           in: path
           required: true
-          x-nullable: false
           schema:
             type: string
+          x-position: 2
       responses:
         '200':
-          x-nullable: false
           description: The heatmap details of the requested video
           content:
             application/json:
-              schema:
-                $ref: '#/components/schemas/VideoHeatmapModel'
-            application/xml:
               schema:
                 $ref: '#/components/schemas/VideoHeatmapModel'
         '401':
@@ -428,6 +439,53 @@ paths:
           description: Internal Server Error
       security:
         - AccessKey: []
+  '/library/{libraryId}/videos/{videoId}/play':
+    get:
+      tags:
+        - Manage Videos
+      summary: Get Video play data
+      operationId: Video_GetVideoPlayData
+      parameters:
+        - name: libraryId
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+          x-position: 1
+        - name: videoId
+          in: path
+          required: true
+          schema:
+            type: string
+          x-position: 2
+        - name: token
+          in: query
+          schema:
+            type: string
+            default: ''
+            nullable: true
+          x-position: 3
+        - name: expires
+          in: query
+          schema:
+            type: integer
+            format: int64
+            default: 0
+          x-position: 4
+      responses:
+        '200':
+          description: The play data of the requested video
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/VideoPlayDataModel'
+        '401':
+          description: The request authorization failed
+        '404':
+          description: The requested video was not found
+        '500':
+          description: Internal Server Error
   '/library/{libraryId}/statistics':
     get:
       tags:
@@ -438,54 +496,53 @@ paths:
         - name: libraryId
           in: path
           required: true
-          x-nullable: false
           schema:
             type: integer
             format: int64
+          x-position: 1
         - name: dateFrom
           in: query
           description: >-
             (Optional) The start date of the statistics. If no value is passed,
             the last 30 days will be returned.
-          x-nullable: true
           schema:
             type: string
             format: date-time
+            nullable: true
+          x-position: 2
         - name: dateTo
           in: query
           description: >-
             (Optional) The end date of the statistics. If no value is passed,
             the last 30 days will be returned.
-          x-nullable: true
           schema:
             type: string
             format: date-time
+            nullable: true
+          x-position: 3
         - name: hourly
           in: query
           description: >-
             (Optional) If true, the statistics data will be returned in hourly
             groupping.
-          x-nullable: false
           schema:
             type: boolean
             default: false
+          x-position: 4
         - name: videoGuid
           in: query
           description: >-
             (Optional) The GUID of the video for which the statistics will be
             returned
-          x-nullable: true
           schema:
             type: string
+            nullable: true
+          x-position: 5
       responses:
         '200':
-          x-nullable: false
           description: The heatmap details of the requested video
           content:
             application/json:
-              schema:
-                $ref: '#/components/schemas/VideoStatisticsModel'
-            application/xml:
               schema:
                 $ref: '#/components/schemas/VideoStatisticsModel'
         '401':
@@ -506,29 +563,121 @@ paths:
         - name: libraryId
           in: path
           required: true
-          x-nullable: false
           schema:
             type: integer
             format: int64
+          x-position: 1
         - name: videoId
           in: path
           required: true
-          x-nullable: false
           schema:
             type: string
+          x-position: 2
       responses:
         '200':
-          x-nullable: false
           description: The details of the requested video
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/VideoModel'
-            application/xml:
+        '400':
+          description: Original file is missing
+        '401':
+          description: The request authorization failed
+        '404':
+          description: The requested video was not found
+        '500':
+          description: Internal Server Error
+      security:
+        - AccessKey: []
+  '/library/{libraryId}/videos/{videoId}/outputs/{outputCodecId}':
+    put:
+      tags:
+        - Manage Videos
+      summary: Add output codec to video
+      operationId: Video_ReencodeUsingCodec
+      parameters:
+        - name: libraryId
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+          x-position: 1
+        - name: videoId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: guid
+          x-position: 2
+        - name: outputCodecId
+          in: path
+          required: true
+          schema:
+            $ref: '#/components/schemas/EncoderOutputCodec'
+          x-position: 3
+      responses:
+        '200':
+          description: The details of the requested video
+          content:
+            application/json:
               schema:
                 $ref: '#/components/schemas/VideoModel'
         '400':
-          description: Original file is missing
+          description: 'Invalid request or validation failed, check response'
+          content:
+            application/json:
+              schema:
+                type: string
+        '401':
+          description: The request authorization failed
+        '404':
+          description: The requested video was not found
+        '500':
+          description: Internal Server Error
+      security:
+        - AccessKey: []
+  '/library/{libraryId}/videos/{videoId}/repackage':
+    post:
+      tags:
+        - Manage Videos
+      summary: Repackage Video
+      operationId: Video_Repackage
+      parameters:
+        - name: libraryId
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+          x-position: 1
+        - name: videoId
+          in: path
+          required: true
+          schema:
+            type: string
+          x-position: 2
+        - name: keepOriginalFiles
+          in: query
+          description: >-
+            Marks whether previous file versions should be kept in storage,
+            allows for faster repackage later on. Default is true.
+          schema:
+            type: boolean
+            default: true
+          x-position: 3
+      responses:
+        '200':
+          description: The details of the requested video
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/VideoModel'
+        '400':
+          description: >-
+            Enterprise DRM is disabled for the library, repackaging not
+            available
         '401':
           description: The request authorization failed
         '404':
@@ -547,51 +696,50 @@ paths:
         - name: libraryId
           in: path
           required: true
-          x-nullable: false
           schema:
             type: integer
             format: int64
+          x-position: 1
         - name: page
           in: query
-          x-nullable: false
           schema:
             type: integer
             format: int32
             default: 1
+          x-position: 2
         - name: itemsPerPage
           in: query
-          x-nullable: false
           schema:
             type: integer
             format: int32
             default: 100
+          x-position: 3
         - name: search
           in: query
-          x-nullable: true
           schema:
             type: string
             default: ''
+            nullable: true
+          x-position: 4
         - name: collection
           in: query
-          x-nullable: true
           schema:
             type: string
             default: ''
+            nullable: true
+          x-position: 5
         - name: orderBy
           in: query
-          x-nullable: true
           schema:
             type: string
             default: date
+            nullable: true
+          x-position: 6
       responses:
         '200':
-          x-nullable: false
           description: The list of videos for the current parameters
           content:
             application/json:
-              schema:
-                $ref: '#/components/schemas/PaginationListOfVideoModel'
-            application/xml:
               schema:
                 $ref: '#/components/schemas/PaginationListOfVideoModel'
         '401':
@@ -609,32 +757,25 @@ paths:
         - name: libraryId
           in: path
           required: true
-          x-nullable: false
           schema:
             type: integer
             format: int64
+          x-position: 1
       requestBody:
+        x-name: model
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/CreateVideoModel'
-          text/json:
-            schema:
-              $ref: '#/components/schemas/CreateVideoModel'
-          application/*+json:
-            schema:
-              $ref: '#/components/schemas/CreateVideoModel'
+              nullable: true
+              oneOf:
+                - $ref: '#/components/schemas/CreateVideoModel'
         required: true
-        x-nullable: false
+        x-position: 2
       responses:
         '200':
-          x-nullable: false
           description: The video was successfuly created and returned as the response.
           content:
             application/json:
-              schema:
-                $ref: '#/components/schemas/VideoModel'
-            application/xml:
               schema:
                 $ref: '#/components/schemas/VideoModel'
         '401':
@@ -653,30 +794,27 @@ paths:
         - name: libraryId
           in: path
           required: true
-          x-nullable: false
           schema:
             type: integer
             format: int64
+          x-position: 1
         - name: videoId
           in: path
           required: true
-          x-nullable: false
           schema:
             type: string
+          x-position: 2
         - name: thumbnailUrl
           in: query
-          x-nullable: true
           schema:
             type: string
+            nullable: true
+          x-position: 3
       responses:
         '200':
-          x-nullable: false
           description: The thumbnail was successfuly set
           content:
             application/json:
-              schema:
-                $ref: '#/components/schemas/StatusModel'
-            application/xml:
               schema:
                 $ref: '#/components/schemas/StatusModel'
         '401':
@@ -697,44 +835,39 @@ paths:
         - name: libraryId
           in: path
           required: true
-          x-nullable: false
           schema:
             type: integer
             format: int64
+          x-position: 1
         - name: collectionId
           in: query
-          x-nullable: true
           schema:
             type: string
+            nullable: true
+          x-position: 3
         - name: thumbnailTime
           in: query
           description: (Optional) Video time in ms to extract the main video thumbnail.
-          x-nullable: true
           schema:
             type: integer
             format: int32
+            nullable: true
+          x-position: 4
       requestBody:
+        x-name: request
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/FetchVideoRequest'
-          text/json:
-            schema:
-              $ref: '#/components/schemas/FetchVideoRequest'
-          application/*+json:
-            schema:
-              $ref: '#/components/schemas/FetchVideoRequest'
+              nullable: true
+              oneOf:
+                - $ref: '#/components/schemas/FetchVideoRequest'
         required: true
-        x-nullable: false
+        x-position: 2
       responses:
         '200':
-          x-nullable: false
           description: The video was successfuly fetched
           content:
             application/json:
-              schema:
-                $ref: '#/components/schemas/StatusModel'
-            application/xml:
               schema:
                 $ref: '#/components/schemas/StatusModel'
         '400':
@@ -757,44 +890,37 @@ paths:
         - name: libraryId
           in: path
           required: true
-          x-nullable: false
           schema:
             type: integer
             format: int64
+          x-position: 1
         - name: videoId
           in: path
           required: true
-          x-nullable: false
           schema:
             type: string
+          x-position: 2
         - name: srclang
           in: path
           required: true
-          x-nullable: false
           schema:
             type: string
+          x-position: 3
       requestBody:
+        x-name: captionModel
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/CaptionModelAdd'
-          text/json:
-            schema:
-              $ref: '#/components/schemas/CaptionModelAdd'
-          application/*+json:
-            schema:
-              $ref: '#/components/schemas/CaptionModelAdd'
+              nullable: true
+              oneOf:
+                - $ref: '#/components/schemas/CaptionModelAdd'
         required: true
-        x-nullable: false
+        x-position: 4
       responses:
         '200':
-          x-nullable: false
           description: The caption was successfuly uploaded
           content:
             application/json:
-              schema:
-                $ref: '#/components/schemas/StatusModel'
-            application/xml:
               schema:
                 $ref: '#/components/schemas/StatusModel'
         '400':
@@ -816,31 +942,27 @@ paths:
         - name: libraryId
           in: path
           required: true
-          x-nullable: false
           schema:
             type: integer
             format: int64
+          x-position: 1
         - name: videoId
           in: path
           required: true
-          x-nullable: false
           schema:
             type: string
+          x-position: 2
         - name: srclang
           in: path
           required: true
-          x-nullable: false
           schema:
             type: string
+          x-position: 3
       responses:
         '200':
-          x-nullable: false
           description: The caption was successfuly deleted
           content:
             application/json:
-              schema:
-                $ref: '#/components/schemas/StatusModel'
-            application/xml:
               schema:
                 $ref: '#/components/schemas/StatusModel'
         '400':
@@ -853,39 +975,237 @@ paths:
           description: Internal Server Error
       security:
         - AccessKey: []
-tags:
-  - name: Manage Collections
-  - name: Manage Videos
-servers:
-  - url: 'https://video.bunnycdn.com'
+  '/library/{libraryId}/videos/{videoId}/transcribe':
+    post:
+      tags:
+        - Manage Videos
+      summary: Transcribe video
+      operationId: Video_TranscribeVideo
+      parameters:
+        - name: libraryId
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+          x-position: 1
+        - name: videoId
+          in: path
+          required: true
+          schema:
+            type: string
+          x-position: 2
+        - name: language
+          in: query
+          description: 'Video source language, use ISO 639-1 language code'
+          schema:
+            type: string
+            nullable: true
+          x-position: 3
+        - name: force
+          in: query
+          schema:
+            type: boolean
+            default: false
+          x-position: 4
+      requestBody:
+        x-name: transcribeSettings
+        description: 'Used to override video library transcription settings, null by default'
+        content:
+          application/json:
+            schema:
+              nullable: true
+              oneOf:
+                - $ref: '#/components/schemas/TranscribeSettings'
+        x-position: 5
+      responses:
+        '200':
+          description: The transcription was queued
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/StatusModel'
+        '400':
+          description: Invalid request for transcription queue
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/StatusModel'
+        '401':
+          description: The request authorization failed
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/StatusModel'
+        '404':
+          description: The requested video was not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/StatusModel'
+        '500':
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/StatusModel'
+      security:
+        - AccessKey: []
+  '/library/{libraryId}/videos/{videoId}/resolutions':
+    get:
+      tags:
+        - Manage Videos
+      summary: Video resolutions info
+      operationId: Video_GetVideoResolutions
+      parameters:
+        - name: libraryId
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+          x-position: 1
+        - name: videoId
+          in: path
+          required: true
+          schema:
+            type: string
+          x-position: 2
+      responses:
+        '200':
+          description: The resolutions info.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/StatusModelOfVideoResolutionsInfoModel'
+        '401':
+          description: The request authorization failed
+        '404':
+          description: The requested video was not found
+        '500':
+          description: Internal Server Error
+      security:
+        - AccessKey: []
+  '/library/{libraryId}/videos/{videoId}/resolutions/cleanup':
+    post:
+      tags:
+        - Manage Videos
+      summary: Cleanup unconfigured resolutions
+      operationId: Video_DeleteResolutions
+      parameters:
+        - name: libraryId
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+          x-position: 1
+        - name: videoId
+          in: path
+          required: true
+          schema:
+            type: string
+          x-position: 2
+        - name: resolutionsToDelete
+          in: query
+          schema:
+            type: string
+            nullable: true
+          x-position: 3
+        - name: deleteNonConfiguredResolutions
+          in: query
+          schema:
+            type: boolean
+            default: false
+          x-position: 4
+        - name: deleteOriginal
+          in: query
+          schema:
+            type: boolean
+            default: false
+          x-position: 5
+        - name: deleteMp4Files
+          in: query
+          schema:
+            type: boolean
+            default: false
+          x-position: 6
+        - name: dryRun
+          in: query
+          description: >-
+            If set to true, no actual file manipulation will happen, only
+            informational data will be returned
+          schema:
+            type: boolean
+            default: false
+          x-position: 7
+      responses:
+        '200':
+          description: The resolutions were successfuly deleted
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/StatusModel'
+        '401':
+          description: The request authorization failed
+        '404':
+          description: The requested video was not found
+        '500':
+          description: Internal Server Error
+      security:
+        - AccessKey: []
+  /OEmbed:
+    get:
+      tags:
+        - OEmbed
+      operationId: OEmbed_GetOEmbed
+      parameters:
+        - name: url
+          in: query
+          schema:
+            type: string
+            nullable: true
+          x-position: 1
+        - name: maxWidth
+          in: query
+          schema:
+            type: integer
+            format: int32
+            nullable: true
+          x-position: 2
+        - name: maxHeight
+          in: query
+          schema:
+            type: integer
+            format: int32
+            nullable: true
+          x-position: 3
+        - name: token
+          in: query
+          schema:
+            type: string
+            default: ''
+            nullable: true
+          x-position: 4
+        - name: expires
+          in: query
+          schema:
+            type: integer
+            format: int64
+            default: 0
+          x-position: 5
+      responses:
+        '200':
+          description: ''
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/VideoOEmbedModel'
 components:
-  requestBodies:
-    UpdateCollectionModel:
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/UpdateCollectionModel'
-        text/json:
-          schema:
-            $ref: '#/components/schemas/UpdateCollectionModel'
-        application/*+json:
-          schema:
-            $ref: '#/components/schemas/UpdateCollectionModel'
-      required: true
-      x-nullable: false
-  securitySchemes:
-    AccessKey:
-      type: apiKey
-      description: AccessKey based authentication
-      name: AccessKey
-      in: header
   schemas:
     CollectionModel:
       type: object
-      required:
-        - videoLibraryId
-        - videoCount
-        - totalSize
+      additionalProperties: true
       properties:
         videoLibraryId:
           type: integer
@@ -894,9 +1214,11 @@ components:
         guid:
           type: string
           description: The unique ID of the collection
+          nullable: true
         name:
           type: string
           description: The name of the collection
+          nullable: true
         videoCount:
           type: integer
           description: The number of videos that the collection contains
@@ -908,12 +1230,16 @@ components:
         previewVideoIds:
           type: string
           description: The IDs of videos to be used as preview icons
+          nullable: true
+        previewImageUrls:
+          type: array
+          description: The URLs of preview images of videos in the collection
+          nullable: true
+          items:
+            type: string
     PaginationListOfCollectionModel:
       type: object
-      required:
-        - totalItems
-        - currentPage
-        - itemsPerPage
+      additionalProperties: true
       properties:
         totalItems:
           type: integer
@@ -930,19 +1256,20 @@ components:
         items:
           type: array
           description: The result items on the current result
+          nullable: true
           items:
             $ref: '#/components/schemas/CollectionModel'
     UpdateCollectionModel:
       type: object
+      additionalProperties: true
       properties:
         name:
           type: string
           description: The name of the collection
+          nullable: true
     StatusModel:
       type: object
-      required:
-        - success
-        - statusCode
+      additionalProperties: true
       properties:
         success:
           type: boolean
@@ -950,28 +1277,14 @@ components:
         message:
           type: string
           description: Response message description
+          nullable: true
         statusCode:
           type: integer
           description: The response status code
           format: int32
     VideoModel:
       type: object
-      required:
-        - videoLibraryId
-        - dateUploaded
-        - views
-        - isPublic
-        - length
-        - status
-        - framerate
-        - width
-        - height
-        - thumbnailCount
-        - encodeProgress
-        - storageSize
-        - hasMP4Fallback
-        - averageWatchTime
-        - totalWatchTime
+      additionalProperties: true
       properties:
         videoLibraryId:
           type: integer
@@ -980,9 +1293,11 @@ components:
         guid:
           type: string
           description: The unique ID of the video
+          nullable: true
         title:
           type: string
           description: The title of the video
+          nullable: true
         dateUploaded:
           type: string
           description: The date when the video was uploaded
@@ -999,10 +1314,8 @@ components:
           description: The duration of the video in seconds
           format: int32
         status:
-          description: >-
-            The status of the video. Created = 0, Uploaded = 1, Processing = 2,
-            Transcoding = 3, Finished = 4, Error = 5, UploadFailed = 6
-          allOf:
+          description: The status of the video. See VideoModelStatus.
+          oneOf:
             - $ref: '#/components/schemas/VideoModelStatus'
         framerate:
           type: number
@@ -1011,6 +1324,7 @@ components:
         rotation:
           type: integer
           description: The rotation of the video
+          nullable: true
         width:
           type: integer
           description: The width of the original video file
@@ -1022,6 +1336,11 @@ components:
         availableResolutions:
           type: string
           description: The available resolutions of the video
+          nullable: true
+        outputCodecs:
+          type: string
+          description: Encoded output codecs of the video
+          nullable: true
         thumbnailCount:
           type: integer
           description: The number of thumbnails generated for this video
@@ -1037,6 +1356,7 @@ components:
         captions:
           type: array
           description: The list of captions available for the video
+          nullable: true
           items:
             $ref: '#/components/schemas/CaptionModel'
         hasMP4Fallback:
@@ -1045,9 +1365,11 @@ components:
         collectionId:
           type: string
           description: The ID of the collection where the video belongs
+          nullable: true
         thumbnailFileName:
           type: string
           description: The file name of the thumbnail inside of the storage
+          nullable: true
         averageWatchTime:
           type: integer
           description: The average watch time of the video in seconds
@@ -1059,19 +1381,23 @@ components:
         category:
           type: string
           description: The automatically detected category of the video
+          nullable: true
         chapters:
           type: array
           description: The list of chapters available for the video
+          nullable: true
           items:
             $ref: '#/components/schemas/ChapterModel'
         moments:
           type: array
           description: The list of moments available for the video
+          nullable: true
           items:
             $ref: '#/components/schemas/MomentModel'
         metaTags:
           type: array
           description: The list of meta tags that have been added to the video
+          nullable: true
           items:
             $ref: '#/components/schemas/MetaTagModel'
         transcodingMessages:
@@ -1079,6 +1405,7 @@ components:
           description: >-
             The list of transcoding messages that describe potential issues
             while the video was transcoding
+          nullable: true
           items:
             $ref: '#/components/schemas/TranscodingMessageModel'
     VideoModelStatus:
@@ -1091,6 +1418,8 @@ components:
         4 = Finished
         5 = Error
         6 = UploadFailed
+        7 = JitSegmenting
+        8 = JitPlaylistsCreated
       x-enumNames:
         - Created
         - Uploaded
@@ -1099,6 +1428,8 @@ components:
         - Finished
         - Error
         - UploadFailed
+        - JitSegmenting
+        - JitPlaylistsCreated
       enum:
         - 0
         - 1
@@ -1107,21 +1438,25 @@ components:
         - 4
         - 5
         - 6
+        - 7
+        - 8
     CaptionModel:
       type: object
+      additionalProperties: true
       properties:
         srclang:
           type: string
           description: The unique srclang shortcode for the caption
+          nullable: true
         label:
           type: string
           description: The text description label for the caption
+          nullable: true
     ChapterModel:
       type: object
+      additionalProperties: true
       required:
         - title
-        - start
-        - end
       properties:
         title:
           type: string
@@ -1137,9 +1472,9 @@ components:
           format: int32
     MomentModel:
       type: object
+      additionalProperties: true
       required:
         - label
-        - timestamp
       properties:
         label:
           type: string
@@ -1151,17 +1486,17 @@ components:
           format: int32
     MetaTagModel:
       type: object
+      additionalProperties: true
       properties:
         property:
           type: string
+          nullable: true
         value:
           type: string
+          nullable: true
     TranscodingMessageModel:
       type: object
-      required:
-        - timeStamp
-        - level
-        - issueCode
+      additionalProperties: true
       properties:
         timeStamp:
           type: string
@@ -1172,8 +1507,10 @@ components:
           $ref: '#/components/schemas/IssueCodes'
         message:
           type: string
+          nullable: true
         value:
           type: string
+          nullable: true
     Severity:
       type: integer
       description: |-
@@ -1202,6 +1539,9 @@ components:
         5 = VideoExceededMaxDuration
         6 = AudioExceededMaxDuration
         7 = OriginalCorrupted
+        8 = TranscriptionFailed
+        9 = JitIncompatible
+        10 = JitFailed
       x-enumNames:
         - Undefined
         - StreamLengthsDifference
@@ -1211,6 +1551,9 @@ components:
         - VideoExceededMaxDuration
         - AudioExceededMaxDuration
         - OriginalCorrupted
+        - TranscriptionFailed
+        - JitIncompatible
+        - JitFailed
       enum:
         - 0
         - 1
@@ -1220,55 +1563,147 @@ components:
         - 5
         - 6
         - 7
+        - 8
+        - 9
+        - 10
     VideoHeatmapModel:
       type: object
+      additionalProperties: true
       properties:
         heatmap:
           type: object
           description: >-
             The heatmap of the video. 100 is the highest percentage of watch
             time.
+          nullable: true
           additionalProperties:
             type: integer
             format: int32
+    VideoPlayDataModel:
+      type: object
+      additionalProperties: true
+      properties:
+        video:
+          description: Video data.
+          nullable: true
+          oneOf:
+            - $ref: '#/components/schemas/VideoModel'
+        captionsPath:
+          type: string
+          nullable: true
+        seekPath:
+          type: string
+          nullable: true
+        thumbnailUrl:
+          type: string
+          nullable: true
+        fallbackUrl:
+          type: string
+          nullable: true
+        videoPlaylistUrl:
+          type: string
+          nullable: true
+        originalUrl:
+          type: string
+          nullable: true
+        previewUrl:
+          type: string
+          nullable: true
+        controls:
+          type: string
+          nullable: true
+        enableDRM:
+          type: boolean
+        drmVersion:
+          type: integer
+          format: int32
+        playerKeyColor:
+          type: string
+          nullable: true
+        vastTagUrl:
+          type: string
+          nullable: true
+        captionsFontSize:
+          type: integer
+          format: int32
+        captionsFontColor:
+          type: string
+          nullable: true
+        captionsBackground:
+          type: string
+          nullable: true
+        uiLanguage:
+          type: string
+          nullable: true
+        allowEarlyPlay:
+          type: boolean
+        tokenAuthEnabled:
+          type: boolean
+        enableMP4Fallback:
+          type: boolean
+        showHeatmap:
+          type: boolean
+        fontFamily:
+          type: string
+          nullable: true
+        playbackSpeeds:
+          type: string
+          nullable: true
     VideoStatisticsModel:
       type: object
-      required:
-        - engagementScore
+      additionalProperties: true
       properties:
         viewsChart:
           type: object
           description: The constructed chart of checked requests threats
+          nullable: true
           additionalProperties:
             type: integer
             format: int64
         watchTimeChart:
           type: object
           description: The constructed chart of the total watch time
+          nullable: true
           additionalProperties:
             type: integer
             format: int64
         countryViewCounts:
           type: object
           description: The country view count constructed chart
+          nullable: true
           additionalProperties:
             type: integer
             format: int64
         countryWatchTime:
           type: object
           description: The country watch time constructed chart
+          nullable: true
           additionalProperties:
             type: integer
             format: int64
         engagementScore:
           type: integer
           format: int32
+    EncoderOutputCodec:
+      type: integer
+      description: |-
+        0 = x264
+        1 = vp9
+        2 = hevc
+        3 = av1
+      x-enumNames:
+        - x264
+        - vp9
+        - hevc
+        - av1
+      enum:
+        - 0
+        - 1
+        - 2
+        - 3
     PaginationListOfVideoModel:
       type: object
-      required:
-        - totalItems
-        - currentPage
-        - itemsPerPage
+      additionalProperties: true
       properties:
         totalItems:
           type: integer
@@ -1285,10 +1720,12 @@ components:
         items:
           type: array
           description: The result items on the current result
+          nullable: true
           items:
             $ref: '#/components/schemas/VideoModel'
     CreateVideoModel:
       type: object
+      additionalProperties: true
       required:
         - title
       properties:
@@ -1299,36 +1736,45 @@ components:
         collectionId:
           type: string
           description: The ID of the collection where the video will be put
+          nullable: true
         thumbnailTime:
           type: integer
           description: Video time in ms to extract the main video thumbnail.
           format: int32
+          nullable: true
     UpdateVideoModel:
       type: object
+      additionalProperties: true
       properties:
         title:
           type: string
           description: The title of the video
+          nullable: true
         collectionId:
           type: string
           description: The ID of the collection where the video belongs
+          nullable: true
         chapters:
           type: array
           description: The list of chapters available for the video
+          nullable: true
           items:
             $ref: '#/components/schemas/ChapterModel'
         moments:
           type: array
           description: The list of moments available for the video
+          nullable: true
           items:
             $ref: '#/components/schemas/MomentModel'
         metaTags:
           type: array
           description: The meta tags added to the video
+          nullable: true
           items:
             $ref: '#/components/schemas/MetaTagModel'
     FetchVideoRequest:
       type: object
+      additionalProperties: true
       required:
         - url
       properties:
@@ -1339,24 +1785,207 @@ components:
         headers:
           type: object
           description: The headers that will be sent along with the fetch request.
+          nullable: true
           additionalProperties:
             type: string
         title:
           type: string
           description: The title that will be set to video.
+          nullable: true
     CaptionModelAdd:
       type: object
+      additionalProperties: true
       properties:
         srclang:
           type: string
           description: The unique srclang shortcode for the caption
+          nullable: true
         label:
           type: string
           description: The text description label for the caption
+          nullable: true
         captionsFile:
           type: string
           description: Base64 encoded captions file
+          nullable: true
+    TranscribeSettings:
+      type: object
+      additionalProperties: true
+      properties:
+        targetLanguages:
+          type: array
+          description: >-
+            List of languages that will be used as target languages, use ISO
+            639-1 language codes
+          nullable: true
+          items:
+            type: string
+        generateTitle:
+          type: boolean
+          description: Whether video title should be automatically generated
+        generateDescription:
+          type: boolean
+          description: Whether video description should be automatically generated
+        sourceLanguage:
+          type: string
+          description: >-
+            Video source language, use ISO 639-1 language code. IMPORTANT: This
+            value takes precedence over query param, if specified
+          nullable: true
+    StatusModelOfVideoResolutionsInfoModel:
+      allOf:
+        - $ref: '#/components/schemas/StatusModel'
+        - type: object
+          additionalProperties: true
+          properties:
+            data:
+              nullable: true
+              oneOf:
+                - $ref: '#/components/schemas/VideoResolutionsInfoModel'
+    VideoResolutionsInfoModel:
+      type: object
+      additionalProperties: true
+      properties:
+        videoId:
+          type: string
+          nullable: true
+        videoLibraryId:
+          type: integer
+          format: int64
+        availableResolutions:
+          type: array
+          nullable: true
+          items:
+            type: string
+        configuredResolutions:
+          type: array
+          nullable: true
+          items:
+            type: string
+        playlistResolutions:
+          type: array
+          nullable: true
+          items:
+            $ref: '#/components/schemas/ResolutionReference'
+        storageResolutions:
+          type: array
+          nullable: true
+          items:
+            $ref: '#/components/schemas/ResolutionReference'
+        mp4Resolutions:
+          type: array
+          nullable: true
+          items:
+            $ref: '#/components/schemas/ResolutionReference'
+        storageObjects:
+          type: array
+          nullable: true
+          items:
+            $ref: '#/components/schemas/StorageObjectModel'
+        oldResolutions:
+          type: array
+          nullable: true
+          items:
+            $ref: '#/components/schemas/StorageObjectModel'
+        hasBothOldAndNewResolutionFormat:
+          type: boolean
+        hasOriginal:
+          type: boolean
+    ResolutionReference:
+      type: object
+      additionalProperties: true
+      properties:
+        resolution:
+          type: string
+          nullable: true
+        path:
+          type: string
+          nullable: true
+    StorageObjectModel:
+      type: object
+      additionalProperties: true
+      properties:
+        guid:
+          type: string
+          nullable: true
+        storageZoneName:
+          type: string
+          nullable: true
+        path:
+          type: string
+          nullable: true
+        objectName:
+          type: string
+          nullable: true
+        length:
+          type: integer
+          format: int64
+        lastChanged:
+          type: string
+          format: date-time
+        serverId:
+          type: integer
+          format: int32
+        isDirectory:
+          type: boolean
+        userId:
+          type: string
+          nullable: true
+        contentType:
+          type: string
+          nullable: true
+        dateCreated:
+          type: string
+          format: date-time
+        storageZoneId:
+          type: integer
+          format: int64
+        checksum:
+          type: string
+          nullable: true
+        replicatedZones:
+          type: string
+          nullable: true
+    VideoOEmbedModel:
+      type: object
+      additionalProperties: true
+      properties:
+        version:
+          type: string
+          nullable: true
+        title:
+          type: string
+          nullable: true
+        type:
+          type: string
+          nullable: true
+        thumbnailUrl:
+          type: string
+          nullable: true
+        width:
+          type: integer
+          format: int32
+        height:
+          type: integer
+          format: int32
+        html:
+          type: string
+          nullable: true
+        providerName:
+          type: string
+          nullable: true
+        providerUrl:
+          type: string
+          nullable: true
+  securitySchemes:
+    AccessKey:
+      type: apiKey
+      description: AccessKey based authentication
+      name: AccessKey
+      in: header
+tags:
+  - name: Manage Collections
+  - name: Manage Videos
 x-readme:
   explorer-enabled: true
   proxy-enabled: true
-  samples-enabled: true

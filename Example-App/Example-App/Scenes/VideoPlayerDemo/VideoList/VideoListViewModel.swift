@@ -41,20 +41,18 @@ class VideoListViewModel: ObservableObject {
         videoInfos = items.map {
           VideoResponseInfo(id: $0.guid ?? "",
                             title: $0.title,
-                            thumbnailCount: $0.thumbnailCount,
-                            width: Float($0.width),
-                            height: Float($0.height),
-                            length: $0.length,
-                            libraryId: $0.videoLibraryId,
-                            encodeProgress: $0.encodeProgress,
-                            storageSize: Double($0.storageSize),
+                            thumbnailCount: $0.thumbnailCount ?? .zero,
+                            width: Float($0.width ?? .zero),
+                            height: Float($0.height ?? .zero),
+                            length: $0.length ?? .zero,
+                            libraryId: $0.videoLibraryId ?? .zero,
+                            encodeProgress: $0.encodeProgress ?? .zero,
+                            storageSize: Double($0.storageSize ?? .zero),
                             thumbnailFileName: $0.thumbnailFileName,
-                            averageWatchTime: $0.averageWatchTime,
-                            views: Int($0.views))
+                            averageWatchTime: $0.averageWatchTime ?? .zero,
+                            views: Int($0.views ?? .zero))
         }
         loadingState = .loaded
-      default:
-        loadingState = .failed("No items!")
       }
     case .undocumented(statusCode: let statusCode, _):
       loadingState = .failed("🥺 undocumented response: \(statusCode)")
