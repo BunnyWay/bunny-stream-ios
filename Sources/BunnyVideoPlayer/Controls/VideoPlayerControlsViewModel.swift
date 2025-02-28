@@ -7,6 +7,7 @@ class VideoPlayerControlsViewModel: ObservableObject {
   var playbackSpeedViewModel: PlaybackSpeedViewModel
   var captionsMenuViewModel: CaptionsMenuViewModel
   var resolutionsViewModel: ResolutionsViewModel
+  var audioTracksViewModel: AudioTracksViewModel
   @Published var seekBarViewModel: SeekBarViewModel
   @Published var isFullScreen: Bool = false
   @Published var isMuted: Bool = false
@@ -25,6 +26,7 @@ class VideoPlayerControlsViewModel: ObservableObject {
     seekBarViewModel = SeekBarViewModel(player: player, video: video, heatmap: heatmap)
     captionsMenuViewModel = CaptionsMenuViewModel(player: player, captions: video.captions)
     resolutionsViewModel = ResolutionsViewModel(player: player, video: video)
+    audioTracksViewModel = AudioTracksViewModel(playerItem: player.currentItem)
     setupPlayer()
   }
 }

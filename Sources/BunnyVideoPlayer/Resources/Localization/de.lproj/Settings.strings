@@ -3,6 +3,7 @@
 
 "caption_menu_title" = "Untertitel";
 "caption_disabled" = "Deaktiviert";
+"audio_track_menu_title" = "Audiospur";
 "playback_speed_menu_title" = "Geschwindigkeit";
 "playback_speed_normal" = "Normal";
 "quality_menu_title" = "Qualität";

@@ -49,6 +49,12 @@ struct VideoPlayerControls: View {
       ResolutionsView(viewModel: viewModel.resolutionsViewModel)
         .environment(\.videoPlayerTheme, theme)
     }
+    .confirmationDialog(Lingua.Settings.audioTrackMenuTitle,
+                        isPresented: $viewModel.audioTracksViewModel.showAudioTracks,
+                        titleVisibility: .visible) {
+      AudioTracksView(viewModel: viewModel.audioTracksViewModel)
+        .environment(\.videoPlayerTheme, theme)
+      }
     .foregroundColor(theme.tintColor)
   }
 }
@@ -155,6 +161,13 @@ extension VideoPlayerControls {
   
   @ViewBuilder
   private func mainOptionsDialog() -> some View {
+    Button(Lingua.Settings.audioTrackMenuTitle) {
+      viewModel.isOptionsMenuActive = false
+      viewModel.audioTracksViewModel.showAudioTracks = true
+    }
+    .shouldAddView(viewModel.audioTracksViewModel.audioTracks.count > 1)
+    .foregroundColor(theme.tintColor)
+
     Button(Lingua.Settings.captionMenuTitle) {
       viewModel.isOptionsMenuActive = false
       viewModel.captionsMenuViewModel.showCaptions = true
