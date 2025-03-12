@@ -6,7 +6,9 @@
 public enum Video_GetVideoPlayData
 ```
 
-Get Video play data
+Get Video Play Data
+
+Retrieves playback data for the specified video including video URLs, captions path, authentication tokens, and player settings.
 
 - Remark: HTTP `GET /library/{libraryId}/videos/{videoId}/play`.
 - Remark: Generated from `#/paths//library/{libraryId}/videos/{videoId}/play/get(Video_GetVideoPlayData)`.

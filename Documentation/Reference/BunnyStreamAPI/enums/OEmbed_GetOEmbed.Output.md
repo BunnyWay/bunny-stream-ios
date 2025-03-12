@@ -13,6 +13,8 @@
 case ok(Operations.OEmbed_GetOEmbed.Output.Ok)
 ```
 
+OEmbed data for the provided URL, including embed HTML and metadata.
+
 - Remark: Generated from `#/paths//OEmbed/get(OEmbed_GetOEmbed)/responses/200`.
 
 HTTP response code: `200 ok`.

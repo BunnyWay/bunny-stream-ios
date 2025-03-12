@@ -6,6 +6,8 @@
 public struct CaptionModelAdd: Codable, Hashable, Sendable
 ```
 
+Schema for adding a caption. Includes language code, descriptive label, and a base64 encoded captions file.
+
 - Remark: Generated from `#/components/schemas/CaptionModelAdd`.
 
 ## Properties
@@ -15,7 +17,7 @@ public struct CaptionModelAdd: Codable, Hashable, Sendable
 public var srclang: Swift.String?
 ```
 
-The unique srclang shortcode for the caption
+The ISO 639-1 language code for the caption.
 
 - Remark: Generated from `#/components/schemas/CaptionModelAdd/srclang`.
 
@@ -25,7 +27,7 @@ The unique srclang shortcode for the caption
 public var label: Swift.String?
 ```
 
-The text description label for the caption
+A descriptive label for the caption.
 
 - Remark: Generated from `#/components/schemas/CaptionModelAdd/label`.
 
@@ -35,46 +37,35 @@ The text description label for the caption
 public var captionsFile: Swift.String?
 ```
 
-Base64 encoded captions file
+The base64 encoded captions file content.
 
 - Remark: Generated from `#/components/schemas/CaptionModelAdd/captionsFile`.
 
-### `additionalProperties`
-
-```swift
-public var additionalProperties: OpenAPIRuntime.OpenAPIObjectContainer
-```
-
-A container of undocumented properties.
-
 ## Methods
-### `init(srclang:label:captionsFile:additionalProperties:)`
+### `init(srclang:label:captionsFile:)`
 
 ```swift
 public init(
     srclang: Swift.String? = nil,
     label: Swift.String? = nil,
-    captionsFile: Swift.String? = nil,
-    additionalProperties: OpenAPIRuntime.OpenAPIObjectContainer = .init()
+    captionsFile: Swift.String? = nil
 )
 ```
 
 Creates a new `CaptionModelAdd`.
 
 - Parameters:
-  - srclang: The unique srclang shortcode for the caption
-  - label: The text description label for the caption
-  - captionsFile: Base64 encoded captions file
-  - additionalProperties: A container of undocumented properties.
+  - srclang: The ISO 639-1 language code for the caption.
+  - label: A descriptive label for the caption.
+  - captionsFile: The base64 encoded captions file content.
 
 #### Parameters
 
 | Name | Description |
 | ---- | ----------- |
-| srclang | The unique srclang shortcode for the caption |
-| label | The text description label for the caption |
-| captionsFile | Base64 encoded captions file |
-| additionalProperties | A container of undocumented properties. |
+| srclang | The ISO 639-1 language code for the caption. |
+| label | A descriptive label for the caption. |
+| captionsFile | The base64 encoded captions file content. |
 
 ### `init(from:)`
 
@@ -87,15 +78,3 @@ public init(from decoder: any Decoder) throws
 | Name | Description |
 | ---- | ----------- |
 | decoder | The decoder to read data from. |
-
-### `encode(to:)`
-
-```swift
-public func encode(to encoder: any Encoder) throws
-```
-
-#### Parameters
-
-| Name | Description |
-| ---- | ----------- |
-| encoder | The encoder to write data to. |

@@ -6,6 +6,8 @@
 public struct StorageObjectModel: Codable, Hashable, Sendable
 ```
 
+Represents a storage object containing file details for a video.
+
 - Remark: Generated from `#/components/schemas/StorageObjectModel`.
 
 ## Properties
@@ -15,6 +17,8 @@ public struct StorageObjectModel: Codable, Hashable, Sendable
 public var guid: Swift.String?
 ```
 
+The unique identifier of the storage object.
+
 - Remark: Generated from `#/components/schemas/StorageObjectModel/guid`.
 
 ### `storageZoneName`
@@ -22,6 +26,8 @@ public var guid: Swift.String?
 ```swift
 public var storageZoneName: Swift.String?
 ```
+
+The name of the storage zone where the file is kept.
 
 - Remark: Generated from `#/components/schemas/StorageObjectModel/storageZoneName`.
 
@@ -31,6 +37,8 @@ public var storageZoneName: Swift.String?
 public var path: Swift.String?
 ```
 
+The file path of the storage object.
+
 - Remark: Generated from `#/components/schemas/StorageObjectModel/path`.
 
 ### `objectName`
@@ -38,6 +46,8 @@ public var path: Swift.String?
 ```swift
 public var objectName: Swift.String?
 ```
+
+The name of the object in storage.
 
 - Remark: Generated from `#/components/schemas/StorageObjectModel/objectName`.
 
@@ -47,6 +57,8 @@ public var objectName: Swift.String?
 public var length: Swift.Int64?
 ```
 
+The length of the file in bytes.
+
 - Remark: Generated from `#/components/schemas/StorageObjectModel/length`.
 
 ### `lastChanged`
@@ -54,6 +66,8 @@ public var length: Swift.Int64?
 ```swift
 public var lastChanged: Foundation.Date?
 ```
+
+The date and time when the file was last modified.
 
 - Remark: Generated from `#/components/schemas/StorageObjectModel/lastChanged`.
 
@@ -63,6 +77,8 @@ public var lastChanged: Foundation.Date?
 public var serverId: Swift.Int32?
 ```
 
+The identifier of the server storing the file.
+
 - Remark: Generated from `#/components/schemas/StorageObjectModel/serverId`.
 
 ### `isDirectory`
@@ -70,6 +86,8 @@ public var serverId: Swift.Int32?
 ```swift
 public var isDirectory: Swift.Bool?
 ```
+
+Indicates if the storage object is a directory.
 
 - Remark: Generated from `#/components/schemas/StorageObjectModel/isDirectory`.
 
@@ -79,6 +97,8 @@ public var isDirectory: Swift.Bool?
 public var userId: Swift.String?
 ```
 
+The user ID associated with the storage object.
+
 - Remark: Generated from `#/components/schemas/StorageObjectModel/userId`.
 
 ### `contentType`
@@ -86,6 +106,8 @@ public var userId: Swift.String?
 ```swift
 public var contentType: Swift.String?
 ```
+
+The MIME type of the file.
 
 - Remark: Generated from `#/components/schemas/StorageObjectModel/contentType`.
 
@@ -95,6 +117,8 @@ public var contentType: Swift.String?
 public var dateCreated: Foundation.Date?
 ```
 
+The date and time when the file was created.
+
 - Remark: Generated from `#/components/schemas/StorageObjectModel/dateCreated`.
 
 ### `storageZoneId`
@@ -102,6 +126,8 @@ public var dateCreated: Foundation.Date?
 ```swift
 public var storageZoneId: Swift.Int64?
 ```
+
+The identifier of the storage zone.
 
 - Remark: Generated from `#/components/schemas/StorageObjectModel/storageZoneId`.
 
@@ -111,6 +137,8 @@ public var storageZoneId: Swift.Int64?
 public var checksum: Swift.String?
 ```
 
+A checksum value for file integrity verification.
+
 - Remark: Generated from `#/components/schemas/StorageObjectModel/checksum`.
 
 ### `replicatedZones`
@@ -119,18 +147,12 @@ public var checksum: Swift.String?
 public var replicatedZones: Swift.String?
 ```
 
+A list of storage zones where the file is replicated.
+
 - Remark: Generated from `#/components/schemas/StorageObjectModel/replicatedZones`.
 
-### `additionalProperties`
-
-```swift
-public var additionalProperties: OpenAPIRuntime.OpenAPIObjectContainer
-```
-
-A container of undocumented properties.
-
 ## Methods
-### `init(guid:storageZoneName:path:objectName:length:lastChanged:serverId:isDirectory:userId:contentType:dateCreated:storageZoneId:checksum:replicatedZones:additionalProperties:)`
+### `init(guid:storageZoneName:path:objectName:length:lastChanged:serverId:isDirectory:userId:contentType:dateCreated:storageZoneId:checksum:replicatedZones:)`
 
 ```swift
 public init(
@@ -147,49 +169,46 @@ public init(
     dateCreated: Foundation.Date? = nil,
     storageZoneId: Swift.Int64? = nil,
     checksum: Swift.String? = nil,
-    replicatedZones: Swift.String? = nil,
-    additionalProperties: OpenAPIRuntime.OpenAPIObjectContainer = .init()
+    replicatedZones: Swift.String? = nil
 )
 ```
 
 Creates a new `StorageObjectModel`.
 
 - Parameters:
-  - guid:
-  - storageZoneName:
-  - path:
-  - objectName:
-  - length:
-  - lastChanged:
-  - serverId:
-  - isDirectory:
-  - userId:
-  - contentType:
-  - dateCreated:
-  - storageZoneId:
-  - checksum:
-  - replicatedZones:
-  - additionalProperties: A container of undocumented properties.
+  - guid: The unique identifier of the storage object.
+  - storageZoneName: The name of the storage zone where the file is kept.
+  - path: The file path of the storage object.
+  - objectName: The name of the object in storage.
+  - length: The length of the file in bytes.
+  - lastChanged: The date and time when the file was last modified.
+  - serverId: The identifier of the server storing the file.
+  - isDirectory: Indicates if the storage object is a directory.
+  - userId: The user ID associated with the storage object.
+  - contentType: The MIME type of the file.
+  - dateCreated: The date and time when the file was created.
+  - storageZoneId: The identifier of the storage zone.
+  - checksum: A checksum value for file integrity verification.
+  - replicatedZones: A list of storage zones where the file is replicated.
 
 #### Parameters
 
 | Name | Description |
 | ---- | ----------- |
-| guid |  |
-| storageZoneName |  |
-| path |  |
-| objectName |  |
-| length |  |
-| lastChanged |  |
-| serverId |  |
-| isDirectory |  |
-| userId |  |
-| contentType |  |
-| dateCreated |  |
-| storageZoneId |  |
-| checksum |  |
-| replicatedZones |  |
-| additionalProperties | A container of undocumented properties. |
+| guid | The unique identifier of the storage object. |
+| storageZoneName | The name of the storage zone where the file is kept. |
+| path | The file path of the storage object. |
+| objectName | The name of the object in storage. |
+| length | The length of the file in bytes. |
+| lastChanged | The date and time when the file was last modified. |
+| serverId | The identifier of the server storing the file. |
+| isDirectory | Indicates if the storage object is a directory. |
+| userId | The user ID associated with the storage object. |
+| contentType | The MIME type of the file. |
+| dateCreated | The date and time when the file was created. |
+| storageZoneId | The identifier of the storage zone. |
+| checksum | A checksum value for file integrity verification. |
+| replicatedZones | A list of storage zones where the file is replicated. |
 
 ### `init(from:)`
 
@@ -202,15 +221,3 @@ public init(from decoder: any Decoder) throws
 | Name | Description |
 | ---- | ----------- |
 | decoder | The decoder to read data from. |
-
-### `encode(to:)`
-
-```swift
-public func encode(to encoder: any Encoder) throws
-```
-
-#### Parameters
-
-| Name | Description |
-| ---- | ----------- |
-| encoder | The encoder to write data to. |

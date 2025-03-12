@@ -6,7 +6,7 @@
 @frozen public enum statusPayload: Codable, Hashable, Sendable
 ```
 
-The status of the video. See VideoModelStatus.
+The current status of the video (e.g., processing, finished, error).
 
 - Remark: Generated from `#/components/schemas/VideoModel/status`.
 

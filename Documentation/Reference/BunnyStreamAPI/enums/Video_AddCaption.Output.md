@@ -13,7 +13,7 @@
 case ok(Operations.Video_AddCaption.Output.Ok)
 ```
 
-The caption was successfuly uploaded
+The caption was successfully uploaded.
 
 - Remark: Generated from `#/paths//library/{libraryId}/videos/{videoId}/captions/{srclang}/post(Video_AddCaption)/responses/200`.
 
@@ -25,7 +25,7 @@ HTTP response code: `200 ok`.
 case badRequest(Operations.Video_AddCaption.Output.BadRequest)
 ```
 
-Failed uploading the captions
+Failed uploading the captions.
 
 - Remark: Generated from `#/paths//library/{libraryId}/videos/{videoId}/captions/{srclang}/post(Video_AddCaption)/responses/400`.
 
@@ -37,7 +37,7 @@ HTTP response code: `400 badRequest`.
 case unauthorized(Operations.Video_AddCaption.Output.Unauthorized)
 ```
 
-The request authorization failed
+The request authorization failed.
 
 - Remark: Generated from `#/paths//library/{libraryId}/videos/{videoId}/captions/{srclang}/post(Video_AddCaption)/responses/401`.
 
@@ -49,7 +49,7 @@ HTTP response code: `401 unauthorized`.
 case notFound(Operations.Video_AddCaption.Output.NotFound)
 ```
 
-The requested video was not found
+The requested video was not found.
 
 - Remark: Generated from `#/paths//library/{libraryId}/videos/{videoId}/captions/{srclang}/post(Video_AddCaption)/responses/404`.
 
@@ -61,7 +61,7 @@ HTTP response code: `404 notFound`.
 case internalServerError(Operations.Video_AddCaption.Output.InternalServerError)
 ```
 
-Internal Server Error
+Internal Server Error.
 
 - Remark: Generated from `#/paths//library/{libraryId}/videos/{videoId}/captions/{srclang}/post(Video_AddCaption)/responses/500`.
 
@@ -95,7 +95,7 @@ The associated value of the enum case if `self` is `.ok`.
 public static var badRequest: Self
 ```
 
-Failed uploading the captions
+Failed uploading the captions.
 
 - Remark: Generated from `#/paths//library/{libraryId}/videos/{videoId}/captions/{srclang}/post(Video_AddCaption)/responses/400`.
 
@@ -118,7 +118,7 @@ The associated value of the enum case if `self` is `.badRequest`.
 public static var unauthorized: Self
 ```
 
-The request authorization failed
+The request authorization failed.
 
 - Remark: Generated from `#/paths//library/{libraryId}/videos/{videoId}/captions/{srclang}/post(Video_AddCaption)/responses/401`.
 
@@ -141,7 +141,7 @@ The associated value of the enum case if `self` is `.unauthorized`.
 public static var notFound: Self
 ```
 
-The requested video was not found
+The requested video was not found.
 
 - Remark: Generated from `#/paths//library/{libraryId}/videos/{videoId}/captions/{srclang}/post(Video_AddCaption)/responses/404`.
 
@@ -164,7 +164,7 @@ The associated value of the enum case if `self` is `.notFound`.
 public static var internalServerError: Self
 ```
 
-Internal Server Error
+Internal Server Error.
 
 - Remark: Generated from `#/paths//library/{libraryId}/videos/{videoId}/captions/{srclang}/post(Video_AddCaption)/responses/500`.
 

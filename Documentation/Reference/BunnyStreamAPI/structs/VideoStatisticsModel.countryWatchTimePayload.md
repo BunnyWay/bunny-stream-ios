@@ -6,7 +6,7 @@
 public struct countryWatchTimePayload: Codable, Hashable, Sendable
 ```
 
-The country watch time constructed chart
+Total watch time grouped by country.
 
 - Remark: Generated from `#/components/schemas/VideoStatisticsModel/countryWatchTime`.
 

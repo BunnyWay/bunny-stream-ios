@@ -6,6 +6,8 @@
 public struct VideoStatisticsModel: Codable, Hashable, Sendable
 ```
 
+Represents various statistics for a video including view counts, watch time, and engagement score.
+
 - Remark: Generated from `#/components/schemas/VideoStatisticsModel`.
 
 ## Properties
@@ -15,7 +17,7 @@ public struct VideoStatisticsModel: Codable, Hashable, Sendable
 public var viewsChart: Components.Schemas.VideoStatisticsModel.viewsChartPayload?
 ```
 
-The constructed chart of checked requests threats
+A chart representing view counts over time.
 
 - Remark: Generated from `#/components/schemas/VideoStatisticsModel/viewsChart`.
 
@@ -25,7 +27,7 @@ The constructed chart of checked requests threats
 public var watchTimeChart: Components.Schemas.VideoStatisticsModel.watchTimeChartPayload?
 ```
 
-The constructed chart of the total watch time
+A chart representing total watch time over time.
 
 - Remark: Generated from `#/components/schemas/VideoStatisticsModel/watchTimeChart`.
 
@@ -35,7 +37,7 @@ The constructed chart of the total watch time
 public var countryViewCounts: Components.Schemas.VideoStatisticsModel.countryViewCountsPayload?
 ```
 
-The country view count constructed chart
+View counts grouped by country.
 
 - Remark: Generated from `#/components/schemas/VideoStatisticsModel/countryViewCounts`.
 
@@ -45,7 +47,7 @@ The country view count constructed chart
 public var countryWatchTime: Components.Schemas.VideoStatisticsModel.countryWatchTimePayload?
 ```
 
-The country watch time constructed chart
+Total watch time grouped by country.
 
 - Remark: Generated from `#/components/schemas/VideoStatisticsModel/countryWatchTime`.
 
@@ -55,18 +57,12 @@ The country watch time constructed chart
 public var engagementScore: Swift.Int32?
 ```
 
+A score representing viewer engagement.
+
 - Remark: Generated from `#/components/schemas/VideoStatisticsModel/engagementScore`.
 
-### `additionalProperties`
-
-```swift
-public var additionalProperties: OpenAPIRuntime.OpenAPIObjectContainer
-```
-
-A container of undocumented properties.
-
 ## Methods
-### `init(viewsChart:watchTimeChart:countryViewCounts:countryWatchTime:engagementScore:additionalProperties:)`
+### `init(viewsChart:watchTimeChart:countryViewCounts:countryWatchTime:engagementScore:)`
 
 ```swift
 public init(
@@ -74,31 +70,28 @@ public init(
     watchTimeChart: Components.Schemas.VideoStatisticsModel.watchTimeChartPayload? = nil,
     countryViewCounts: Components.Schemas.VideoStatisticsModel.countryViewCountsPayload? = nil,
     countryWatchTime: Components.Schemas.VideoStatisticsModel.countryWatchTimePayload? = nil,
-    engagementScore: Swift.Int32? = nil,
-    additionalProperties: OpenAPIRuntime.OpenAPIObjectContainer = .init()
+    engagementScore: Swift.Int32? = nil
 )
 ```
 
 Creates a new `VideoStatisticsModel`.
 
 - Parameters:
-  - viewsChart: The constructed chart of checked requests threats
-  - watchTimeChart: The constructed chart of the total watch time
-  - countryViewCounts: The country view count constructed chart
-  - countryWatchTime: The country watch time constructed chart
-  - engagementScore:
-  - additionalProperties: A container of undocumented properties.
+  - viewsChart: A chart representing view counts over time.
+  - watchTimeChart: A chart representing total watch time over time.
+  - countryViewCounts: View counts grouped by country.
+  - countryWatchTime: Total watch time grouped by country.
+  - engagementScore: A score representing viewer engagement.
 
 #### Parameters
 
 | Name | Description |
 | ---- | ----------- |
-| viewsChart | The constructed chart of checked requests threats |
-| watchTimeChart | The constructed chart of the total watch time |
-| countryViewCounts | The country view count constructed chart |
-| countryWatchTime | The country watch time constructed chart |
-| engagementScore |  |
-| additionalProperties | A container of undocumented properties. |
+| viewsChart | A chart representing view counts over time. |
+| watchTimeChart | A chart representing total watch time over time. |
+| countryViewCounts | View counts grouped by country. |
+| countryWatchTime | Total watch time grouped by country. |
+| engagementScore | A score representing viewer engagement. |
 
 ### `init(from:)`
 
@@ -111,15 +104,3 @@ public init(from decoder: any Decoder) throws
 | Name | Description |
 | ---- | ----------- |
 | decoder | The decoder to read data from. |
-
-### `encode(to:)`
-
-```swift
-public func encode(to encoder: any Encoder) throws
-```
-
-#### Parameters
-
-| Name | Description |
-| ---- | ----------- |
-| encoder | The encoder to write data to. |

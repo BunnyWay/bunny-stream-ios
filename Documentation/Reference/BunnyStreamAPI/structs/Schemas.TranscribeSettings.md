@@ -6,6 +6,8 @@
 public struct TranscribeSettings: Codable, Hashable, Sendable
 ```
 
+Settings for video transcription that allow overriding default transcription options.
+
 - Remark: Generated from `#/components/schemas/TranscribeSettings`.
 
 ## Properties
@@ -15,7 +17,7 @@ public struct TranscribeSettings: Codable, Hashable, Sendable
 public var targetLanguages: [Swift.String]?
 ```
 
-List of languages that will be used as target languages, use ISO 639-1 language codes
+List of target language codes (ISO 639-1) for transcription.
 
 - Remark: Generated from `#/components/schemas/TranscribeSettings/targetLanguages`.
 
@@ -25,7 +27,7 @@ List of languages that will be used as target languages, use ISO 639-1 language 
 public var generateTitle: Swift.Bool?
 ```
 
-Whether video title should be automatically generated
+Determines if the video title should be automatically generated.
 
 - Remark: Generated from `#/components/schemas/TranscribeSettings/generateTitle`.
 
@@ -35,7 +37,7 @@ Whether video title should be automatically generated
 public var generateDescription: Swift.Bool?
 ```
 
-Whether video description should be automatically generated
+Determines if the video description should be automatically generated.
 
 - Remark: Generated from `#/components/schemas/TranscribeSettings/generateDescription`.
 
@@ -45,49 +47,38 @@ Whether video description should be automatically generated
 public var sourceLanguage: Swift.String?
 ```
 
-Video source language, use ISO 639-1 language code. IMPORTANT: This value takes precedence over query param, if specified
+The source language code (ISO 639-1) of the video. This takes precedence over the query parameter if provided.
 
 - Remark: Generated from `#/components/schemas/TranscribeSettings/sourceLanguage`.
 
-### `additionalProperties`
-
-```swift
-public var additionalProperties: OpenAPIRuntime.OpenAPIObjectContainer
-```
-
-A container of undocumented properties.
-
 ## Methods
-### `init(targetLanguages:generateTitle:generateDescription:sourceLanguage:additionalProperties:)`
+### `init(targetLanguages:generateTitle:generateDescription:sourceLanguage:)`
 
 ```swift
 public init(
     targetLanguages: [Swift.String]? = nil,
     generateTitle: Swift.Bool? = nil,
     generateDescription: Swift.Bool? = nil,
-    sourceLanguage: Swift.String? = nil,
-    additionalProperties: OpenAPIRuntime.OpenAPIObjectContainer = .init()
+    sourceLanguage: Swift.String? = nil
 )
 ```
 
 Creates a new `TranscribeSettings`.
 
 - Parameters:
-  - targetLanguages: List of languages that will be used as target languages, use ISO 639-1 language codes
-  - generateTitle: Whether video title should be automatically generated
-  - generateDescription: Whether video description should be automatically generated
-  - sourceLanguage: Video source language, use ISO 639-1 language code. IMPORTANT: This value takes precedence over query param, if specified
-  - additionalProperties: A container of undocumented properties.
+  - targetLanguages: List of target language codes (ISO 639-1) for transcription.
+  - generateTitle: Determines if the video title should be automatically generated.
+  - generateDescription: Determines if the video description should be automatically generated.
+  - sourceLanguage: The source language code (ISO 639-1) of the video. This takes precedence over the query parameter if provided.
 
 #### Parameters
 
 | Name | Description |
 | ---- | ----------- |
-| targetLanguages | List of languages that will be used as target languages, use ISO 639-1 language codes |
-| generateTitle | Whether video title should be automatically generated |
-| generateDescription | Whether video description should be automatically generated |
-| sourceLanguage | Video source language, use ISO 639-1 language code. IMPORTANT: This value takes precedence over query param, if specified |
-| additionalProperties | A container of undocumented properties. |
+| targetLanguages | List of target language codes (ISO 639-1) for transcription. |
+| generateTitle | Determines if the video title should be automatically generated. |
+| generateDescription | Determines if the video description should be automatically generated. |
+| sourceLanguage | The source language code (ISO 639-1) of the video. This takes precedence over the query parameter if provided. |
 
 ### `init(from:)`
 
@@ -100,15 +91,3 @@ public init(from decoder: any Decoder) throws
 | Name | Description |
 | ---- | ----------- |
 | decoder | The decoder to read data from. |
-
-### `encode(to:)`
-
-```swift
-public func encode(to encoder: any Encoder) throws
-```
-
-#### Parameters
-
-| Name | Description |
-| ---- | ----------- |
-| encoder | The encoder to write data to. |

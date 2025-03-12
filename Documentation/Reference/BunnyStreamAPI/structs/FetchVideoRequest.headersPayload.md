@@ -6,7 +6,7 @@
 public struct headersPayload: Codable, Hashable, Sendable
 ```
 
-The headers that will be sent along with the fetch request.
+Optional headers to include with the fetch request.
 
 - Remark: Generated from `#/components/schemas/FetchVideoRequest/headers`.
 

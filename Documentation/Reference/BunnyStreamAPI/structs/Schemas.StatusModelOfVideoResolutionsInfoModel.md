@@ -23,6 +23,8 @@ public var value1: Components.Schemas.StatusModel
 public var value2: Components.Schemas.StatusModelOfVideoResolutionsInfoModel.Value2Payload
 ```
 
+Wraps the VideoResolutionsInfoModel with a status response.
+
 - Remark: Generated from `#/components/schemas/StatusModelOfVideoResolutionsInfoModel/value2`.
 
 ## Methods
@@ -39,14 +41,14 @@ Creates a new `StatusModelOfVideoResolutionsInfoModel`.
 
 - Parameters:
   - value1:
-  - value2:
+  - value2: Wraps the VideoResolutionsInfoModel with a status response.
 
 #### Parameters
 
 | Name | Description |
 | ---- | ----------- |
 | value1 |  |
-| value2 |  |
+| value2 | Wraps the VideoResolutionsInfoModel with a status response. |
 
 ### `init(from:)`
 

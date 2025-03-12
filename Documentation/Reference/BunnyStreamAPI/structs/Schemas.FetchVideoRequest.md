@@ -6,6 +6,8 @@
 public struct FetchVideoRequest: Codable, Hashable, Sendable
 ```
 
+Schema for fetching a video from a remote URL. The 'url' field is required.
+
 - Remark: Generated from `#/components/schemas/FetchVideoRequest`.
 
 ## Properties
@@ -15,7 +17,7 @@ public struct FetchVideoRequest: Codable, Hashable, Sendable
 public var url: Swift.String
 ```
 
-The URL from which the video will be fetched from.
+The URL from which to fetch the video.
 
 - Remark: Generated from `#/components/schemas/FetchVideoRequest/url`.
 
@@ -25,7 +27,7 @@ The URL from which the video will be fetched from.
 public var headers: Components.Schemas.FetchVideoRequest.headersPayload?
 ```
 
-The headers that will be sent along with the fetch request.
+Optional headers to include with the fetch request.
 
 - Remark: Generated from `#/components/schemas/FetchVideoRequest/headers`.
 
@@ -35,46 +37,35 @@ The headers that will be sent along with the fetch request.
 public var title: Swift.String?
 ```
 
-The title that will be set to video.
+Optional title to assign to the fetched video.
 
 - Remark: Generated from `#/components/schemas/FetchVideoRequest/title`.
 
-### `additionalProperties`
-
-```swift
-public var additionalProperties: OpenAPIRuntime.OpenAPIObjectContainer
-```
-
-A container of undocumented properties.
-
 ## Methods
-### `init(url:headers:title:additionalProperties:)`
+### `init(url:headers:title:)`
 
 ```swift
 public init(
     url: Swift.String,
     headers: Components.Schemas.FetchVideoRequest.headersPayload? = nil,
-    title: Swift.String? = nil,
-    additionalProperties: OpenAPIRuntime.OpenAPIObjectContainer = .init()
+    title: Swift.String? = nil
 )
 ```
 
 Creates a new `FetchVideoRequest`.
 
 - Parameters:
-  - url: The URL from which the video will be fetched from.
-  - headers: The headers that will be sent along with the fetch request.
-  - title: The title that will be set to video.
-  - additionalProperties: A container of undocumented properties.
+  - url: The URL from which to fetch the video.
+  - headers: Optional headers to include with the fetch request.
+  - title: Optional title to assign to the fetched video.
 
 #### Parameters
 
 | Name | Description |
 | ---- | ----------- |
-| url | The URL from which the video will be fetched from. |
-| headers | The headers that will be sent along with the fetch request. |
-| title | The title that will be set to video. |
-| additionalProperties | A container of undocumented properties. |
+| url | The URL from which to fetch the video. |
+| headers | Optional headers to include with the fetch request. |
+| title | Optional title to assign to the fetched video. |
 
 ### `init(from:)`
 
@@ -87,15 +78,3 @@ public init(from decoder: any Decoder) throws
 | Name | Description |
 | ---- | ----------- |
 | decoder | The decoder to read data from. |
-
-### `encode(to:)`
-
-```swift
-public func encode(to encoder: any Encoder) throws
-```
-
-#### Parameters
-
-| Name | Description |
-| ---- | ----------- |
-| encoder | The encoder to write data to. |

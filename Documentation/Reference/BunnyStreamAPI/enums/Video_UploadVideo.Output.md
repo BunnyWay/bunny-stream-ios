@@ -13,7 +13,7 @@
 case ok(Operations.Video_UploadVideo.Output.Ok)
 ```
 
-The video was successfuly uploaded
+The video was successfully uploaded and is now being processed.
 
 - Remark: Generated from `#/paths//library/{libraryId}/videos/{videoId}/put(Video_UploadVideo)/responses/200`.
 
@@ -25,7 +25,7 @@ HTTP response code: `200 ok`.
 case badRequest(Operations.Video_UploadVideo.Output.BadRequest)
 ```
 
-The requested video was already uploaded
+The requested video was already uploaded.
 
 - Remark: Generated from `#/paths//library/{libraryId}/videos/{videoId}/put(Video_UploadVideo)/responses/400`.
 
@@ -37,7 +37,7 @@ HTTP response code: `400 badRequest`.
 case unauthorized(Operations.Video_UploadVideo.Output.Unauthorized)
 ```
 
-The request authorization failed
+The request authorization failed.
 
 - Remark: Generated from `#/paths//library/{libraryId}/videos/{videoId}/put(Video_UploadVideo)/responses/401`.
 
@@ -49,7 +49,7 @@ HTTP response code: `401 unauthorized`.
 case notFound(Operations.Video_UploadVideo.Output.NotFound)
 ```
 
-The requested video was not found
+The requested video was not found.
 
 - Remark: Generated from `#/paths//library/{libraryId}/videos/{videoId}/put(Video_UploadVideo)/responses/404`.
 
@@ -61,7 +61,7 @@ HTTP response code: `404 notFound`.
 case internalServerError(Operations.Video_UploadVideo.Output.InternalServerError)
 ```
 
-Internal Server Error
+Internal Server Error.
 
 - Remark: Generated from `#/paths//library/{libraryId}/videos/{videoId}/put(Video_UploadVideo)/responses/500`.
 
@@ -95,7 +95,7 @@ The associated value of the enum case if `self` is `.ok`.
 public static var badRequest: Self
 ```
 
-The requested video was already uploaded
+The requested video was already uploaded.
 
 - Remark: Generated from `#/paths//library/{libraryId}/videos/{videoId}/put(Video_UploadVideo)/responses/400`.
 
@@ -118,7 +118,7 @@ The associated value of the enum case if `self` is `.badRequest`.
 public static var unauthorized: Self
 ```
 
-The request authorization failed
+The request authorization failed.
 
 - Remark: Generated from `#/paths//library/{libraryId}/videos/{videoId}/put(Video_UploadVideo)/responses/401`.
 
@@ -141,7 +141,7 @@ The associated value of the enum case if `self` is `.unauthorized`.
 public static var notFound: Self
 ```
 
-The requested video was not found
+The requested video was not found.
 
 - Remark: Generated from `#/paths//library/{libraryId}/videos/{videoId}/put(Video_UploadVideo)/responses/404`.
 
@@ -164,7 +164,7 @@ The associated value of the enum case if `self` is `.notFound`.
 public static var internalServerError: Self
 ```
 
-Internal Server Error
+Internal Server Error.
 
 - Remark: Generated from `#/paths//library/{libraryId}/videos/{videoId}/put(Video_UploadVideo)/responses/500`.
 

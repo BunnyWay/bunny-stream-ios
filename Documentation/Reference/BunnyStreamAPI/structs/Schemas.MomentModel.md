@@ -6,6 +6,8 @@
 public struct MomentModel: Codable, Hashable, Sendable
 ```
 
+Represents a key moment in the video with a descriptive label and timestamp.
+
 - Remark: Generated from `#/components/schemas/MomentModel`.
 
 ## Properties
@@ -15,7 +17,7 @@ public struct MomentModel: Codable, Hashable, Sendable
 public var label: Swift.String
 ```
 
-The text description label for the chapter
+A descriptive label for the moment.
 
 - Remark: Generated from `#/components/schemas/MomentModel/label`.
 
@@ -25,43 +27,32 @@ The text description label for the chapter
 public var timestamp: Swift.Int32?
 ```
 
-The timestamp of the moment in seconds
+The timestamp of the moment in seconds.
 
 - Remark: Generated from `#/components/schemas/MomentModel/timestamp`.
 
-### `additionalProperties`
-
-```swift
-public var additionalProperties: OpenAPIRuntime.OpenAPIObjectContainer
-```
-
-A container of undocumented properties.
-
 ## Methods
-### `init(label:timestamp:additionalProperties:)`
+### `init(label:timestamp:)`
 
 ```swift
 public init(
     label: Swift.String,
-    timestamp: Swift.Int32? = nil,
-    additionalProperties: OpenAPIRuntime.OpenAPIObjectContainer = .init()
+    timestamp: Swift.Int32? = nil
 )
 ```
 
 Creates a new `MomentModel`.
 
 - Parameters:
-  - label: The text description label for the chapter
-  - timestamp: The timestamp of the moment in seconds
-  - additionalProperties: A container of undocumented properties.
+  - label: A descriptive label for the moment.
+  - timestamp: The timestamp of the moment in seconds.
 
 #### Parameters
 
 | Name | Description |
 | ---- | ----------- |
-| label | The text description label for the chapter |
-| timestamp | The timestamp of the moment in seconds |
-| additionalProperties | A container of undocumented properties. |
+| label | A descriptive label for the moment. |
+| timestamp | The timestamp of the moment in seconds. |
 
 ### `init(from:)`
 
@@ -74,15 +65,3 @@ public init(from decoder: any Decoder) throws
 | Name | Description |
 | ---- | ----------- |
 | decoder | The decoder to read data from. |
-
-### `encode(to:)`
-
-```swift
-public func encode(to encoder: any Encoder) throws
-```
-
-#### Parameters
-
-| Name | Description |
-| ---- | ----------- |
-| encoder | The encoder to write data to. |

@@ -6,6 +6,8 @@
 public struct VideoModel: Codable, Hashable, Sendable
 ```
 
+Represents a video and its metadata including title, upload date, dimensions, encoding status, and more.
+
 - Remark: Generated from `#/components/schemas/VideoModel`.
 
 ## Properties
@@ -15,7 +17,7 @@ public struct VideoModel: Codable, Hashable, Sendable
 public var videoLibraryId: Swift.Int64?
 ```
 
-The ID of the video library that the video belongs to
+The ID of the video library that the video belongs to.
 
 - Remark: Generated from `#/components/schemas/VideoModel/videoLibraryId`.
 
@@ -25,7 +27,7 @@ The ID of the video library that the video belongs to
 public var guid: Swift.String?
 ```
 
-The unique ID of the video
+The unique identifier of the video.
 
 - Remark: Generated from `#/components/schemas/VideoModel/guid`.
 
@@ -35,7 +37,7 @@ The unique ID of the video
 public var title: Swift.String?
 ```
 
-The title of the video
+The title of the video.
 
 - Remark: Generated from `#/components/schemas/VideoModel/title`.
 
@@ -45,7 +47,7 @@ The title of the video
 public var dateUploaded: Foundation.Date?
 ```
 
-The date when the video was uploaded
+The date and time when the video was uploaded.
 
 - Remark: Generated from `#/components/schemas/VideoModel/dateUploaded`.
 
@@ -55,7 +57,7 @@ The date when the video was uploaded
 public var views: Swift.Int64?
 ```
 
-The number of views the video received
+The number of views the video has received.
 
 - Remark: Generated from `#/components/schemas/VideoModel/views`.
 
@@ -65,7 +67,7 @@ The number of views the video received
 public var isPublic: Swift.Bool?
 ```
 
-Determines if the video is publically accessible
+Determines if the video is publicly accessible.
 
 - Remark: Generated from `#/components/schemas/VideoModel/isPublic`.
 
@@ -75,7 +77,7 @@ Determines if the video is publically accessible
 public var length: Swift.Int32?
 ```
 
-The duration of the video in seconds
+The duration of the video in seconds.
 
 - Remark: Generated from `#/components/schemas/VideoModel/length`.
 
@@ -85,7 +87,7 @@ The duration of the video in seconds
 public var status: Components.Schemas.VideoModel.statusPayload?
 ```
 
-The status of the video. See VideoModelStatus.
+The current status of the video (e.g., processing, finished, error).
 
 - Remark: Generated from `#/components/schemas/VideoModel/status`.
 
@@ -95,7 +97,7 @@ The status of the video. See VideoModelStatus.
 public var framerate: Swift.Double?
 ```
 
-The framerate of the video
+The framerate of the video.
 
 - Remark: Generated from `#/components/schemas/VideoModel/framerate`.
 
@@ -105,7 +107,7 @@ The framerate of the video
 public var rotation: Swift.Int?
 ```
 
-The rotation of the video
+The rotation (in degrees) of the video if applicable.
 
 - Remark: Generated from `#/components/schemas/VideoModel/rotation`.
 
@@ -115,7 +117,7 @@ The rotation of the video
 public var width: Swift.Int32?
 ```
 
-The width of the original video file
+The width of the original video in pixels.
 
 - Remark: Generated from `#/components/schemas/VideoModel/width`.
 
@@ -125,7 +127,7 @@ The width of the original video file
 public var height: Swift.Int32?
 ```
 
-The height of the original video file
+The height of the original video in pixels.
 
 - Remark: Generated from `#/components/schemas/VideoModel/height`.
 
@@ -135,7 +137,7 @@ The height of the original video file
 public var availableResolutions: Swift.String?
 ```
 
-The available resolutions of the video
+A comma-separated list of resolutions available for the video.
 
 - Remark: Generated from `#/components/schemas/VideoModel/availableResolutions`.
 
@@ -145,7 +147,7 @@ The available resolutions of the video
 public var outputCodecs: Swift.String?
 ```
 
-Encoded output codecs of the video
+A comma-separated list of output codecs used for video encoding.
 
 - Remark: Generated from `#/components/schemas/VideoModel/outputCodecs`.
 
@@ -155,7 +157,7 @@ Encoded output codecs of the video
 public var thumbnailCount: Swift.Int32?
 ```
 
-The number of thumbnails generated for this video
+The number of thumbnails generated for the video.
 
 - Remark: Generated from `#/components/schemas/VideoModel/thumbnailCount`.
 
@@ -165,7 +167,7 @@ The number of thumbnails generated for this video
 public var encodeProgress: Swift.Int32?
 ```
 
-The current encode progress of the video
+The current encoding progress of the video as a percentage.
 
 - Remark: Generated from `#/components/schemas/VideoModel/encodeProgress`.
 
@@ -175,7 +177,7 @@ The current encode progress of the video
 public var storageSize: Swift.Int64?
 ```
 
-The amount of storage used by this video
+The total storage size of the video file in bytes.
 
 - Remark: Generated from `#/components/schemas/VideoModel/storageSize`.
 
@@ -185,7 +187,7 @@ The amount of storage used by this video
 public var captions: [Components.Schemas.CaptionModel]?
 ```
 
-The list of captions available for the video
+A list of captions available for the video.
 
 - Remark: Generated from `#/components/schemas/VideoModel/captions`.
 
@@ -195,7 +197,7 @@ The list of captions available for the video
 public var hasMP4Fallback: Swift.Bool?
 ```
 
-Determines if the video has MP4 fallback files generated
+Indicates if MP4 fallback files are available for the video.
 
 - Remark: Generated from `#/components/schemas/VideoModel/hasMP4Fallback`.
 
@@ -205,7 +207,7 @@ Determines if the video has MP4 fallback files generated
 public var collectionId: Swift.String?
 ```
 
-The ID of the collection where the video belongs
+The identifier of the collection that the video belongs to.
 
 - Remark: Generated from `#/components/schemas/VideoModel/collectionId`.
 
@@ -215,7 +217,7 @@ The ID of the collection where the video belongs
 public var thumbnailFileName: Swift.String?
 ```
 
-The file name of the thumbnail inside of the storage
+The file name of the thumbnail stored on the server.
 
 - Remark: Generated from `#/components/schemas/VideoModel/thumbnailFileName`.
 
@@ -225,7 +227,7 @@ The file name of the thumbnail inside of the storage
 public var averageWatchTime: Swift.Int64?
 ```
 
-The average watch time of the video in seconds
+The average watch time of the video in seconds.
 
 - Remark: Generated from `#/components/schemas/VideoModel/averageWatchTime`.
 
@@ -235,7 +237,7 @@ The average watch time of the video in seconds
 public var totalWatchTime: Swift.Int64?
 ```
 
-The total video watch time in seconds
+The total accumulated watch time of the video in seconds.
 
 - Remark: Generated from `#/components/schemas/VideoModel/totalWatchTime`.
 
@@ -245,7 +247,7 @@ The total video watch time in seconds
 public var category: Swift.String?
 ```
 
-The automatically detected category of the video
+The automatically detected category of the video.
 
 - Remark: Generated from `#/components/schemas/VideoModel/category`.
 
@@ -255,7 +257,7 @@ The automatically detected category of the video
 public var chapters: [Components.Schemas.ChapterModel]?
 ```
 
-The list of chapters available for the video
+A list of chapters within the video.
 
 - Remark: Generated from `#/components/schemas/VideoModel/chapters`.
 
@@ -265,7 +267,7 @@ The list of chapters available for the video
 public var moments: [Components.Schemas.MomentModel]?
 ```
 
-The list of moments available for the video
+A list of significant moments or events in the video.
 
 - Remark: Generated from `#/components/schemas/VideoModel/moments`.
 
@@ -275,7 +277,7 @@ The list of moments available for the video
 public var metaTags: [Components.Schemas.MetaTagModel]?
 ```
 
-The list of meta tags that have been added to the video
+A list of metadata tags associated with the video.
 
 - Remark: Generated from `#/components/schemas/VideoModel/metaTags`.
 
@@ -285,20 +287,12 @@ The list of meta tags that have been added to the video
 public var transcodingMessages: [Components.Schemas.TranscodingMessageModel]?
 ```
 
-The list of transcoding messages that describe potential issues while the video was transcoding
+Messages generated during transcoding that indicate warnings or errors.
 
 - Remark: Generated from `#/components/schemas/VideoModel/transcodingMessages`.
 
-### `additionalProperties`
-
-```swift
-public var additionalProperties: OpenAPIRuntime.OpenAPIObjectContainer
-```
-
-A container of undocumented properties.
-
 ## Methods
-### `init(videoLibraryId:guid:title:dateUploaded:views:isPublic:length:status:framerate:rotation:width:height:availableResolutions:outputCodecs:thumbnailCount:encodeProgress:storageSize:captions:hasMP4Fallback:collectionId:thumbnailFileName:averageWatchTime:totalWatchTime:category:chapters:moments:metaTags:transcodingMessages:additionalProperties:)`
+### `init(videoLibraryId:guid:title:dateUploaded:views:isPublic:length:status:framerate:rotation:width:height:availableResolutions:outputCodecs:thumbnailCount:encodeProgress:storageSize:captions:hasMP4Fallback:collectionId:thumbnailFileName:averageWatchTime:totalWatchTime:category:chapters:moments:metaTags:transcodingMessages:)`
 
 ```swift
 public init(
@@ -329,77 +323,74 @@ public init(
     chapters: [Components.Schemas.ChapterModel]? = nil,
     moments: [Components.Schemas.MomentModel]? = nil,
     metaTags: [Components.Schemas.MetaTagModel]? = nil,
-    transcodingMessages: [Components.Schemas.TranscodingMessageModel]? = nil,
-    additionalProperties: OpenAPIRuntime.OpenAPIObjectContainer = .init()
+    transcodingMessages: [Components.Schemas.TranscodingMessageModel]? = nil
 )
 ```
 
 Creates a new `VideoModel`.
 
 - Parameters:
-  - videoLibraryId: The ID of the video library that the video belongs to
-  - guid: The unique ID of the video
-  - title: The title of the video
-  - dateUploaded: The date when the video was uploaded
-  - views: The number of views the video received
-  - isPublic: Determines if the video is publically accessible
-  - length: The duration of the video in seconds
-  - status: The status of the video. See VideoModelStatus.
-  - framerate: The framerate of the video
-  - rotation: The rotation of the video
-  - width: The width of the original video file
-  - height: The height of the original video file
-  - availableResolutions: The available resolutions of the video
-  - outputCodecs: Encoded output codecs of the video
-  - thumbnailCount: The number of thumbnails generated for this video
-  - encodeProgress: The current encode progress of the video
-  - storageSize: The amount of storage used by this video
-  - captions: The list of captions available for the video
-  - hasMP4Fallback: Determines if the video has MP4 fallback files generated
-  - collectionId: The ID of the collection where the video belongs
-  - thumbnailFileName: The file name of the thumbnail inside of the storage
-  - averageWatchTime: The average watch time of the video in seconds
-  - totalWatchTime: The total video watch time in seconds
-  - category: The automatically detected category of the video
-  - chapters: The list of chapters available for the video
-  - moments: The list of moments available for the video
-  - metaTags: The list of meta tags that have been added to the video
-  - transcodingMessages: The list of transcoding messages that describe potential issues while the video was transcoding
-  - additionalProperties: A container of undocumented properties.
+  - videoLibraryId: The ID of the video library that the video belongs to.
+  - guid: The unique identifier of the video.
+  - title: The title of the video.
+  - dateUploaded: The date and time when the video was uploaded.
+  - views: The number of views the video has received.
+  - isPublic: Determines if the video is publicly accessible.
+  - length: The duration of the video in seconds.
+  - status: The current status of the video (e.g., processing, finished, error).
+  - framerate: The framerate of the video.
+  - rotation: The rotation (in degrees) of the video if applicable.
+  - width: The width of the original video in pixels.
+  - height: The height of the original video in pixels.
+  - availableResolutions: A comma-separated list of resolutions available for the video.
+  - outputCodecs: A comma-separated list of output codecs used for video encoding.
+  - thumbnailCount: The number of thumbnails generated for the video.
+  - encodeProgress: The current encoding progress of the video as a percentage.
+  - storageSize: The total storage size of the video file in bytes.
+  - captions: A list of captions available for the video.
+  - hasMP4Fallback: Indicates if MP4 fallback files are available for the video.
+  - collectionId: The identifier of the collection that the video belongs to.
+  - thumbnailFileName: The file name of the thumbnail stored on the server.
+  - averageWatchTime: The average watch time of the video in seconds.
+  - totalWatchTime: The total accumulated watch time of the video in seconds.
+  - category: The automatically detected category of the video.
+  - chapters: A list of chapters within the video.
+  - moments: A list of significant moments or events in the video.
+  - metaTags: A list of metadata tags associated with the video.
+  - transcodingMessages: Messages generated during transcoding that indicate warnings or errors.
 
 #### Parameters
 
 | Name | Description |
 | ---- | ----------- |
-| videoLibraryId | The ID of the video library that the video belongs to |
-| guid | The unique ID of the video |
-| title | The title of the video |
-| dateUploaded | The date when the video was uploaded |
-| views | The number of views the video received |
-| isPublic | Determines if the video is publically accessible |
-| length | The duration of the video in seconds |
-| status | The status of the video. See VideoModelStatus. |
-| framerate | The framerate of the video |
-| rotation | The rotation of the video |
-| width | The width of the original video file |
-| height | The height of the original video file |
-| availableResolutions | The available resolutions of the video |
-| outputCodecs | Encoded output codecs of the video |
-| thumbnailCount | The number of thumbnails generated for this video |
-| encodeProgress | The current encode progress of the video |
-| storageSize | The amount of storage used by this video |
-| captions | The list of captions available for the video |
-| hasMP4Fallback | Determines if the video has MP4 fallback files generated |
-| collectionId | The ID of the collection where the video belongs |
-| thumbnailFileName | The file name of the thumbnail inside of the storage |
-| averageWatchTime | The average watch time of the video in seconds |
-| totalWatchTime | The total video watch time in seconds |
-| category | The automatically detected category of the video |
-| chapters | The list of chapters available for the video |
-| moments | The list of moments available for the video |
-| metaTags | The list of meta tags that have been added to the video |
-| transcodingMessages | The list of transcoding messages that describe potential issues while the video was transcoding |
-| additionalProperties | A container of undocumented properties. |
+| videoLibraryId | The ID of the video library that the video belongs to. |
+| guid | The unique identifier of the video. |
+| title | The title of the video. |
+| dateUploaded | The date and time when the video was uploaded. |
+| views | The number of views the video has received. |
+| isPublic | Determines if the video is publicly accessible. |
+| length | The duration of the video in seconds. |
+| status | The current status of the video (e.g., processing, finished, error). |
+| framerate | The framerate of the video. |
+| rotation | The rotation (in degrees) of the video if applicable. |
+| width | The width of the original video in pixels. |
+| height | The height of the original video in pixels. |
+| availableResolutions | A comma-separated list of resolutions available for the video. |
+| outputCodecs | A comma-separated list of output codecs used for video encoding. |
+| thumbnailCount | The number of thumbnails generated for the video. |
+| encodeProgress | The current encoding progress of the video as a percentage. |
+| storageSize | The total storage size of the video file in bytes. |
+| captions | A list of captions available for the video. |
+| hasMP4Fallback | Indicates if MP4 fallback files are available for the video. |
+| collectionId | The identifier of the collection that the video belongs to. |
+| thumbnailFileName | The file name of the thumbnail stored on the server. |
+| averageWatchTime | The average watch time of the video in seconds. |
+| totalWatchTime | The total accumulated watch time of the video in seconds. |
+| category | The automatically detected category of the video. |
+| chapters | A list of chapters within the video. |
+| moments | A list of significant moments or events in the video. |
+| metaTags | A list of metadata tags associated with the video. |
+| transcodingMessages | Messages generated during transcoding that indicate warnings or errors. |
 
 ### `init(from:)`
 
@@ -412,15 +403,3 @@ public init(from decoder: any Decoder) throws
 | Name | Description |
 | ---- | ----------- |
 | decoder | The decoder to read data from. |
-
-### `encode(to:)`
-
-```swift
-public func encode(to encoder: any Encoder) throws
-```
-
-#### Parameters
-
-| Name | Description |
-| ---- | ----------- |
-| encoder | The encoder to write data to. |

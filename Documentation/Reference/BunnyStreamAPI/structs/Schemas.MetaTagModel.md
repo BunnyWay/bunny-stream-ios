@@ -6,6 +6,8 @@
 public struct MetaTagModel: Codable, Hashable, Sendable
 ```
 
+Represents a metadata tag for a video.
+
 - Remark: Generated from `#/components/schemas/MetaTagModel`.
 
 ## Properties
@@ -15,6 +17,8 @@ public struct MetaTagModel: Codable, Hashable, Sendable
 public var property: Swift.String?
 ```
 
+The property name of the meta tag.
+
 - Remark: Generated from `#/components/schemas/MetaTagModel/property`.
 
 ### `value`
@@ -23,41 +27,32 @@ public var property: Swift.String?
 public var value: Swift.String?
 ```
 
+The value associated with the meta tag property.
+
 - Remark: Generated from `#/components/schemas/MetaTagModel/value`.
 
-### `additionalProperties`
-
-```swift
-public var additionalProperties: OpenAPIRuntime.OpenAPIObjectContainer
-```
-
-A container of undocumented properties.
-
 ## Methods
-### `init(property:value:additionalProperties:)`
+### `init(property:value:)`
 
 ```swift
 public init(
     property: Swift.String? = nil,
-    value: Swift.String? = nil,
-    additionalProperties: OpenAPIRuntime.OpenAPIObjectContainer = .init()
+    value: Swift.String? = nil
 )
 ```
 
 Creates a new `MetaTagModel`.
 
 - Parameters:
-  - property:
-  - value:
-  - additionalProperties: A container of undocumented properties.
+  - property: The property name of the meta tag.
+  - value: The value associated with the meta tag property.
 
 #### Parameters
 
 | Name | Description |
 | ---- | ----------- |
-| property |  |
-| value |  |
-| additionalProperties | A container of undocumented properties. |
+| property | The property name of the meta tag. |
+| value | The value associated with the meta tag property. |
 
 ### `init(from:)`
 
@@ -70,15 +65,3 @@ public init(from decoder: any Decoder) throws
 | Name | Description |
 | ---- | ----------- |
 | decoder | The decoder to read data from. |
-
-### `encode(to:)`
-
-```swift
-public func encode(to encoder: any Encoder) throws
-```
-
-#### Parameters
-
-| Name | Description |
-| ---- | ----------- |
-| encoder | The encoder to write data to. |

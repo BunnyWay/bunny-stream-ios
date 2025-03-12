@@ -6,15 +6,7 @@
 @frozen public enum VideoModelStatus: Int, Codable, Hashable, Sendable, CaseIterable
 ```
 
-0 = Created
-1 = Uploaded
-2 = Processing
-3 = Transcoding
-4 = Finished
-5 = Error
-6 = UploadFailed
-7 = JitSegmenting
-8 = JitPlaylistsCreated
+Status of the video: 0 = Created, 1 = Uploaded, 2 = Processing, 3 = Transcoding, 4 = Finished, 5 = Error, 6 = UploadFailed, 7 = JitSegmenting, 8 = JitPlaylistsCreated
 
 - Remark: Generated from `#/components/schemas/VideoModelStatus`.
 

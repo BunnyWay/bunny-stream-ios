@@ -6,6 +6,8 @@
 public struct UpdateVideoModel: Codable, Hashable, Sendable
 ```
 
+Schema for updating video metadata.
+
 - Remark: Generated from `#/components/schemas/UpdateVideoModel`.
 
 ## Properties
@@ -15,7 +17,7 @@ public struct UpdateVideoModel: Codable, Hashable, Sendable
 public var title: Swift.String?
 ```
 
-The title of the video
+The updated title of the video.
 
 - Remark: Generated from `#/components/schemas/UpdateVideoModel/title`.
 
@@ -25,7 +27,7 @@ The title of the video
 public var collectionId: Swift.String?
 ```
 
-The ID of the collection where the video belongs
+The ID of the collection to which the video belongs.
 
 - Remark: Generated from `#/components/schemas/UpdateVideoModel/collectionId`.
 
@@ -35,7 +37,7 @@ The ID of the collection where the video belongs
 public var chapters: [Components.Schemas.ChapterModel]?
 ```
 
-The list of chapters available for the video
+A list of chapters for the video.
 
 - Remark: Generated from `#/components/schemas/UpdateVideoModel/chapters`.
 
@@ -45,7 +47,7 @@ The list of chapters available for the video
 public var moments: [Components.Schemas.MomentModel]?
 ```
 
-The list of moments available for the video
+A list of key moments in the video.
 
 - Remark: Generated from `#/components/schemas/UpdateVideoModel/moments`.
 
@@ -55,20 +57,12 @@ The list of moments available for the video
 public var metaTags: [Components.Schemas.MetaTagModel]?
 ```
 
-The meta tags added to the video
+A list of meta tags to associate with the video.
 
 - Remark: Generated from `#/components/schemas/UpdateVideoModel/metaTags`.
 
-### `additionalProperties`
-
-```swift
-public var additionalProperties: OpenAPIRuntime.OpenAPIObjectContainer
-```
-
-A container of undocumented properties.
-
 ## Methods
-### `init(title:collectionId:chapters:moments:metaTags:additionalProperties:)`
+### `init(title:collectionId:chapters:moments:metaTags:)`
 
 ```swift
 public init(
@@ -76,31 +70,28 @@ public init(
     collectionId: Swift.String? = nil,
     chapters: [Components.Schemas.ChapterModel]? = nil,
     moments: [Components.Schemas.MomentModel]? = nil,
-    metaTags: [Components.Schemas.MetaTagModel]? = nil,
-    additionalProperties: OpenAPIRuntime.OpenAPIObjectContainer = .init()
+    metaTags: [Components.Schemas.MetaTagModel]? = nil
 )
 ```
 
 Creates a new `UpdateVideoModel`.
 
 - Parameters:
-  - title: The title of the video
-  - collectionId: The ID of the collection where the video belongs
-  - chapters: The list of chapters available for the video
-  - moments: The list of moments available for the video
-  - metaTags: The meta tags added to the video
-  - additionalProperties: A container of undocumented properties.
+  - title: The updated title of the video.
+  - collectionId: The ID of the collection to which the video belongs.
+  - chapters: A list of chapters for the video.
+  - moments: A list of key moments in the video.
+  - metaTags: A list of meta tags to associate with the video.
 
 #### Parameters
 
 | Name | Description |
 | ---- | ----------- |
-| title | The title of the video |
-| collectionId | The ID of the collection where the video belongs |
-| chapters | The list of chapters available for the video |
-| moments | The list of moments available for the video |
-| metaTags | The meta tags added to the video |
-| additionalProperties | A container of undocumented properties. |
+| title | The updated title of the video. |
+| collectionId | The ID of the collection to which the video belongs. |
+| chapters | A list of chapters for the video. |
+| moments | A list of key moments in the video. |
+| metaTags | A list of meta tags to associate with the video. |
 
 ### `init(from:)`
 
@@ -113,15 +104,3 @@ public init(from decoder: any Decoder) throws
 | Name | Description |
 | ---- | ----------- |
 | decoder | The decoder to read data from. |
-
-### `encode(to:)`
-
-```swift
-public func encode(to encoder: any Encoder) throws
-```
-
-#### Parameters
-
-| Name | Description |
-| ---- | ----------- |
-| encoder | The encoder to write data to. |

@@ -6,6 +6,8 @@
 public struct VideoHeatmapModel: Codable, Hashable, Sendable
 ```
 
+Represents the heatmap data for a video. Each key represents a time segment and its corresponding watch percentage.
+
 - Remark: Generated from `#/components/schemas/VideoHeatmapModel`.
 
 ## Properties
@@ -15,40 +17,27 @@ public struct VideoHeatmapModel: Codable, Hashable, Sendable
 public var heatmap: Components.Schemas.VideoHeatmapModel.heatmapPayload?
 ```
 
-The heatmap of the video. 100 is the highest percentage of watch time.
+The heatmap where keys are time segments and values are watch percentages.
 
 - Remark: Generated from `#/components/schemas/VideoHeatmapModel/heatmap`.
 
-### `additionalProperties`
-
-```swift
-public var additionalProperties: OpenAPIRuntime.OpenAPIObjectContainer
-```
-
-A container of undocumented properties.
-
 ## Methods
-### `init(heatmap:additionalProperties:)`
+### `init(heatmap:)`
 
 ```swift
-public init(
-    heatmap: Components.Schemas.VideoHeatmapModel.heatmapPayload? = nil,
-    additionalProperties: OpenAPIRuntime.OpenAPIObjectContainer = .init()
-)
+public init(heatmap: Components.Schemas.VideoHeatmapModel.heatmapPayload? = nil)
 ```
 
 Creates a new `VideoHeatmapModel`.
 
 - Parameters:
-  - heatmap: The heatmap of the video. 100 is the highest percentage of watch time.
-  - additionalProperties: A container of undocumented properties.
+  - heatmap: The heatmap where keys are time segments and values are watch percentages.
 
 #### Parameters
 
 | Name | Description |
 | ---- | ----------- |
-| heatmap | The heatmap of the video. 100 is the highest percentage of watch time. |
-| additionalProperties | A container of undocumented properties. |
+| heatmap | The heatmap where keys are time segments and values are watch percentages. |
 
 ### `init(from:)`
 
@@ -61,15 +50,3 @@ public init(from decoder: any Decoder) throws
 | Name | Description |
 | ---- | ----------- |
 | decoder | The decoder to read data from. |
-
-### `encode(to:)`
-
-```swift
-public func encode(to encoder: any Encoder) throws
-```
-
-#### Parameters
-
-| Name | Description |
-| ---- | ----------- |
-| encoder | The encoder to write data to. |

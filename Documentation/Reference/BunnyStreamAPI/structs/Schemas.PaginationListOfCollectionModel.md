@@ -6,6 +6,8 @@
 public struct PaginationListOfCollectionModel: Codable, Hashable, Sendable
 ```
 
+A paginated list of collections.
+
 - Remark: Generated from `#/components/schemas/PaginationListOfCollectionModel`.
 
 ## Properties
@@ -15,7 +17,7 @@ public struct PaginationListOfCollectionModel: Codable, Hashable, Sendable
 public var totalItems: Swift.Int64?
 ```
 
-The total number of items that can be returned
+The total number of collections available.
 
 - Remark: Generated from `#/components/schemas/PaginationListOfCollectionModel/totalItems`.
 
@@ -25,7 +27,7 @@ The total number of items that can be returned
 public var currentPage: Swift.Int64?
 ```
 
-The current page of the response
+The current page number.
 
 - Remark: Generated from `#/components/schemas/PaginationListOfCollectionModel/currentPage`.
 
@@ -35,7 +37,7 @@ The current page of the response
 public var itemsPerPage: Swift.Int32?
 ```
 
-The number of items returned per page
+The number of collections per page.
 
 - Remark: Generated from `#/components/schemas/PaginationListOfCollectionModel/itemsPerPage`.
 
@@ -45,49 +47,38 @@ The number of items returned per page
 public var items: [Components.Schemas.CollectionModel]?
 ```
 
-The result items on the current result
+The collections returned on the current page.
 
 - Remark: Generated from `#/components/schemas/PaginationListOfCollectionModel/items`.
 
-### `additionalProperties`
-
-```swift
-public var additionalProperties: OpenAPIRuntime.OpenAPIObjectContainer
-```
-
-A container of undocumented properties.
-
 ## Methods
-### `init(totalItems:currentPage:itemsPerPage:items:additionalProperties:)`
+### `init(totalItems:currentPage:itemsPerPage:items:)`
 
 ```swift
 public init(
     totalItems: Swift.Int64? = nil,
     currentPage: Swift.Int64? = nil,
     itemsPerPage: Swift.Int32? = nil,
-    items: [Components.Schemas.CollectionModel]? = nil,
-    additionalProperties: OpenAPIRuntime.OpenAPIObjectContainer = .init()
+    items: [Components.Schemas.CollectionModel]? = nil
 )
 ```
 
 Creates a new `PaginationListOfCollectionModel`.
 
 - Parameters:
-  - totalItems: The total number of items that can be returned
-  - currentPage: The current page of the response
-  - itemsPerPage: The number of items returned per page
-  - items: The result items on the current result
-  - additionalProperties: A container of undocumented properties.
+  - totalItems: The total number of collections available.
+  - currentPage: The current page number.
+  - itemsPerPage: The number of collections per page.
+  - items: The collections returned on the current page.
 
 #### Parameters
 
 | Name | Description |
 | ---- | ----------- |
-| totalItems | The total number of items that can be returned |
-| currentPage | The current page of the response |
-| itemsPerPage | The number of items returned per page |
-| items | The result items on the current result |
-| additionalProperties | A container of undocumented properties. |
+| totalItems | The total number of collections available. |
+| currentPage | The current page number. |
+| itemsPerPage | The number of collections per page. |
+| items | The collections returned on the current page. |
 
 ### `init(from:)`
 
@@ -100,15 +91,3 @@ public init(from decoder: any Decoder) throws
 | Name | Description |
 | ---- | ----------- |
 | decoder | The decoder to read data from. |
-
-### `encode(to:)`
-
-```swift
-public func encode(to encoder: any Encoder) throws
-```
-
-#### Parameters
-
-| Name | Description |
-| ---- | ----------- |
-| encoder | The encoder to write data to. |

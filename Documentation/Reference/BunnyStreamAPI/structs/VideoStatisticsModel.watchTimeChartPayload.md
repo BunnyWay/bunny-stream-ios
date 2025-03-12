@@ -6,7 +6,7 @@
 public struct watchTimeChartPayload: Codable, Hashable, Sendable
 ```
 
-The constructed chart of the total watch time
+A chart representing total watch time over time.
 
 - Remark: Generated from `#/components/schemas/VideoStatisticsModel/watchTimeChart`.
 

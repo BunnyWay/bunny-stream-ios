@@ -6,6 +6,8 @@
 public struct VideoOEmbedModel: Codable, Hashable, Sendable
 ```
 
+Represents OEmbed data for a video, including embed HTML and metadata such as title and provider information.
+
 - Remark: Generated from `#/components/schemas/VideoOEmbedModel`.
 
 ## Properties
@@ -15,6 +17,8 @@ public struct VideoOEmbedModel: Codable, Hashable, Sendable
 public var version: Swift.String?
 ```
 
+The version of the OEmbed specification being used.
+
 - Remark: Generated from `#/components/schemas/VideoOEmbedModel/version`.
 
 ### `title`
@@ -22,6 +26,8 @@ public var version: Swift.String?
 ```swift
 public var title: Swift.String?
 ```
+
+The title of the video.
 
 - Remark: Generated from `#/components/schemas/VideoOEmbedModel/title`.
 
@@ -31,6 +37,8 @@ public var title: Swift.String?
 public var _type: Swift.String?
 ```
 
+The type of the embedded object (e.g., video).
+
 - Remark: Generated from `#/components/schemas/VideoOEmbedModel/type`.
 
 ### `thumbnailUrl`
@@ -38,6 +46,8 @@ public var _type: Swift.String?
 ```swift
 public var thumbnailUrl: Swift.String?
 ```
+
+The URL of the video thumbnail.
 
 - Remark: Generated from `#/components/schemas/VideoOEmbedModel/thumbnailUrl`.
 
@@ -47,6 +57,8 @@ public var thumbnailUrl: Swift.String?
 public var width: Swift.Int32?
 ```
 
+The width of the embedded video.
+
 - Remark: Generated from `#/components/schemas/VideoOEmbedModel/width`.
 
 ### `height`
@@ -54,6 +66,8 @@ public var width: Swift.Int32?
 ```swift
 public var height: Swift.Int32?
 ```
+
+The height of the embedded video.
 
 - Remark: Generated from `#/components/schemas/VideoOEmbedModel/height`.
 
@@ -63,6 +77,8 @@ public var height: Swift.Int32?
 public var html: Swift.String?
 ```
 
+The HTML snippet for embedding the video.
+
 - Remark: Generated from `#/components/schemas/VideoOEmbedModel/html`.
 
 ### `providerName`
@@ -70,6 +86,8 @@ public var html: Swift.String?
 ```swift
 public var providerName: Swift.String?
 ```
+
+The name of the provider (e.g., bunny.net).
 
 - Remark: Generated from `#/components/schemas/VideoOEmbedModel/providerName`.
 
@@ -79,18 +97,12 @@ public var providerName: Swift.String?
 public var providerUrl: Swift.String?
 ```
 
+The URL of the provider's website.
+
 - Remark: Generated from `#/components/schemas/VideoOEmbedModel/providerUrl`.
 
-### `additionalProperties`
-
-```swift
-public var additionalProperties: OpenAPIRuntime.OpenAPIObjectContainer
-```
-
-A container of undocumented properties.
-
 ## Methods
-### `init(version:title:_type:thumbnailUrl:width:height:html:providerName:providerUrl:additionalProperties:)`
+### `init(version:title:_type:thumbnailUrl:width:height:html:providerName:providerUrl:)`
 
 ```swift
 public init(
@@ -102,39 +114,36 @@ public init(
     height: Swift.Int32? = nil,
     html: Swift.String? = nil,
     providerName: Swift.String? = nil,
-    providerUrl: Swift.String? = nil,
-    additionalProperties: OpenAPIRuntime.OpenAPIObjectContainer = .init()
+    providerUrl: Swift.String? = nil
 )
 ```
 
 Creates a new `VideoOEmbedModel`.
 
 - Parameters:
-  - version:
-  - title:
-  - _type:
-  - thumbnailUrl:
-  - width:
-  - height:
-  - html:
-  - providerName:
-  - providerUrl:
-  - additionalProperties: A container of undocumented properties.
+  - version: The version of the OEmbed specification being used.
+  - title: The title of the video.
+  - _type: The type of the embedded object (e.g., video).
+  - thumbnailUrl: The URL of the video thumbnail.
+  - width: The width of the embedded video.
+  - height: The height of the embedded video.
+  - html: The HTML snippet for embedding the video.
+  - providerName: The name of the provider (e.g., bunny.net).
+  - providerUrl: The URL of the provider's website.
 
 #### Parameters
 
 | Name | Description |
 | ---- | ----------- |
-| version |  |
-| title |  |
-| _type |  |
-| thumbnailUrl |  |
-| width |  |
-| height |  |
-| html |  |
-| providerName |  |
-| providerUrl |  |
-| additionalProperties | A container of undocumented properties. |
+| version | The version of the OEmbed specification being used. |
+| title | The title of the video. |
+| _type | The type of the embedded object (e.g., video). |
+| thumbnailUrl | The URL of the video thumbnail. |
+| width | The width of the embedded video. |
+| height | The height of the embedded video. |
+| html | The HTML snippet for embedding the video. |
+| providerName | The name of the provider (e.g., bunny.net). |
+| providerUrl | The URL of the provider’s website. |
 
 ### `init(from:)`
 
@@ -147,15 +156,3 @@ public init(from decoder: any Decoder) throws
 | Name | Description |
 | ---- | ----------- |
 | decoder | The decoder to read data from. |
-
-### `encode(to:)`
-
-```swift
-public func encode(to encoder: any Encoder) throws
-```
-
-#### Parameters
-
-| Name | Description |
-| ---- | ----------- |
-| encoder | The encoder to write data to. |

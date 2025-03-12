@@ -15,6 +15,8 @@ public struct Path: Sendable, Hashable
 public var libraryId: Swift.Int64
 ```
 
+The ID of the video library.
+
 - Remark: Generated from `#/paths/library/{libraryId}/videos/{videoId}/resolutions/cleanup/POST/path/libraryId`.
 
 ### `videoId`
@@ -22,6 +24,8 @@ public var libraryId: Swift.Int64
 ```swift
 public var videoId: Swift.String
 ```
+
+The unique identifier of the video.
 
 - Remark: Generated from `#/paths/library/{libraryId}/videos/{videoId}/resolutions/cleanup/POST/path/videoId`.
 
@@ -38,12 +42,12 @@ public init(
 Creates a new `Path`.
 
 - Parameters:
-  - libraryId:
-  - videoId:
+  - libraryId: The ID of the video library.
+  - videoId: The unique identifier of the video.
 
 #### Parameters
 
 | Name | Description |
 | ---- | ----------- |
-| libraryId |  |
-| videoId |  |
+| libraryId | The ID of the video library. |
+| videoId | The unique identifier of the video. |

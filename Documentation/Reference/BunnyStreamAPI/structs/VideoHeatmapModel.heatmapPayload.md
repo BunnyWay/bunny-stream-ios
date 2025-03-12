@@ -6,7 +6,7 @@
 public struct heatmapPayload: Codable, Hashable, Sendable
 ```
 
-The heatmap of the video. 100 is the highest percentage of watch time.
+The heatmap where keys are time segments and values are watch percentages.
 
 - Remark: Generated from `#/components/schemas/VideoHeatmapModel/heatmap`.
 

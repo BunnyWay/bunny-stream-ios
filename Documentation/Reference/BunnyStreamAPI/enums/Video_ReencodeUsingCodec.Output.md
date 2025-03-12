@@ -13,7 +13,7 @@
 case ok(Operations.Video_ReencodeUsingCodec.Output.Ok)
 ```
 
-The details of the requested video
+The output codec was successfully added and the updated video details are returned.
 
 - Remark: Generated from `#/paths//library/{libraryId}/videos/{videoId}/outputs/{outputCodecId}/put(Video_ReencodeUsingCodec)/responses/200`.
 
@@ -25,7 +25,7 @@ HTTP response code: `200 ok`.
 case badRequest(Operations.Video_ReencodeUsingCodec.Output.BadRequest)
 ```
 
-Invalid request or validation failed, check response
+Invalid request or validation failed. Check the response for details.
 
 - Remark: Generated from `#/paths//library/{libraryId}/videos/{videoId}/outputs/{outputCodecId}/put(Video_ReencodeUsingCodec)/responses/400`.
 
@@ -37,7 +37,7 @@ HTTP response code: `400 badRequest`.
 case unauthorized(Operations.Video_ReencodeUsingCodec.Output.Unauthorized)
 ```
 
-The request authorization failed
+The request authorization failed.
 
 - Remark: Generated from `#/paths//library/{libraryId}/videos/{videoId}/outputs/{outputCodecId}/put(Video_ReencodeUsingCodec)/responses/401`.
 
@@ -49,7 +49,7 @@ HTTP response code: `401 unauthorized`.
 case notFound(Operations.Video_ReencodeUsingCodec.Output.NotFound)
 ```
 
-The requested video was not found
+The requested video was not found.
 
 - Remark: Generated from `#/paths//library/{libraryId}/videos/{videoId}/outputs/{outputCodecId}/put(Video_ReencodeUsingCodec)/responses/404`.
 
@@ -61,7 +61,7 @@ HTTP response code: `404 notFound`.
 case internalServerError(Operations.Video_ReencodeUsingCodec.Output.InternalServerError)
 ```
 
-Internal Server Error
+Internal Server Error.
 
 - Remark: Generated from `#/paths//library/{libraryId}/videos/{videoId}/outputs/{outputCodecId}/put(Video_ReencodeUsingCodec)/responses/500`.
 
@@ -106,7 +106,7 @@ The associated value of the enum case if `self` is `.badRequest`.
 public static var unauthorized: Self
 ```
 
-The request authorization failed
+The request authorization failed.
 
 - Remark: Generated from `#/paths//library/{libraryId}/videos/{videoId}/outputs/{outputCodecId}/put(Video_ReencodeUsingCodec)/responses/401`.
 
@@ -129,7 +129,7 @@ The associated value of the enum case if `self` is `.unauthorized`.
 public static var notFound: Self
 ```
 
-The requested video was not found
+The requested video was not found.
 
 - Remark: Generated from `#/paths//library/{libraryId}/videos/{videoId}/outputs/{outputCodecId}/put(Video_ReencodeUsingCodec)/responses/404`.
 
@@ -152,7 +152,7 @@ The associated value of the enum case if `self` is `.notFound`.
 public static var internalServerError: Self
 ```
 
-Internal Server Error
+Internal Server Error.
 
 - Remark: Generated from `#/paths//library/{libraryId}/videos/{videoId}/outputs/{outputCodecId}/put(Video_ReencodeUsingCodec)/responses/500`.
 

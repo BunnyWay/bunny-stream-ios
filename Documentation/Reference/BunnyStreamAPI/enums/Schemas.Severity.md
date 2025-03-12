@@ -6,10 +6,7 @@
 @frozen public enum Severity: Int, Codable, Hashable, Sendable, CaseIterable
 ```
 
-0 = Undefined
-1 = Information
-2 = Warning
-3 = Error
+The severity level of a transcoding message: 0 = Undefined, 1 = Information, 2 = Warning, 3 = Error.
 
 - Remark: Generated from `#/components/schemas/Severity`.
 

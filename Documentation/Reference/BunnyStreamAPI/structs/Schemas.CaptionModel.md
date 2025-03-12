@@ -6,6 +6,8 @@
 public struct CaptionModel: Codable, Hashable, Sendable
 ```
 
+Represents caption details for a video.
+
 - Remark: Generated from `#/components/schemas/CaptionModel`.
 
 ## Properties
@@ -15,7 +17,7 @@ public struct CaptionModel: Codable, Hashable, Sendable
 public var srclang: Swift.String?
 ```
 
-The unique srclang shortcode for the caption
+The ISO 639-1 language code for the caption.
 
 - Remark: Generated from `#/components/schemas/CaptionModel/srclang`.
 
@@ -25,43 +27,32 @@ The unique srclang shortcode for the caption
 public var label: Swift.String?
 ```
 
-The text description label for the caption
+A descriptive label for the caption.
 
 - Remark: Generated from `#/components/schemas/CaptionModel/label`.
 
-### `additionalProperties`
-
-```swift
-public var additionalProperties: OpenAPIRuntime.OpenAPIObjectContainer
-```
-
-A container of undocumented properties.
-
 ## Methods
-### `init(srclang:label:additionalProperties:)`
+### `init(srclang:label:)`
 
 ```swift
 public init(
     srclang: Swift.String? = nil,
-    label: Swift.String? = nil,
-    additionalProperties: OpenAPIRuntime.OpenAPIObjectContainer = .init()
+    label: Swift.String? = nil
 )
 ```
 
 Creates a new `CaptionModel`.
 
 - Parameters:
-  - srclang: The unique srclang shortcode for the caption
-  - label: The text description label for the caption
-  - additionalProperties: A container of undocumented properties.
+  - srclang: The ISO 639-1 language code for the caption.
+  - label: A descriptive label for the caption.
 
 #### Parameters
 
 | Name | Description |
 | ---- | ----------- |
-| srclang | The unique srclang shortcode for the caption |
-| label | The text description label for the caption |
-| additionalProperties | A container of undocumented properties. |
+| srclang | The ISO 639-1 language code for the caption. |
+| label | A descriptive label for the caption. |
 
 ### `init(from:)`
 
@@ -74,15 +65,3 @@ public init(from decoder: any Decoder) throws
 | Name | Description |
 | ---- | ----------- |
 | decoder | The decoder to read data from. |
-
-### `encode(to:)`
-
-```swift
-public func encode(to encoder: any Encoder) throws
-```
-
-#### Parameters
-
-| Name | Description |
-| ---- | ----------- |
-| encoder | The encoder to write data to. |

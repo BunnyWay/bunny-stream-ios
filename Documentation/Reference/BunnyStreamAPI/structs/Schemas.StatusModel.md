@@ -6,6 +6,8 @@
 public struct StatusModel: Codable, Hashable, Sendable
 ```
 
+Generic status response model indicating the success or failure of an operation.
+
 - Remark: Generated from `#/components/schemas/StatusModel`.
 
 ## Properties
@@ -15,7 +17,7 @@ public struct StatusModel: Codable, Hashable, Sendable
 public var success: Swift.Bool?
 ```
 
-Determines if the request was successful
+Indicates whether the operation was successful.
 
 - Remark: Generated from `#/components/schemas/StatusModel/success`.
 
@@ -25,7 +27,7 @@ Determines if the request was successful
 public var message: Swift.String?
 ```
 
-Response message description
+A descriptive message regarding the operation outcome.
 
 - Remark: Generated from `#/components/schemas/StatusModel/message`.
 
@@ -35,46 +37,35 @@ Response message description
 public var statusCode: Swift.Int32?
 ```
 
-The response status code
+The HTTP status code for the response.
 
 - Remark: Generated from `#/components/schemas/StatusModel/statusCode`.
 
-### `additionalProperties`
-
-```swift
-public var additionalProperties: OpenAPIRuntime.OpenAPIObjectContainer
-```
-
-A container of undocumented properties.
-
 ## Methods
-### `init(success:message:statusCode:additionalProperties:)`
+### `init(success:message:statusCode:)`
 
 ```swift
 public init(
     success: Swift.Bool? = nil,
     message: Swift.String? = nil,
-    statusCode: Swift.Int32? = nil,
-    additionalProperties: OpenAPIRuntime.OpenAPIObjectContainer = .init()
+    statusCode: Swift.Int32? = nil
 )
 ```
 
 Creates a new `StatusModel`.
 
 - Parameters:
-  - success: Determines if the request was successful
-  - message: Response message description
-  - statusCode: The response status code
-  - additionalProperties: A container of undocumented properties.
+  - success: Indicates whether the operation was successful.
+  - message: A descriptive message regarding the operation outcome.
+  - statusCode: The HTTP status code for the response.
 
 #### Parameters
 
 | Name | Description |
 | ---- | ----------- |
-| success | Determines if the request was successful |
-| message | Response message description |
-| statusCode | The response status code |
-| additionalProperties | A container of undocumented properties. |
+| success | Indicates whether the operation was successful. |
+| message | A descriptive message regarding the operation outcome. |
+| statusCode | The HTTP status code for the response. |
 
 ### `init(from:)`
 
@@ -87,15 +78,3 @@ public init(from decoder: any Decoder) throws
 | Name | Description |
 | ---- | ----------- |
 | decoder | The decoder to read data from. |
-
-### `encode(to:)`
-
-```swift
-public func encode(to encoder: any Encoder) throws
-```
-
-#### Parameters
-
-| Name | Description |
-| ---- | ----------- |
-| encoder | The encoder to write data to. |

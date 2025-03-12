@@ -6,6 +6,8 @@
 public struct Value2Payload: Codable, Hashable, Sendable
 ```
 
+Wraps the VideoResolutionsInfoModel with a status response.
+
 - Remark: Generated from `#/components/schemas/StatusModelOfVideoResolutionsInfoModel/value2`.
 
 ## Properties
@@ -17,36 +19,23 @@ public var data: Components.Schemas.StatusModelOfVideoResolutionsInfoModel.Value
 
 - Remark: Generated from `#/components/schemas/StatusModelOfVideoResolutionsInfoModel/value2/data`.
 
-### `additionalProperties`
-
-```swift
-public var additionalProperties: OpenAPIRuntime.OpenAPIObjectContainer
-```
-
-A container of undocumented properties.
-
 ## Methods
-### `init(data:additionalProperties:)`
+### `init(data:)`
 
 ```swift
-public init(
-    data: Components.Schemas.StatusModelOfVideoResolutionsInfoModel.Value2Payload.dataPayload? = nil,
-    additionalProperties: OpenAPIRuntime.OpenAPIObjectContainer = .init()
-)
+public init(data: Components.Schemas.StatusModelOfVideoResolutionsInfoModel.Value2Payload.dataPayload? = nil)
 ```
 
 Creates a new `Value2Payload`.
 
 - Parameters:
   - data:
-  - additionalProperties: A container of undocumented properties.
 
 #### Parameters
 
 | Name | Description |
 | ---- | ----------- |
 | data |  |
-| additionalProperties | A container of undocumented properties. |
 
 ### `init(from:)`
 
@@ -59,15 +48,3 @@ public init(from decoder: any Decoder) throws
 | Name | Description |
 | ---- | ----------- |
 | decoder | The decoder to read data from. |
-
-### `encode(to:)`
-
-```swift
-public func encode(to encoder: any Encoder) throws
-```
-
-#### Parameters
-
-| Name | Description |
-| ---- | ----------- |
-| encoder | The encoder to write data to. |

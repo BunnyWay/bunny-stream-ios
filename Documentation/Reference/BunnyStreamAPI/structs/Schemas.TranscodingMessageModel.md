@@ -6,6 +6,8 @@
 public struct TranscodingMessageModel: Codable, Hashable, Sendable
 ```
 
+Represents a message from the transcoding process indicating warnings or errors.
+
 - Remark: Generated from `#/components/schemas/TranscodingMessageModel`.
 
 ## Properties
@@ -14,6 +16,8 @@ public struct TranscodingMessageModel: Codable, Hashable, Sendable
 ```swift
 public var timeStamp: Foundation.Date?
 ```
+
+The timestamp when the message was generated.
 
 - Remark: Generated from `#/components/schemas/TranscodingMessageModel/timeStamp`.
 
@@ -39,6 +43,8 @@ public var issueCode: Components.Schemas.IssueCodes?
 public var message: Swift.String?
 ```
 
+A descriptive message detailing the transcoding issue.
+
 - Remark: Generated from `#/components/schemas/TranscodingMessageModel/message`.
 
 ### `value`
@@ -47,18 +53,12 @@ public var message: Swift.String?
 public var value: Swift.String?
 ```
 
+An optional value providing further context for the issue.
+
 - Remark: Generated from `#/components/schemas/TranscodingMessageModel/value`.
 
-### `additionalProperties`
-
-```swift
-public var additionalProperties: OpenAPIRuntime.OpenAPIObjectContainer
-```
-
-A container of undocumented properties.
-
 ## Methods
-### `init(timeStamp:level:issueCode:message:value:additionalProperties:)`
+### `init(timeStamp:level:issueCode:message:value:)`
 
 ```swift
 public init(
@@ -66,31 +66,28 @@ public init(
     level: Components.Schemas.Severity? = nil,
     issueCode: Components.Schemas.IssueCodes? = nil,
     message: Swift.String? = nil,
-    value: Swift.String? = nil,
-    additionalProperties: OpenAPIRuntime.OpenAPIObjectContainer = .init()
+    value: Swift.String? = nil
 )
 ```
 
 Creates a new `TranscodingMessageModel`.
 
 - Parameters:
-  - timeStamp:
+  - timeStamp: The timestamp when the message was generated.
   - level:
   - issueCode:
-  - message:
-  - value:
-  - additionalProperties: A container of undocumented properties.
+  - message: A descriptive message detailing the transcoding issue.
+  - value: An optional value providing further context for the issue.
 
 #### Parameters
 
 | Name | Description |
 | ---- | ----------- |
-| timeStamp |  |
+| timeStamp | The timestamp when the message was generated. |
 | level |  |
 | issueCode |  |
-| message |  |
-| value |  |
-| additionalProperties | A container of undocumented properties. |
+| message | A descriptive message detailing the transcoding issue. |
+| value | An optional value providing further context for the issue. |
 
 ### `init(from:)`
 
@@ -103,15 +100,3 @@ public init(from decoder: any Decoder) throws
 | Name | Description |
 | ---- | ----------- |
 | decoder | The decoder to read data from. |
-
-### `encode(to:)`
-
-```swift
-public func encode(to encoder: any Encoder) throws
-```
-
-#### Parameters
-
-| Name | Description |
-| ---- | ----------- |
-| encoder | The encoder to write data to. |

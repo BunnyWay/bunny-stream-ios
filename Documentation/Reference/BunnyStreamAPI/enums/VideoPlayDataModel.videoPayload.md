@@ -6,7 +6,7 @@
 @frozen public enum videoPayload: Codable, Hashable, Sendable
 ```
 
-Video data.
+The video data model.
 
 - Remark: Generated from `#/components/schemas/VideoPlayDataModel/video`.
 

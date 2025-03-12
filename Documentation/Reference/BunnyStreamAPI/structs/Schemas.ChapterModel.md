@@ -6,6 +6,8 @@
 public struct ChapterModel: Codable, Hashable, Sendable
 ```
 
+Represents a chapter within a video, including its title and start/end times.
+
 - Remark: Generated from `#/components/schemas/ChapterModel`.
 
 ## Properties
@@ -15,7 +17,7 @@ public struct ChapterModel: Codable, Hashable, Sendable
 public var title: Swift.String
 ```
 
-The title of the chapter
+The title of the chapter.
 
 - Remark: Generated from `#/components/schemas/ChapterModel/title`.
 
@@ -25,7 +27,7 @@ The title of the chapter
 public var start: Swift.Int32?
 ```
 
-The start time of the chapter in seconds
+The start time of the chapter in seconds.
 
 - Remark: Generated from `#/components/schemas/ChapterModel/start`.
 
@@ -35,46 +37,35 @@ The start time of the chapter in seconds
 public var end: Swift.Int32?
 ```
 
-The end time of the chapter in seconds
+The end time of the chapter in seconds.
 
 - Remark: Generated from `#/components/schemas/ChapterModel/end`.
 
-### `additionalProperties`
-
-```swift
-public var additionalProperties: OpenAPIRuntime.OpenAPIObjectContainer
-```
-
-A container of undocumented properties.
-
 ## Methods
-### `init(title:start:end:additionalProperties:)`
+### `init(title:start:end:)`
 
 ```swift
 public init(
     title: Swift.String,
     start: Swift.Int32? = nil,
-    end: Swift.Int32? = nil,
-    additionalProperties: OpenAPIRuntime.OpenAPIObjectContainer = .init()
+    end: Swift.Int32? = nil
 )
 ```
 
 Creates a new `ChapterModel`.
 
 - Parameters:
-  - title: The title of the chapter
-  - start: The start time of the chapter in seconds
-  - end: The end time of the chapter in seconds
-  - additionalProperties: A container of undocumented properties.
+  - title: The title of the chapter.
+  - start: The start time of the chapter in seconds.
+  - end: The end time of the chapter in seconds.
 
 #### Parameters
 
 | Name | Description |
 | ---- | ----------- |
-| title | The title of the chapter |
-| start | The start time of the chapter in seconds |
-| end | The end time of the chapter in seconds |
-| additionalProperties | A container of undocumented properties. |
+| title | The title of the chapter. |
+| start | The start time of the chapter in seconds. |
+| end | The end time of the chapter in seconds. |
 
 ### `init(from:)`
 
@@ -87,15 +78,3 @@ public init(from decoder: any Decoder) throws
 | Name | Description |
 | ---- | ----------- |
 | decoder | The decoder to read data from. |
-
-### `encode(to:)`
-
-```swift
-public func encode(to encoder: any Encoder) throws
-```
-
-#### Parameters
-
-| Name | Description |
-| ---- | ----------- |
-| encoder | The encoder to write data to. |

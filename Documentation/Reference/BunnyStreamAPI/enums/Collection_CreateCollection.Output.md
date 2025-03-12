@@ -13,7 +13,7 @@
 case ok(Operations.Collection_CreateCollection.Output.Ok)
 ```
 
-The collection was successfuly created
+The collection was successfully created.
 
 - Remark: Generated from `#/paths//library/{libraryId}/collections/post(Collection_CreateCollection)/responses/200`.
 
@@ -25,7 +25,7 @@ HTTP response code: `200 ok`.
 case unauthorized(Operations.Collection_CreateCollection.Output.Unauthorized)
 ```
 
-The request authorization failed
+The request authorization failed.
 
 - Remark: Generated from `#/paths//library/{libraryId}/collections/post(Collection_CreateCollection)/responses/401`.
 
@@ -37,7 +37,7 @@ HTTP response code: `401 unauthorized`.
 case internalServerError(Operations.Collection_CreateCollection.Output.InternalServerError)
 ```
 
-Internal Server Error
+Internal Server Error.
 
 - Remark: Generated from `#/paths//library/{libraryId}/collections/post(Collection_CreateCollection)/responses/500`.
 
@@ -71,7 +71,7 @@ The associated value of the enum case if `self` is `.ok`.
 public static var unauthorized: Self
 ```
 
-The request authorization failed
+The request authorization failed.
 
 - Remark: Generated from `#/paths//library/{libraryId}/collections/post(Collection_CreateCollection)/responses/401`.
 
@@ -94,7 +94,7 @@ The associated value of the enum case if `self` is `.unauthorized`.
 public static var internalServerError: Self
 ```
 
-Internal Server Error
+Internal Server Error.
 
 - Remark: Generated from `#/paths//library/{libraryId}/collections/post(Collection_CreateCollection)/responses/500`.
 

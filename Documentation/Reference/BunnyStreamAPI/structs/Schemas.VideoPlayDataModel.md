@@ -6,6 +6,8 @@
 public struct VideoPlayDataModel: Codable, Hashable, Sendable
 ```
 
+Contains all necessary playback information for a video, including various URLs and player configurations.
+
 - Remark: Generated from `#/components/schemas/VideoPlayDataModel`.
 
 ## Properties
@@ -15,7 +17,7 @@ public struct VideoPlayDataModel: Codable, Hashable, Sendable
 public var video: Components.Schemas.VideoPlayDataModel.videoPayload?
 ```
 
-Video data.
+The video data model.
 
 - Remark: Generated from `#/components/schemas/VideoPlayDataModel/video`.
 
@@ -25,6 +27,8 @@ Video data.
 public var captionsPath: Swift.String?
 ```
 
+The path where caption files are stored.
+
 - Remark: Generated from `#/components/schemas/VideoPlayDataModel/captionsPath`.
 
 ### `seekPath`
@@ -32,6 +36,8 @@ public var captionsPath: Swift.String?
 ```swift
 public var seekPath: Swift.String?
 ```
+
+The URL to be used for seeking within the video.
 
 - Remark: Generated from `#/components/schemas/VideoPlayDataModel/seekPath`.
 
@@ -41,6 +47,8 @@ public var seekPath: Swift.String?
 public var thumbnailUrl: Swift.String?
 ```
 
+The URL of the video's thumbnail.
+
 - Remark: Generated from `#/components/schemas/VideoPlayDataModel/thumbnailUrl`.
 
 ### `fallbackUrl`
@@ -48,6 +56,8 @@ public var thumbnailUrl: Swift.String?
 ```swift
 public var fallbackUrl: Swift.String?
 ```
+
+The fallback URL for the video.
 
 - Remark: Generated from `#/components/schemas/VideoPlayDataModel/fallbackUrl`.
 
@@ -57,6 +67,8 @@ public var fallbackUrl: Swift.String?
 public var videoPlaylistUrl: Swift.String?
 ```
 
+The URL of the video playlist.
+
 - Remark: Generated from `#/components/schemas/VideoPlayDataModel/videoPlaylistUrl`.
 
 ### `originalUrl`
@@ -64,6 +76,8 @@ public var videoPlaylistUrl: Swift.String?
 ```swift
 public var originalUrl: Swift.String?
 ```
+
+The URL of the original video file.
 
 - Remark: Generated from `#/components/schemas/VideoPlayDataModel/originalUrl`.
 
@@ -73,6 +87,8 @@ public var originalUrl: Swift.String?
 public var previewUrl: Swift.String?
 ```
 
+The URL of the video preview.
+
 - Remark: Generated from `#/components/schemas/VideoPlayDataModel/previewUrl`.
 
 ### `controls`
@@ -80,6 +96,8 @@ public var previewUrl: Swift.String?
 ```swift
 public var controls: Swift.String?
 ```
+
+Player control settings.
 
 - Remark: Generated from `#/components/schemas/VideoPlayDataModel/controls`.
 
@@ -89,6 +107,8 @@ public var controls: Swift.String?
 public var enableDRM: Swift.Bool?
 ```
 
+Indicates if DRM is enabled for the video.
+
 - Remark: Generated from `#/components/schemas/VideoPlayDataModel/enableDRM`.
 
 ### `drmVersion`
@@ -96,6 +116,8 @@ public var enableDRM: Swift.Bool?
 ```swift
 public var drmVersion: Swift.Int32?
 ```
+
+The version number of DRM used.
 
 - Remark: Generated from `#/components/schemas/VideoPlayDataModel/drmVersion`.
 
@@ -105,6 +127,8 @@ public var drmVersion: Swift.Int32?
 public var playerKeyColor: Swift.String?
 ```
 
+The primary color used for the video player interface.
+
 - Remark: Generated from `#/components/schemas/VideoPlayDataModel/playerKeyColor`.
 
 ### `vastTagUrl`
@@ -112,6 +136,8 @@ public var playerKeyColor: Swift.String?
 ```swift
 public var vastTagUrl: Swift.String?
 ```
+
+The VAST tag URL for video ads.
 
 - Remark: Generated from `#/components/schemas/VideoPlayDataModel/vastTagUrl`.
 
@@ -121,6 +147,8 @@ public var vastTagUrl: Swift.String?
 public var captionsFontSize: Swift.Int32?
 ```
 
+Font size for captions in the video player.
+
 - Remark: Generated from `#/components/schemas/VideoPlayDataModel/captionsFontSize`.
 
 ### `captionsFontColor`
@@ -128,6 +156,8 @@ public var captionsFontSize: Swift.Int32?
 ```swift
 public var captionsFontColor: Swift.String?
 ```
+
+Font color for captions in the video player.
 
 - Remark: Generated from `#/components/schemas/VideoPlayDataModel/captionsFontColor`.
 
@@ -137,6 +167,8 @@ public var captionsFontColor: Swift.String?
 public var captionsBackground: Swift.String?
 ```
 
+Background color for captions.
+
 - Remark: Generated from `#/components/schemas/VideoPlayDataModel/captionsBackground`.
 
 ### `uiLanguage`
@@ -144,6 +176,8 @@ public var captionsBackground: Swift.String?
 ```swift
 public var uiLanguage: Swift.String?
 ```
+
+The language used for the player UI.
 
 - Remark: Generated from `#/components/schemas/VideoPlayDataModel/uiLanguage`.
 
@@ -153,6 +187,8 @@ public var uiLanguage: Swift.String?
 public var allowEarlyPlay: Swift.Bool?
 ```
 
+Indicates if early playback is allowed.
+
 - Remark: Generated from `#/components/schemas/VideoPlayDataModel/allowEarlyPlay`.
 
 ### `tokenAuthEnabled`
@@ -160,6 +196,8 @@ public var allowEarlyPlay: Swift.Bool?
 ```swift
 public var tokenAuthEnabled: Swift.Bool?
 ```
+
+Indicates if token-based authentication is enabled for playback.
 
 - Remark: Generated from `#/components/schemas/VideoPlayDataModel/tokenAuthEnabled`.
 
@@ -169,6 +207,8 @@ public var tokenAuthEnabled: Swift.Bool?
 public var enableMP4Fallback: Swift.Bool?
 ```
 
+Indicates if MP4 fallback files should be used.
+
 - Remark: Generated from `#/components/schemas/VideoPlayDataModel/enableMP4Fallback`.
 
 ### `showHeatmap`
@@ -176,6 +216,8 @@ public var enableMP4Fallback: Swift.Bool?
 ```swift
 public var showHeatmap: Swift.Bool?
 ```
+
+Indicates if the heatmap should be displayed on the player.
 
 - Remark: Generated from `#/components/schemas/VideoPlayDataModel/showHeatmap`.
 
@@ -185,6 +227,8 @@ public var showHeatmap: Swift.Bool?
 public var fontFamily: Swift.String?
 ```
 
+The font family used for captions.
+
 - Remark: Generated from `#/components/schemas/VideoPlayDataModel/fontFamily`.
 
 ### `playbackSpeeds`
@@ -193,18 +237,12 @@ public var fontFamily: Swift.String?
 public var playbackSpeeds: Swift.String?
 ```
 
+Available playback speed options for the video.
+
 - Remark: Generated from `#/components/schemas/VideoPlayDataModel/playbackSpeeds`.
 
-### `additionalProperties`
-
-```swift
-public var additionalProperties: OpenAPIRuntime.OpenAPIObjectContainer
-```
-
-A container of undocumented properties.
-
 ## Methods
-### `init(video:captionsPath:seekPath:thumbnailUrl:fallbackUrl:videoPlaylistUrl:originalUrl:previewUrl:controls:enableDRM:drmVersion:playerKeyColor:vastTagUrl:captionsFontSize:captionsFontColor:captionsBackground:uiLanguage:allowEarlyPlay:tokenAuthEnabled:enableMP4Fallback:showHeatmap:fontFamily:playbackSpeeds:additionalProperties:)`
+### `init(video:captionsPath:seekPath:thumbnailUrl:fallbackUrl:videoPlaylistUrl:originalUrl:previewUrl:controls:enableDRM:drmVersion:playerKeyColor:vastTagUrl:captionsFontSize:captionsFontColor:captionsBackground:uiLanguage:allowEarlyPlay:tokenAuthEnabled:enableMP4Fallback:showHeatmap:fontFamily:playbackSpeeds:)`
 
 ```swift
 public init(
@@ -230,67 +268,64 @@ public init(
     enableMP4Fallback: Swift.Bool? = nil,
     showHeatmap: Swift.Bool? = nil,
     fontFamily: Swift.String? = nil,
-    playbackSpeeds: Swift.String? = nil,
-    additionalProperties: OpenAPIRuntime.OpenAPIObjectContainer = .init()
+    playbackSpeeds: Swift.String? = nil
 )
 ```
 
 Creates a new `VideoPlayDataModel`.
 
 - Parameters:
-  - video: Video data.
-  - captionsPath:
-  - seekPath:
-  - thumbnailUrl:
-  - fallbackUrl:
-  - videoPlaylistUrl:
-  - originalUrl:
-  - previewUrl:
-  - controls:
-  - enableDRM:
-  - drmVersion:
-  - playerKeyColor:
-  - vastTagUrl:
-  - captionsFontSize:
-  - captionsFontColor:
-  - captionsBackground:
-  - uiLanguage:
-  - allowEarlyPlay:
-  - tokenAuthEnabled:
-  - enableMP4Fallback:
-  - showHeatmap:
-  - fontFamily:
-  - playbackSpeeds:
-  - additionalProperties: A container of undocumented properties.
+  - video: The video data model.
+  - captionsPath: The path where caption files are stored.
+  - seekPath: The URL to be used for seeking within the video.
+  - thumbnailUrl: The URL of the video's thumbnail.
+  - fallbackUrl: The fallback URL for the video.
+  - videoPlaylistUrl: The URL of the video playlist.
+  - originalUrl: The URL of the original video file.
+  - previewUrl: The URL of the video preview.
+  - controls: Player control settings.
+  - enableDRM: Indicates if DRM is enabled for the video.
+  - drmVersion: The version number of DRM used.
+  - playerKeyColor: The primary color used for the video player interface.
+  - vastTagUrl: The VAST tag URL for video ads.
+  - captionsFontSize: Font size for captions in the video player.
+  - captionsFontColor: Font color for captions in the video player.
+  - captionsBackground: Background color for captions.
+  - uiLanguage: The language used for the player UI.
+  - allowEarlyPlay: Indicates if early playback is allowed.
+  - tokenAuthEnabled: Indicates if token-based authentication is enabled for playback.
+  - enableMP4Fallback: Indicates if MP4 fallback files should be used.
+  - showHeatmap: Indicates if the heatmap should be displayed on the player.
+  - fontFamily: The font family used for captions.
+  - playbackSpeeds: Available playback speed options for the video.
 
 #### Parameters
 
 | Name | Description |
 | ---- | ----------- |
-| video | Video data. |
-| captionsPath |  |
-| seekPath |  |
-| thumbnailUrl |  |
-| fallbackUrl |  |
-| videoPlaylistUrl |  |
-| originalUrl |  |
-| previewUrl |  |
-| controls |  |
-| enableDRM |  |
-| drmVersion |  |
-| playerKeyColor |  |
-| vastTagUrl |  |
-| captionsFontSize |  |
-| captionsFontColor |  |
-| captionsBackground |  |
-| uiLanguage |  |
-| allowEarlyPlay |  |
-| tokenAuthEnabled |  |
-| enableMP4Fallback |  |
-| showHeatmap |  |
-| fontFamily |  |
-| playbackSpeeds |  |
-| additionalProperties | A container of undocumented properties. |
+| video | The video data model. |
+| captionsPath | The path where caption files are stored. |
+| seekPath | The URL to be used for seeking within the video. |
+| thumbnailUrl | The URL of the video’s thumbnail. |
+| fallbackUrl | The fallback URL for the video. |
+| videoPlaylistUrl | The URL of the video playlist. |
+| originalUrl | The URL of the original video file. |
+| previewUrl | The URL of the video preview. |
+| controls | Player control settings. |
+| enableDRM | Indicates if DRM is enabled for the video. |
+| drmVersion | The version number of DRM used. |
+| playerKeyColor | The primary color used for the video player interface. |
+| vastTagUrl | The VAST tag URL for video ads. |
+| captionsFontSize | Font size for captions in the video player. |
+| captionsFontColor | Font color for captions in the video player. |
+| captionsBackground | Background color for captions. |
+| uiLanguage | The language used for the player UI. |
+| allowEarlyPlay | Indicates if early playback is allowed. |
+| tokenAuthEnabled | Indicates if token-based authentication is enabled for playback. |
+| enableMP4Fallback | Indicates if MP4 fallback files should be used. |
+| showHeatmap | Indicates if the heatmap should be displayed on the player. |
+| fontFamily | The font family used for captions. |
+| playbackSpeeds | Available playback speed options for the video. |
 
 ### `init(from:)`
 
@@ -303,15 +338,3 @@ public init(from decoder: any Decoder) throws
 | Name | Description |
 | ---- | ----------- |
 | decoder | The decoder to read data from. |
-
-### `encode(to:)`
-
-```swift
-public func encode(to encoder: any Encoder) throws
-```
-
-#### Parameters
-
-| Name | Description |
-| ---- | ----------- |
-| encoder | The encoder to write data to. |

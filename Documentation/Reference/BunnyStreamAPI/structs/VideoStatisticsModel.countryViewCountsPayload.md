@@ -6,7 +6,7 @@
 public struct countryViewCountsPayload: Codable, Hashable, Sendable
 ```
 
-The country view count constructed chart
+View counts grouped by country.
 
 - Remark: Generated from `#/components/schemas/VideoStatisticsModel/countryViewCounts`.
 

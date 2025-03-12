@@ -13,7 +13,7 @@
 case ok(Operations.Video_DeleteVideo.Output.Ok)
 ```
 
-The video was successfuly deleted
+The video was successfully deleted.
 
 - Remark: Generated from `#/paths//library/{libraryId}/videos/{videoId}/delete(Video_DeleteVideo)/responses/200`.
 
@@ -25,7 +25,7 @@ HTTP response code: `200 ok`.
 case unauthorized(Operations.Video_DeleteVideo.Output.Unauthorized)
 ```
 
-The request authorization failed
+The request authorization failed.
 
 - Remark: Generated from `#/paths//library/{libraryId}/videos/{videoId}/delete(Video_DeleteVideo)/responses/401`.
 
@@ -37,7 +37,7 @@ HTTP response code: `401 unauthorized`.
 case notFound(Operations.Video_DeleteVideo.Output.NotFound)
 ```
 
-The requested video was not found
+The requested video was not found.
 
 - Remark: Generated from `#/paths//library/{libraryId}/videos/{videoId}/delete(Video_DeleteVideo)/responses/404`.
 
@@ -49,7 +49,7 @@ HTTP response code: `404 notFound`.
 case internalServerError(Operations.Video_DeleteVideo.Output.InternalServerError)
 ```
 
-Internal Server Error
+Internal Server Error.
 
 - Remark: Generated from `#/paths//library/{libraryId}/videos/{videoId}/delete(Video_DeleteVideo)/responses/500`.
 
@@ -83,7 +83,7 @@ The associated value of the enum case if `self` is `.ok`.
 public static var unauthorized: Self
 ```
 
-The request authorization failed
+The request authorization failed.
 
 - Remark: Generated from `#/paths//library/{libraryId}/videos/{videoId}/delete(Video_DeleteVideo)/responses/401`.
 
@@ -106,7 +106,7 @@ The associated value of the enum case if `self` is `.unauthorized`.
 public static var notFound: Self
 ```
 
-The requested video was not found
+The requested video was not found.
 
 - Remark: Generated from `#/paths//library/{libraryId}/videos/{videoId}/delete(Video_DeleteVideo)/responses/404`.
 
@@ -129,7 +129,7 @@ The associated value of the enum case if `self` is `.notFound`.
 public static var internalServerError: Self
 ```
 
-Internal Server Error
+Internal Server Error.
 
 - Remark: Generated from `#/paths//library/{libraryId}/videos/{videoId}/delete(Video_DeleteVideo)/responses/500`.
 

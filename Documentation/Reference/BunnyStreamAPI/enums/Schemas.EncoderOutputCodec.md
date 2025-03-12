@@ -6,10 +6,7 @@
 @frozen public enum EncoderOutputCodec: Int, Codable, Hashable, Sendable, CaseIterable
 ```
 
-0 = x264
-1 = vp9
-2 = hevc
-3 = av1
+Output codec used for encoding the video: 0 = x264, 1 = vp9, 2 = hevc, 3 = av1.
 
 - Remark: Generated from `#/components/schemas/EncoderOutputCodec`.
 

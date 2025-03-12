@@ -6,6 +6,8 @@
 public struct ResolutionReference: Codable, Hashable, Sendable
 ```
 
+Reference to a specific video resolution including its file path.
+
 - Remark: Generated from `#/components/schemas/ResolutionReference`.
 
 ## Properties
@@ -15,6 +17,8 @@ public struct ResolutionReference: Codable, Hashable, Sendable
 public var resolution: Swift.String?
 ```
 
+The resolution (e.g., 720p, 1080p).
+
 - Remark: Generated from `#/components/schemas/ResolutionReference/resolution`.
 
 ### `path`
@@ -23,41 +27,32 @@ public var resolution: Swift.String?
 public var path: Swift.String?
 ```
 
+The file path associated with this resolution.
+
 - Remark: Generated from `#/components/schemas/ResolutionReference/path`.
 
-### `additionalProperties`
-
-```swift
-public var additionalProperties: OpenAPIRuntime.OpenAPIObjectContainer
-```
-
-A container of undocumented properties.
-
 ## Methods
-### `init(resolution:path:additionalProperties:)`
+### `init(resolution:path:)`
 
 ```swift
 public init(
     resolution: Swift.String? = nil,
-    path: Swift.String? = nil,
-    additionalProperties: OpenAPIRuntime.OpenAPIObjectContainer = .init()
+    path: Swift.String? = nil
 )
 ```
 
 Creates a new `ResolutionReference`.
 
 - Parameters:
-  - resolution:
-  - path:
-  - additionalProperties: A container of undocumented properties.
+  - resolution: The resolution (e.g., 720p, 1080p).
+  - path: The file path associated with this resolution.
 
 #### Parameters
 
 | Name | Description |
 | ---- | ----------- |
-| resolution |  |
-| path |  |
-| additionalProperties | A container of undocumented properties. |
+| resolution | The resolution (e.g., 720p, 1080p). |
+| path | The file path associated with this resolution. |
 
 ### `init(from:)`
 
@@ -70,15 +65,3 @@ public init(from decoder: any Decoder) throws
 | Name | Description |
 | ---- | ----------- |
 | decoder | The decoder to read data from. |
-
-### `encode(to:)`
-
-```swift
-public func encode(to encoder: any Encoder) throws
-```
-
-#### Parameters
-
-| Name | Description |
-| ---- | ----------- |
-| encoder | The encoder to write data to. |

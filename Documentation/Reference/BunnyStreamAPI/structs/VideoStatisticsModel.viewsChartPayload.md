@@ -6,7 +6,7 @@
 public struct viewsChartPayload: Codable, Hashable, Sendable
 ```
 
-The constructed chart of checked requests threats
+A chart representing view counts over time.
 
 - Remark: Generated from `#/components/schemas/VideoStatisticsModel/viewsChart`.
 

@@ -6,17 +6,7 @@
 @frozen public enum IssueCodes: Int, Codable, Hashable, Sendable, CaseIterable
 ```
 
-0 = Undefined
-1 = StreamLengthsDifference
-2 = TranscodingWarnings
-3 = IncompatibleResolution
-4 = InvalidFramerate
-5 = VideoExceededMaxDuration
-6 = AudioExceededMaxDuration
-7 = OriginalCorrupted
-8 = TranscriptionFailed
-9 = JitIncompatible
-10 = JitFailed
+The issue code representing a specific transcoding problem. Codes: 0 = Undefined, 1 = StreamLengthsDifference, 2 = TranscodingWarnings, 3 = IncompatibleResolution, 4 = InvalidFramerate, 5 = VideoExceededMaxDuration, 6 = AudioExceededMaxDuration, 7 = OriginalCorrupted, 8 = TranscriptionFailed, 9 = JitIncompatible, 10 = JitFailed.
 
 - Remark: Generated from `#/components/schemas/IssueCodes`.
 

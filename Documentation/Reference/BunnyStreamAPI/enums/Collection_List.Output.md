@@ -13,7 +13,7 @@
 case ok(Operations.Collection_List.Output.Ok)
 ```
 
-The list of videos for the current parameters
+A paginated list of collections matching the query parameters.
 
 - Remark: Generated from `#/paths//library/{libraryId}/collections/get(Collection_List)/responses/200`.
 
@@ -25,7 +25,7 @@ HTTP response code: `200 ok`.
 case unauthorized(Operations.Collection_List.Output.Unauthorized)
 ```
 
-The request authorization failed
+The request authorization failed.
 
 - Remark: Generated from `#/paths//library/{libraryId}/collections/get(Collection_List)/responses/401`.
 
@@ -37,7 +37,7 @@ HTTP response code: `401 unauthorized`.
 case internalServerError(Operations.Collection_List.Output.InternalServerError)
 ```
 
-Internal Server Error
+Internal Server Error.
 
 - Remark: Generated from `#/paths//library/{libraryId}/collections/get(Collection_List)/responses/500`.
 
@@ -71,7 +71,7 @@ The associated value of the enum case if `self` is `.ok`.
 public static var unauthorized: Self
 ```
 
-The request authorization failed
+The request authorization failed.
 
 - Remark: Generated from `#/paths//library/{libraryId}/collections/get(Collection_List)/responses/401`.
 
@@ -94,7 +94,7 @@ The associated value of the enum case if `self` is `.unauthorized`.
 public static var internalServerError: Self
 ```
 
-Internal Server Error
+Internal Server Error.
 
 - Remark: Generated from `#/paths//library/{libraryId}/collections/get(Collection_List)/responses/500`.
 

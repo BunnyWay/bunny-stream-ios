@@ -13,7 +13,7 @@
 case ok(Operations.Video_TranscribeVideo.Output.Ok)
 ```
 
-The transcription was queued
+The transcription process was successfully queued.
 
 - Remark: Generated from `#/paths//library/{libraryId}/videos/{videoId}/transcribe/post(Video_TranscribeVideo)/responses/200`.
 
@@ -25,7 +25,7 @@ HTTP response code: `200 ok`.
 case badRequest(Operations.Video_TranscribeVideo.Output.BadRequest)
 ```
 
-Invalid request for transcription queue
+Invalid request for transcription queue.
 
 - Remark: Generated from `#/paths//library/{libraryId}/videos/{videoId}/transcribe/post(Video_TranscribeVideo)/responses/400`.
 
@@ -37,7 +37,7 @@ HTTP response code: `400 badRequest`.
 case unauthorized(Operations.Video_TranscribeVideo.Output.Unauthorized)
 ```
 
-The request authorization failed
+The request authorization failed.
 
 - Remark: Generated from `#/paths//library/{libraryId}/videos/{videoId}/transcribe/post(Video_TranscribeVideo)/responses/401`.
 
@@ -49,7 +49,7 @@ HTTP response code: `401 unauthorized`.
 case notFound(Operations.Video_TranscribeVideo.Output.NotFound)
 ```
 
-The requested video was not found
+The requested video was not found.
 
 - Remark: Generated from `#/paths//library/{libraryId}/videos/{videoId}/transcribe/post(Video_TranscribeVideo)/responses/404`.
 
@@ -61,7 +61,7 @@ HTTP response code: `404 notFound`.
 case internalServerError(Operations.Video_TranscribeVideo.Output.InternalServerError)
 ```
 
-Internal Server Error
+Internal Server Error.
 
 - Remark: Generated from `#/paths//library/{libraryId}/videos/{videoId}/transcribe/post(Video_TranscribeVideo)/responses/500`.
 
@@ -92,6 +92,18 @@ The associated value of the enum case if `self` is `.ok`.
 ### `badRequest`
 
 ```swift
+public static var badRequest: Self
+```
+
+Invalid request for transcription queue.
+
+- Remark: Generated from `#/paths//library/{libraryId}/videos/{videoId}/transcribe/post(Video_TranscribeVideo)/responses/400`.
+
+HTTP response code: `400 badRequest`.
+
+### `badRequest`
+
+```swift
 public var badRequest: Operations.Video_TranscribeVideo.Output.BadRequest
 ```
 
@@ -99,6 +111,18 @@ The associated value of the enum case if `self` is `.badRequest`.
 
 - Throws: An error if `self` is not `.badRequest`.
 - SeeAlso: `.badRequest`.
+
+### `unauthorized`
+
+```swift
+public static var unauthorized: Self
+```
+
+The request authorization failed.
+
+- Remark: Generated from `#/paths//library/{libraryId}/videos/{videoId}/transcribe/post(Video_TranscribeVideo)/responses/401`.
+
+HTTP response code: `401 unauthorized`.
 
 ### `unauthorized`
 
@@ -114,6 +138,18 @@ The associated value of the enum case if `self` is `.unauthorized`.
 ### `notFound`
 
 ```swift
+public static var notFound: Self
+```
+
+The requested video was not found.
+
+- Remark: Generated from `#/paths//library/{libraryId}/videos/{videoId}/transcribe/post(Video_TranscribeVideo)/responses/404`.
+
+HTTP response code: `404 notFound`.
+
+### `notFound`
+
+```swift
 public var notFound: Operations.Video_TranscribeVideo.Output.NotFound
 ```
 
@@ -121,6 +157,18 @@ The associated value of the enum case if `self` is `.notFound`.
 
 - Throws: An error if `self` is not `.notFound`.
 - SeeAlso: `.notFound`.
+
+### `internalServerError`
+
+```swift
+public static var internalServerError: Self
+```
+
+Internal Server Error.
+
+- Remark: Generated from `#/paths//library/{libraryId}/videos/{videoId}/transcribe/post(Video_TranscribeVideo)/responses/500`.
+
+HTTP response code: `500 internalServerError`.
 
 ### `internalServerError`
 

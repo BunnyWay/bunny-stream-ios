@@ -6,6 +6,8 @@
 public struct VideoResolutionsInfoModel: Codable, Hashable, Sendable
 ```
 
+Represents detailed resolution information for a video, including available, configured, and storage resolutions.
+
 - Remark: Generated from `#/components/schemas/VideoResolutionsInfoModel`.
 
 ## Properties
@@ -15,6 +17,8 @@ public struct VideoResolutionsInfoModel: Codable, Hashable, Sendable
 public var videoId: Swift.String?
 ```
 
+The unique identifier of the video.
+
 - Remark: Generated from `#/components/schemas/VideoResolutionsInfoModel/videoId`.
 
 ### `videoLibraryId`
@@ -22,6 +26,8 @@ public var videoId: Swift.String?
 ```swift
 public var videoLibraryId: Swift.Int64?
 ```
+
+The ID of the video library.
 
 - Remark: Generated from `#/components/schemas/VideoResolutionsInfoModel/videoLibraryId`.
 
@@ -31,6 +37,8 @@ public var videoLibraryId: Swift.Int64?
 public var availableResolutions: [Swift.String]?
 ```
 
+A list of available resolutions for the video.
+
 - Remark: Generated from `#/components/schemas/VideoResolutionsInfoModel/availableResolutions`.
 
 ### `configuredResolutions`
@@ -38,6 +46,8 @@ public var availableResolutions: [Swift.String]?
 ```swift
 public var configuredResolutions: [Swift.String]?
 ```
+
+A list of resolutions configured for encoding.
 
 - Remark: Generated from `#/components/schemas/VideoResolutionsInfoModel/configuredResolutions`.
 
@@ -47,6 +57,8 @@ public var configuredResolutions: [Swift.String]?
 public var playlistResolutions: [Components.Schemas.ResolutionReference]?
 ```
 
+A list of resolutions used in playlists.
+
 - Remark: Generated from `#/components/schemas/VideoResolutionsInfoModel/playlistResolutions`.
 
 ### `storageResolutions`
@@ -54,6 +66,8 @@ public var playlistResolutions: [Components.Schemas.ResolutionReference]?
 ```swift
 public var storageResolutions: [Components.Schemas.ResolutionReference]?
 ```
+
+A list of resolutions stored on the server.
 
 - Remark: Generated from `#/components/schemas/VideoResolutionsInfoModel/storageResolutions`.
 
@@ -63,6 +77,8 @@ public var storageResolutions: [Components.Schemas.ResolutionReference]?
 public var mp4Resolutions: [Components.Schemas.ResolutionReference]?
 ```
 
+A list of MP4 fallback resolutions.
+
 - Remark: Generated from `#/components/schemas/VideoResolutionsInfoModel/mp4Resolutions`.
 
 ### `storageObjects`
@@ -70,6 +86,8 @@ public var mp4Resolutions: [Components.Schemas.ResolutionReference]?
 ```swift
 public var storageObjects: [Components.Schemas.StorageObjectModel]?
 ```
+
+A list of storage objects related to the video resolutions.
 
 - Remark: Generated from `#/components/schemas/VideoResolutionsInfoModel/storageObjects`.
 
@@ -79,6 +97,8 @@ public var storageObjects: [Components.Schemas.StorageObjectModel]?
 public var oldResolutions: [Components.Schemas.StorageObjectModel]?
 ```
 
+A list of previous resolution objects that may be removed.
+
 - Remark: Generated from `#/components/schemas/VideoResolutionsInfoModel/oldResolutions`.
 
 ### `hasBothOldAndNewResolutionFormat`
@@ -86,6 +106,8 @@ public var oldResolutions: [Components.Schemas.StorageObjectModel]?
 ```swift
 public var hasBothOldAndNewResolutionFormat: Swift.Bool?
 ```
+
+Indicates if both old and new resolution formats are present.
 
 - Remark: Generated from `#/components/schemas/VideoResolutionsInfoModel/hasBothOldAndNewResolutionFormat`.
 
@@ -95,18 +117,12 @@ public var hasBothOldAndNewResolutionFormat: Swift.Bool?
 public var hasOriginal: Swift.Bool?
 ```
 
+Indicates if the original video file is available.
+
 - Remark: Generated from `#/components/schemas/VideoResolutionsInfoModel/hasOriginal`.
 
-### `additionalProperties`
-
-```swift
-public var additionalProperties: OpenAPIRuntime.OpenAPIObjectContainer
-```
-
-A container of undocumented properties.
-
 ## Methods
-### `init(videoId:videoLibraryId:availableResolutions:configuredResolutions:playlistResolutions:storageResolutions:mp4Resolutions:storageObjects:oldResolutions:hasBothOldAndNewResolutionFormat:hasOriginal:additionalProperties:)`
+### `init(videoId:videoLibraryId:availableResolutions:configuredResolutions:playlistResolutions:storageResolutions:mp4Resolutions:storageObjects:oldResolutions:hasBothOldAndNewResolutionFormat:hasOriginal:)`
 
 ```swift
 public init(
@@ -120,43 +136,40 @@ public init(
     storageObjects: [Components.Schemas.StorageObjectModel]? = nil,
     oldResolutions: [Components.Schemas.StorageObjectModel]? = nil,
     hasBothOldAndNewResolutionFormat: Swift.Bool? = nil,
-    hasOriginal: Swift.Bool? = nil,
-    additionalProperties: OpenAPIRuntime.OpenAPIObjectContainer = .init()
+    hasOriginal: Swift.Bool? = nil
 )
 ```
 
 Creates a new `VideoResolutionsInfoModel`.
 
 - Parameters:
-  - videoId:
-  - videoLibraryId:
-  - availableResolutions:
-  - configuredResolutions:
-  - playlistResolutions:
-  - storageResolutions:
-  - mp4Resolutions:
-  - storageObjects:
-  - oldResolutions:
-  - hasBothOldAndNewResolutionFormat:
-  - hasOriginal:
-  - additionalProperties: A container of undocumented properties.
+  - videoId: The unique identifier of the video.
+  - videoLibraryId: The ID of the video library.
+  - availableResolutions: A list of available resolutions for the video.
+  - configuredResolutions: A list of resolutions configured for encoding.
+  - playlistResolutions: A list of resolutions used in playlists.
+  - storageResolutions: A list of resolutions stored on the server.
+  - mp4Resolutions: A list of MP4 fallback resolutions.
+  - storageObjects: A list of storage objects related to the video resolutions.
+  - oldResolutions: A list of previous resolution objects that may be removed.
+  - hasBothOldAndNewResolutionFormat: Indicates if both old and new resolution formats are present.
+  - hasOriginal: Indicates if the original video file is available.
 
 #### Parameters
 
 | Name | Description |
 | ---- | ----------- |
-| videoId |  |
-| videoLibraryId |  |
-| availableResolutions |  |
-| configuredResolutions |  |
-| playlistResolutions |  |
-| storageResolutions |  |
-| mp4Resolutions |  |
-| storageObjects |  |
-| oldResolutions |  |
-| hasBothOldAndNewResolutionFormat |  |
-| hasOriginal |  |
-| additionalProperties | A container of undocumented properties. |
+| videoId | The unique identifier of the video. |
+| videoLibraryId | The ID of the video library. |
+| availableResolutions | A list of available resolutions for the video. |
+| configuredResolutions | A list of resolutions configured for encoding. |
+| playlistResolutions | A list of resolutions used in playlists. |
+| storageResolutions | A list of resolutions stored on the server. |
+| mp4Resolutions | A list of MP4 fallback resolutions. |
+| storageObjects | A list of storage objects related to the video resolutions. |
+| oldResolutions | A list of previous resolution objects that may be removed. |
+| hasBothOldAndNewResolutionFormat | Indicates if both old and new resolution formats are present. |
+| hasOriginal | Indicates if the original video file is available. |
 
 ### `init(from:)`
 
@@ -169,15 +182,3 @@ public init(from decoder: any Decoder) throws
 | Name | Description |
 | ---- | ----------- |
 | decoder | The decoder to read data from. |
-
-### `encode(to:)`
-
-```swift
-public func encode(to encoder: any Encoder) throws
-```
-
-#### Parameters
-
-| Name | Description |
-| ---- | ----------- |
-| encoder | The encoder to write data to. |

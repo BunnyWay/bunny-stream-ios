@@ -6,6 +6,8 @@
 public struct Client: APIProtocol
 ```
 
+This API allows you to manage video collections and videos on the Bunny Stream platform. It supports operations such as retrieval, creation, updating, deletion, fetching, and transcoding of collections and videos. For further details, please refer to the external documentation.
+
 ## Methods
 ### `init(serverURL:configuration:transport:middlewares:)`
 
@@ -44,6 +46,8 @@ public func Collection_GetCollection(_ input: Operations.Collection_GetCollectio
 
 Get Collection
 
+Retrieves details of a specific collection. Use the query parameter 'includeThumbnails' to include preview images if available.
+
 - Remark: HTTP `GET /library/{libraryId}/collections/{collectionId}`.
 - Remark: Generated from `#/paths//library/{libraryId}/collections/{collectionId}/get(Collection_GetCollection)`.
 
@@ -54,6 +58,8 @@ public func Collection_UpdateCollection(_ input: Operations.Collection_UpdateCol
 ```
 
 Update Collection
+
+Updates an existing collection. Provide the new collection details in the request body using the UpdateCollectionModel.
 
 - Remark: HTTP `POST /library/{libraryId}/collections/{collectionId}`.
 - Remark: Generated from `#/paths//library/{libraryId}/collections/{collectionId}/post(Collection_UpdateCollection)`.
@@ -66,6 +72,8 @@ public func Collection_DeleteCollection(_ input: Operations.Collection_DeleteCol
 
 Delete Collection
 
+Deletes the specified collection permanently from the video library.
+
 - Remark: HTTP `DELETE /library/{libraryId}/collections/{collectionId}`.
 - Remark: Generated from `#/paths//library/{libraryId}/collections/{collectionId}/delete(Collection_DeleteCollection)`.
 
@@ -76,6 +84,8 @@ public func Collection_List(_ input: Operations.Collection_List.Input) async thr
 ```
 
 Get Collection List
+
+Retrieves a paginated list of collections for the specified video library. Optional query parameters allow for filtering, pagination, and ordering the results.
 
 - Remark: HTTP `GET /library/{libraryId}/collections`.
 - Remark: Generated from `#/paths//library/{libraryId}/collections/get(Collection_List)`.
@@ -88,6 +98,8 @@ public func Collection_CreateCollection(_ input: Operations.Collection_CreateCol
 
 Create Collection
 
+Creates a new collection in the specified video library using the provided collection details.
+
 - Remark: HTTP `POST /library/{libraryId}/collections`.
 - Remark: Generated from `#/paths//library/{libraryId}/collections/post(Collection_CreateCollection)`.
 
@@ -98,6 +110,8 @@ public func Video_GetVideo(_ input: Operations.Video_GetVideo.Input) async throw
 ```
 
 Get Video
+
+Retrieves detailed metadata for the specified video, including status, dimensions, encoding progress, and more.
 
 - Remark: HTTP `GET /library/{libraryId}/videos/{videoId}`.
 - Remark: Generated from `#/paths//library/{libraryId}/videos/{videoId}/get(Video_GetVideo)`.
@@ -110,6 +124,8 @@ public func Video_UpdateVideo(_ input: Operations.Video_UpdateVideo.Input) async
 
 Update Video
 
+Updates metadata and other details for the specified video. Provide updated fields in the request body using the UpdateVideoModel.
+
 - Remark: HTTP `POST /library/{libraryId}/videos/{videoId}`.
 - Remark: Generated from `#/paths//library/{libraryId}/videos/{videoId}/post(Video_UpdateVideo)`.
 
@@ -120,6 +136,8 @@ public func Video_UploadVideo(_ input: Operations.Video_UploadVideo.Input) async
 ```
 
 Upload Video
+
+Uploads a new video file to the specified video library. Additional query parameters allow customization of encoding options such as JIT encoding, enabled resolutions, and output codecs.
 
 - Remark: HTTP `PUT /library/{libraryId}/videos/{videoId}`.
 - Remark: Generated from `#/paths//library/{libraryId}/videos/{videoId}/put(Video_UploadVideo)`.
@@ -132,6 +150,8 @@ public func Video_DeleteVideo(_ input: Operations.Video_DeleteVideo.Input) async
 
 Delete Video
 
+Deletes the specified video permanently from the video library.
+
 - Remark: HTTP `DELETE /library/{libraryId}/videos/{videoId}`.
 - Remark: Generated from `#/paths//library/{libraryId}/videos/{videoId}/delete(Video_DeleteVideo)`.
 
@@ -143,6 +163,8 @@ public func Video_GetVideoHeatmap(_ input: Operations.Video_GetVideoHeatmap.Inpu
 
 Get Video Heatmap
 
+Retrieves the heatmap data for the specified video, indicating the percentage of watch time across the video's duration.
+
 - Remark: HTTP `GET /library/{libraryId}/videos/{videoId}/heatmap`.
 - Remark: Generated from `#/paths//library/{libraryId}/videos/{videoId}/heatmap/get(Video_GetVideoHeatmap)`.
 
@@ -152,7 +174,9 @@ Get Video Heatmap
 public func Video_GetVideoPlayData(_ input: Operations.Video_GetVideoPlayData.Input) async throws -> Operations.Video_GetVideoPlayData.Output
 ```
 
-Get Video play data
+Get Video Play Data
+
+Retrieves playback data for the specified video including video URLs, captions path, authentication tokens, and player settings.
 
 - Remark: HTTP `GET /library/{libraryId}/videos/{videoId}/play`.
 - Remark: Generated from `#/paths//library/{libraryId}/videos/{videoId}/play/get(Video_GetVideoPlayData)`.
@@ -165,6 +189,8 @@ public func Video_GetVideoStatistics(_ input: Operations.Video_GetVideoStatistic
 
 Get Video Statistics
 
+Retrieves statistical data for videos in the specified library. Supports filtering by date range, hourly grouping, and filtering by video GUID.
+
 - Remark: HTTP `GET /library/{libraryId}/statistics`.
 - Remark: Generated from `#/paths//library/{libraryId}/statistics/get(Video_GetVideoStatistics)`.
 
@@ -175,6 +201,8 @@ public func Video_ReencodeVideo(_ input: Operations.Video_ReencodeVideo.Input) a
 ```
 
 Reencode Video
+
+Initiates a re-encoding process for the specified video. This operation can be used to adjust encoding settings or to fix issues with the original encoding.
 
 - Remark: HTTP `POST /library/{libraryId}/videos/{videoId}/reencode`.
 - Remark: Generated from `#/paths//library/{libraryId}/videos/{videoId}/reencode/post(Video_ReencodeVideo)`.
@@ -187,6 +215,8 @@ public func Video_ReencodeUsingCodec(_ input: Operations.Video_ReencodeUsingCode
 
 Add output codec to video
 
+Adds a specified output codec to the video. This enables additional encoding options for the video file.
+
 - Remark: HTTP `PUT /library/{libraryId}/videos/{videoId}/outputs/{outputCodecId}`.
 - Remark: Generated from `#/paths//library/{libraryId}/videos/{videoId}/outputs/{outputCodecId}/put(Video_ReencodeUsingCodec)`.
 
@@ -197,6 +227,8 @@ public func Video_Repackage(_ input: Operations.Video_Repackage.Input) async thr
 ```
 
 Repackage Video
+
+Repackages the video, with an option to retain original files for faster future operations. This process may adjust resolution outputs and file formats.
 
 - Remark: HTTP `POST /library/{libraryId}/videos/{videoId}/repackage`.
 - Remark: Generated from `#/paths//library/{libraryId}/videos/{videoId}/repackage/post(Video_Repackage)`.
@@ -209,6 +241,8 @@ public func Video_List(_ input: Operations.Video_List.Input) async throws -> Ope
 
 List Videos
 
+Retrieves a paginated list of videos from the specified video library. Supports filtering by search term, collection, and ordering by date.
+
 - Remark: HTTP `GET /library/{libraryId}/videos`.
 - Remark: Generated from `#/paths//library/{libraryId}/videos/get(Video_List)`.
 
@@ -219,6 +253,8 @@ public func Video_CreateVideo(_ input: Operations.Video_CreateVideo.Input) async
 ```
 
 Create Video
+
+Creates a new video entry in the specified library. Provide the video details, such as title and optional thumbnail extraction time, in the request body.
 
 - Remark: HTTP `POST /library/{libraryId}/videos`.
 - Remark: Generated from `#/paths//library/{libraryId}/videos/post(Video_CreateVideo)`.
@@ -231,6 +267,8 @@ public func Video_SetThumbnail(_ input: Operations.Video_SetThumbnail.Input) asy
 
 Set Thumbnail
 
+Sets or updates the thumbnail image for the specified video using the provided thumbnail URL.
+
 - Remark: HTTP `POST /library/{libraryId}/videos/{videoId}/thumbnail`.
 - Remark: Generated from `#/paths//library/{libraryId}/videos/{videoId}/thumbnail/post(Video_SetThumbnail)`.
 
@@ -241,6 +279,8 @@ public func Video_FetchNewVideo(_ input: Operations.Video_FetchNewVideo.Input) a
 ```
 
 Fetch Video
+
+Fetches a video from a remote URL and adds it to the specified library. Optional parameters allow you to specify a collection and the time (in ms) to extract a thumbnail.
 
 - Remark: HTTP `POST /library/{libraryId}/videos/fetch`.
 - Remark: Generated from `#/paths//library/{libraryId}/videos/fetch/post(Video_FetchNewVideo)`.
@@ -253,6 +293,8 @@ public func Video_AddCaption(_ input: Operations.Video_AddCaption.Input) async t
 
 Add Caption
 
+Adds caption data to the specified video for the given language. The caption file should be provided as a base64 encoded string.
+
 - Remark: HTTP `POST /library/{libraryId}/videos/{videoId}/captions/{srclang}`.
 - Remark: Generated from `#/paths//library/{libraryId}/videos/{videoId}/captions/{srclang}/post(Video_AddCaption)`.
 
@@ -264,6 +306,8 @@ public func Video_DeleteCaption(_ input: Operations.Video_DeleteCaption.Input) a
 
 Delete Caption
 
+Deletes the caption for the specified language from the video.
+
 - Remark: HTTP `DELETE /library/{libraryId}/videos/{videoId}/captions/{srclang}`.
 - Remark: Generated from `#/paths//library/{libraryId}/videos/{videoId}/captions/{srclang}/delete(Video_DeleteCaption)`.
 
@@ -273,7 +317,9 @@ Delete Caption
 public func Video_TranscribeVideo(_ input: Operations.Video_TranscribeVideo.Input) async throws -> Operations.Video_TranscribeVideo.Output
 ```
 
-Transcribe video
+Transcribe Video
+
+Initiates the transcription process for the specified video. You can optionally override the video library transcription settings using the provided request body.
 
 - Remark: HTTP `POST /library/{libraryId}/videos/{videoId}/transcribe`.
 - Remark: Generated from `#/paths//library/{libraryId}/videos/{videoId}/transcribe/post(Video_TranscribeVideo)`.
@@ -284,7 +330,9 @@ Transcribe video
 public func Video_GetVideoResolutions(_ input: Operations.Video_GetVideoResolutions.Input) async throws -> Operations.Video_GetVideoResolutions.Output
 ```
 
-Video resolutions info
+Video Resolutions Info
+
+Retrieves information about the available and configured resolutions for the specified video. This includes data on storage resolutions and MP4 fallback files if available.
 
 - Remark: HTTP `GET /library/{libraryId}/videos/{videoId}/resolutions`.
 - Remark: Generated from `#/paths//library/{libraryId}/videos/{videoId}/resolutions/get(Video_GetVideoResolutions)`.
@@ -295,7 +343,9 @@ Video resolutions info
 public func Video_DeleteResolutions(_ input: Operations.Video_DeleteResolutions.Input) async throws -> Operations.Video_DeleteResolutions.Output
 ```
 
-Cleanup unconfigured resolutions
+Cleanup Unconfigured Resolutions
+
+Cleans up unconfigured resolutions for the specified video. Query parameters allow you to specify which resolutions to delete and whether to perform a dry run without actual file deletion.
 
 - Remark: HTTP `POST /library/{libraryId}/videos/{videoId}/resolutions/cleanup`.
 - Remark: Generated from `#/paths//library/{libraryId}/videos/{videoId}/resolutions/cleanup/post(Video_DeleteResolutions)`.
@@ -305,6 +355,10 @@ Cleanup unconfigured resolutions
 ```swift
 public func OEmbed_GetOEmbed(_ input: Operations.OEmbed_GetOEmbed.Input) async throws -> Operations.OEmbed_GetOEmbed.Output
 ```
+
+Get OEmbed Data
+
+Retrieves OEmbed information for a given video URL. This includes embed HTML, thumbnail URL, and metadata such as title and provider details.
 
 - Remark: HTTP `GET /OEmbed`.
 - Remark: Generated from `#/paths//OEmbed/get(OEmbed_GetOEmbed)`.

@@ -15,6 +15,8 @@ public struct Query: Sendable, Hashable
 public var url: Swift.String?
 ```
 
+The URL for which to retrieve OEmbed information.
+
 - Remark: Generated from `#/paths/OEmbed/GET/query/url`.
 
 ### `maxWidth`
@@ -22,6 +24,8 @@ public var url: Swift.String?
 ```swift
 public var maxWidth: Swift.Int32?
 ```
+
+Optional maximum width of the embed.
 
 - Remark: Generated from `#/paths/OEmbed/GET/query/maxWidth`.
 
@@ -31,6 +35,8 @@ public var maxWidth: Swift.Int32?
 public var maxHeight: Swift.Int32?
 ```
 
+Optional maximum height of the embed.
+
 - Remark: Generated from `#/paths/OEmbed/GET/query/maxHeight`.
 
 ### `token`
@@ -39,6 +45,8 @@ public var maxHeight: Swift.Int32?
 public var token: Swift.String?
 ```
 
+Authentication token if required.
+
 - Remark: Generated from `#/paths/OEmbed/GET/query/token`.
 
 ### `expires`
@@ -46,6 +54,8 @@ public var token: Swift.String?
 ```swift
 public var expires: Swift.Int64?
 ```
+
+Expiration timestamp for the provided token.
 
 - Remark: Generated from `#/paths/OEmbed/GET/query/expires`.
 
@@ -65,18 +75,18 @@ public init(
 Creates a new `Query`.
 
 - Parameters:
-  - url:
-  - maxWidth:
-  - maxHeight:
-  - token:
-  - expires:
+  - url: The URL for which to retrieve OEmbed information.
+  - maxWidth: Optional maximum width of the embed.
+  - maxHeight: Optional maximum height of the embed.
+  - token: Authentication token if required.
+  - expires: Expiration timestamp for the provided token.
 
 #### Parameters
 
 | Name | Description |
 | ---- | ----------- |
-| url |  |
-| maxWidth |  |
-| maxHeight |  |
-| token |  |
-| expires |  |
+| url | The URL for which to retrieve OEmbed information. |
+| maxWidth | Optional maximum width of the embed. |
+| maxHeight | Optional maximum height of the embed. |
+| token | Authentication token if required. |
+| expires | Expiration timestamp for the provided token. |
