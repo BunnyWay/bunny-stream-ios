@@ -25,14 +25,14 @@ class VideoListViewModel: ObservableObject {
   func loadVideos(libraryId: Int64) async {
     do {
       loadingState = .loading
-      let output = try await bunnyStreamAPI.client.Video_List(path: .init(libraryId: libraryId))
+      let output = try await bunnyStreamAPI.client.listVideos(path: .init(libraryId: Int64(libraryId)))
       handle(output: output)
     } catch {
       loadingState = .failed(error.localizedDescription)
     }
   }
   
-  private func handle(output: Operations.Video_List.Output) {
+  private func handle(output: Operations.listVideos.Output) {
     switch output {
     case .ok(let okResponse):
       switch okResponse.body {

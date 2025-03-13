@@ -9,7 +9,9 @@ struct HeatmapLoader {
   }
   
   func loadHeatmap(videoId: String, libraryId: Int, cdn: String) async throws -> Heatmap {
-    let output = try await bunnyStreamAPI.client.Video_GetVideoHeatmap(path: .init(libraryId: Int64(libraryId), videoId: videoId))
+    let output = try await bunnyStreamAPI.client.getVideoHeatmap(
+      path: .init(libraryId: Int64(libraryId), videoId: videoId)
+    )
     switch output {
     case .ok(let okResponse):
       switch okResponse.body {

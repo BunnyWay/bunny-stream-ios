@@ -42,7 +42,7 @@ import BunnyStreamAPI
 let bunnyStreamAPI = BunnyStreamAPI(accessKey: "your_access_key")
 
 // Fetch video details using the client
-let videoInfo = try await bunnyStreamAPI.client.Video_GetVideo(
+let videoInfo = try await bunnyStreamAPI.client.getVideo(
     path: .init(
         libraryId: 12345,
         videoId: "abcd-e9bb-4b96-wxyz-c17bc6a5292b"
@@ -56,7 +56,12 @@ BunnyStreamAPI provides detailed error information via custom error types. The e
 
 ```swift
 do {
-    try await bunnyStreamAPI.client.Video_DeleteVideo("videoId", libraryId: 123)
+    let output = try await bunnyStreamAPI.client.deleteVideo(
+        path: .init(
+          libraryId: 123,
+          videoId: "videoId"
+        )
+    )
 } catch let error as BunnyStreamError {
     switch error {
     case .unauthorized:

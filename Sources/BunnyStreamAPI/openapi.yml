@@ -10,7 +10,7 @@ info:
   version: 1.0.0
   description: This API allows you to manage video collections and videos on the Bunny Stream platform. It supports operations such as retrieval, creation, updating, deletion, fetching, and transcoding of collections and videos. For further details, please refer to the external documentation.
 servers:
-  - url: https://video.bunnycdn.com/
+  - url: https://video.bunnycdn.com
 paths:
   /library/{libraryId}/collections/{collectionId}:
     get:
@@ -1178,7 +1178,7 @@ components:
     CollectionModel:
       type: object
       description: Represents a video collection in the library. Contains metadata such as the unique identifier, name, video count, total storage size, and preview information.
-      additionalProperties: false
+      additionalProperties: true
       properties:
         videoLibraryId:
           type: integer
@@ -1213,7 +1213,7 @@ components:
     PaginationListOfCollectionModel:
       type: object
       description: A paginated list of collections.
-      additionalProperties: false
+      additionalProperties: true
       properties:
         totalItems:
           type: integer
@@ -1236,7 +1236,7 @@ components:
     UpdateCollectionModel:
       type: object
       description: Schema for updating collection details.
-      additionalProperties: false
+      additionalProperties: true
       properties:
         name:
           type: string
@@ -1245,7 +1245,7 @@ components:
     StatusModel:
       type: object
       description: Generic status response model indicating the success or failure of an operation.
-      additionalProperties: false
+      additionalProperties: true
       properties:
         success:
           type: boolean
@@ -1261,7 +1261,7 @@ components:
     VideoModel:
       type: object
       description: Represents a video and its metadata including title, upload date, dimensions, encoding status, and more.
-      additionalProperties: false
+      additionalProperties: true
       properties:
         videoLibraryId:
           type: integer
@@ -1409,7 +1409,7 @@ components:
     CaptionModel:
       type: object
       description: Represents caption details for a video.
-      additionalProperties: false
+      additionalProperties: true
       properties:
         srclang:
           type: string
@@ -1422,7 +1422,7 @@ components:
     ChapterModel:
       type: object
       description: Represents a chapter within a video, including its title and start/end times.
-      additionalProperties: false
+      additionalProperties: true
       required:
         - title
       properties:
@@ -1441,7 +1441,7 @@ components:
     MomentModel:
       type: object
       description: Represents a key moment in the video with a descriptive label and timestamp.
-      additionalProperties: false
+      additionalProperties: true
       required:
         - label
       properties:
@@ -1456,7 +1456,7 @@ components:
     MetaTagModel:
       type: object
       description: Represents a metadata tag for a video.
-      additionalProperties: false
+      additionalProperties: true
       properties:
         property:
           type: string
@@ -1469,7 +1469,7 @@ components:
     TranscodingMessageModel:
       type: object
       description: Represents a message from the transcoding process indicating warnings or errors.
-      additionalProperties: false
+      additionalProperties: true
       properties:
         timeStamp:
           type: string
@@ -1530,7 +1530,7 @@ components:
     VideoHeatmapModel:
       type: object
       description: Represents the heatmap data for a video. Each key represents a time segment and its corresponding watch percentage.
-      additionalProperties: false
+      additionalProperties: true
       properties:
         heatmap:
           type: object
@@ -1542,7 +1542,7 @@ components:
     VideoPlayDataModel:
       type: object
       description: Contains all necessary playback information for a video, including various URLs and player configurations.
-      additionalProperties: false
+      additionalProperties: true
       properties:
         video:
           description: The video data model.
@@ -1635,7 +1635,7 @@ components:
     VideoStatisticsModel:
       type: object
       description: Represents various statistics for a video including view counts, watch time, and engagement score.
-      additionalProperties: false
+      additionalProperties: true
       properties:
         viewsChart:
           type: object
@@ -1685,7 +1685,7 @@ components:
     PaginationListOfVideoModel:
       type: object
       description: A paginated list of videos.
-      additionalProperties: false
+      additionalProperties: true
       properties:
         totalItems:
           type: integer
@@ -1708,7 +1708,7 @@ components:
     CreateVideoModel:
       type: object
       description: Schema for creating a new video entry. 'title' is required.
-      additionalProperties: false
+      additionalProperties: true
       required:
         - title
       properties:
@@ -1728,7 +1728,7 @@ components:
     UpdateVideoModel:
       type: object
       description: Schema for updating video metadata.
-      additionalProperties: false
+      additionalProperties: true
       properties:
         title:
           type: string
@@ -1759,7 +1759,7 @@ components:
     FetchVideoRequest:
       type: object
       description: Schema for fetching a video from a remote URL. The 'url' field is required.
-      additionalProperties: false
+      additionalProperties: true
       required:
         - url
       properties:
@@ -1780,7 +1780,7 @@ components:
     CaptionModelAdd:
       type: object
       description: Schema for adding a caption. Includes language code, descriptive label, and a base64 encoded captions file.
-      additionalProperties: false
+      additionalProperties: true
       properties:
         srclang:
           type: string
@@ -1797,7 +1797,7 @@ components:
     TranscribeSettings:
       type: object
       description: Settings for video transcription that allow overriding default transcription options.
-      additionalProperties: false
+      additionalProperties: true
       properties:
         targetLanguages:
           type: array
@@ -1822,7 +1822,7 @@ components:
         - $ref: '#/components/schemas/StatusModel'
         - type: object
           description: Wraps the VideoResolutionsInfoModel with a status response.
-          additionalProperties: false
+          additionalProperties: true
           properties:
             data:
               nullable: true
@@ -1831,7 +1831,7 @@ components:
     VideoResolutionsInfoModel:
       type: object
       description: Represents detailed resolution information for a video, including available, configured, and storage resolutions.
-      additionalProperties: false
+      additionalProperties: true
       properties:
         videoId:
           type: string
@@ -1892,7 +1892,7 @@ components:
     ResolutionReference:
       type: object
       description: Reference to a specific video resolution including its file path.
-      additionalProperties: false
+      additionalProperties: true
       properties:
         resolution:
           type: string
@@ -1905,7 +1905,7 @@ components:
     StorageObjectModel:
       type: object
       description: Represents a storage object containing file details for a video.
-      additionalProperties: false
+      additionalProperties: true
       properties:
         guid:
           type: string
@@ -1965,7 +1965,7 @@ components:
     VideoOEmbedModel:
       type: object
       description: Represents OEmbed data for a video, including embed HTML and metadata such as title and provider information.
-      additionalProperties: false
+      additionalProperties: true
       properties:
         version:
           type: string

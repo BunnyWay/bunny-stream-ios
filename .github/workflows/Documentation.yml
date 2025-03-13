@@ -33,6 +33,10 @@ jobs:
     - name: Build project
       run: swift build
     
+    - name: Remove Unwanted Remark Lines
+      run: |
+        find . -type f -name "*.swift" -print0 | xargs -0 sed -i '' '/^[[:space:]]*\/\/\/ - Remark:/d'
+
     - name: Generate Documentation
       run: sourcedocs generate --all-modules
 

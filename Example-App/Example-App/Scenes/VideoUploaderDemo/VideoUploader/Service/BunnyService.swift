@@ -16,8 +16,11 @@ final class BunnyService {
   }
   
   func createVideo(title: String, libraryId: Int) async throws -> String? {
-    let output = try await bunnyStreamAPI.client.Video_CreateVideo(path: .init(libraryId: Int64(libraryId)),
-                                                                body: .json(.CreateVideoModel(.init(title: title))))
+    let output = try await bunnyStreamAPI.client.createVideo(
+      path: .init(libraryId: Int64(libraryId)),
+      body: .json(.CreateVideoModel(.init(title: title)))
+    )
+
     switch output {
     case .ok(let okResponse):
       if case .json(let viewModel) = okResponse.body {
@@ -32,8 +35,9 @@ final class BunnyService {
   }
   
   func deleteVideo(_ videoId: String, libraryId: Int) async throws {
-    _ = try await bunnyStreamAPI.client.Video_DeleteVideo(path: .init(libraryId: Int64(libraryId),
-                                                                   videoId: videoId.lowercased()))
+    _ = try await bunnyStreamAPI.client.deleteVideo(
+      path: .init(libraryId: Int64(libraryId), videoId: videoId.lowercased())
+    )
   }
 }
 

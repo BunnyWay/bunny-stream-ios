@@ -1,4 +1,32 @@
 generate:
   - types
   - client
+namingStrategy: idiomatic
 accessModifier: public
+
+nameOverrides:
+  Video_GetVideo: getVideo
+  Video_UpdateVideo: updateVideo
+  Video_DeleteVideo: deleteVideo
+  Video_UploadVideo: uploadVideo
+  Video_GetVideoHeatmap: getVideoHeatmap
+  Video_GetVideoPlayData: getVideoPlayData
+  Video_GetVideoStatistics: getVideoStatistics
+  Video_ReencodeVideo: reencodeVideo
+  Video_ReencodeUsingCodec: reencodeUsingCodec
+  Video_Repackage: repackageVideo
+  Video_List: listVideos
+  Video_CreateVideo: createVideo
+  Video_SetThumbnail: setThumbnail
+  Video_FetchNewVideo: fetchVideo
+  Video_AddCaption: addCaption
+  Video_DeleteCaption: deleteCaption
+  Video_TranscribeVideo: transcribeVideo
+  Video_GetVideoResolutions: getVideoResolutions
+  Video_DeleteResolutions: deleteResolutions
+  OEmbed_GetOEmbed: getOEmbed
+  Collection_GetCollection: getCollection
+  Collection_UpdateCollection: updateCollection
+  Collection_DeleteCollection: deleteCollection
+  Collection_List: listCollections
+  Collection_CreateCollection: createCollection
