@@ -27,8 +27,8 @@ struct VideoResponseInfo: Hashable, Identifiable {
   }
   
   var formattedFileSize: String {
-    let oneMB = 1024.0 * 1024.0
-    let oneGB = oneMB * 1024.0
+    let oneMB = 1000.0 * 1000.0
+    let oneGB = oneMB * 1000.0
     
     if storageSize < oneGB {
       return String(format: "%.2f MB", storageSize / oneMB)
