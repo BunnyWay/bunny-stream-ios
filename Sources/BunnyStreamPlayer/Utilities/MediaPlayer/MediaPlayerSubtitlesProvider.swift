@@ -12,10 +12,17 @@ class MediaPlayerSubtitlesProvider {
   
   func loadSubtitles() async throws {
     for caption in video.captions {
-      guard let url = URL(string: caption.captionsPath ?? "") else { return }
-      let (data, _) = try await URLSession.shared.data(from: url)
-      let subtitles = try Subtitles(data: data, expectedExtension: "vtt", encoding: .utf8)
-      await subtitlesActor.updateSubtitles(key: caption.languageCode, subtitles: subtitles)
+      guard let fullUrl = caption.captionsURL else {
+        print("[MediaPlayerSubtitlesProvider] Invalid or missing URL for caption lang=\(caption.languageCode) using path=\(caption.captionsPath ?? "nil")")
+        continue 
+      }
+      do {
+        let (data, _) = try await URLSession.shared.data(from: fullUrl)
+        let subtitles = try Subtitles(data: data, expectedExtension: "vtt", encoding: .utf8)
+        await subtitlesActor.updateSubtitles(key: caption.languageCode, subtitles: subtitles)
+      } catch {
+        print("[MediaPlayerSubtitlesProvider] Failed to load/parse caption for lang=\(caption.languageCode) from \(fullUrl): \(error)")
+      }
     }
   }
   
