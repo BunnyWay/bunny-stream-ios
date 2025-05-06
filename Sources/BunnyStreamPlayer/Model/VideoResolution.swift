@@ -1,7 +1,7 @@
 import Foundation
 
 extension Video {
-  enum Resolution: String, Identifiable {
+  enum Resolution: String, Identifiable, Equatable {
     var id: Self {
       self
     }

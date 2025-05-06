@@ -50,7 +50,7 @@ extension Video {
     var computedResolutions = [Video.Resolution.auto]
     let resolutionStrings = videoConfigResponse.availableResolutions.split(separator: ",")
     for resolutionLabel in resolutionStrings {
-      if let resolution = Video.Resolution(rawValue: String(resolutionLabel)) {
+      if let resolution = Video.Resolution(rawValue: String(resolutionLabel)), !computedResolutions.contains(resolution) {
         computedResolutions.append(resolution)
       }
     }
