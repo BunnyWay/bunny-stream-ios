@@ -7,7 +7,16 @@ struct ThumbnailAsyncImageView: View {
   @State var image: Image?
   @Binding var thumbnailSize: CGSize
   
+  @ViewBuilder
   var body: some View {
+    if video.seekThumbnail.frameDurationPerThumbnail > 0 {
+      content
+    }
+  }
+}
+
+private extension ThumbnailAsyncImageView {
+  var content: some View {
     GeometryReader { geo in
       let frameDuration = video.seekThumbnail.frameDurationPerThumbnail
       let frameIndex = min(Int(floor(second / Double(frameDuration))), Int(video.length / Double(frameDuration)) - 1)
