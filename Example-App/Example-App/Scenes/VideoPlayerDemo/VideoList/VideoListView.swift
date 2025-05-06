@@ -30,7 +30,16 @@ struct VideoListView: View {
                 Button(action: {
                   selectedVideoInfo = videoInfo
                 }) {
-                  VideoListRow(video: videoInfo)
+                  VideoListRow(
+                    video: videoInfo,
+                    thumbnailURL: viewModel.thumbnails[videoInfo.id]
+                  )
+                }
+                .task {
+                  await viewModel.loadThumbnailIfNeeded(
+                    libraryId: dependenciesManager.libraryId,
+                    videoId: videoInfo.id
+                  )
                 }
               } else {
                 VideoListRow(video: videoInfo)

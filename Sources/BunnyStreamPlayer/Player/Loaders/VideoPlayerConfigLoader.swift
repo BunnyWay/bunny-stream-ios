@@ -1,7 +1,9 @@
 import Foundation
 import SwiftUI
 
-struct VideoPlayerConfigLoader {
+public struct VideoPlayerConfigLoader {
+  public init() {}
+  
   func load(libraryId: Int, videoId: String) async throws -> VideoConfigResponse {
     guard let url = URL(string: "https://video.bunnycdn.com/library/\(libraryId)/videos/\(videoId)/play") else {
       throw VideoPlayerError.unknownError
@@ -36,6 +38,10 @@ struct VideoPlayerConfigLoader {
     } catch {
       throw VideoPlayerError.unknownError
     }
+  }
+  
+  public func loadVideoThumbnail(libraryId: Int, videoId: String) async throws -> String {
+    try await load(libraryId: libraryId, videoId: videoId).thumbnailUrl
   }
 }
 

@@ -7,20 +7,27 @@
 
 import Foundation
 import BunnyStreamAPI
+import BunnyStreamPlayer
 import SwiftUI
 
 @MainActor
 class VideoListViewModel: ObservableObject {
   let bunnyStreamAPI: BunnyStreamAPI
+  let videoPlayerConfigLoader: VideoPlayerConfigLoader
   @Published var videoInfos: [VideoResponseInfo] = []
   @Published var loadingState: LoadingState = .loading
+  @Published var thumbnails: [String: URL] = [:]
   
   enum LoadingState {
     case loading, loaded, failed(String)
   }
   
-  init(bunnyStreamAPI: BunnyStreamAPI) {
+  init(
+    bunnyStreamAPI: BunnyStreamAPI,
+    videoPlayerConfigLoader: VideoPlayerConfigLoader = .init()
+  ) {
     self.bunnyStreamAPI = bunnyStreamAPI
+    self.videoPlayerConfigLoader = videoPlayerConfigLoader
   }
   
   func loadVideos(libraryId: Int64) async {
@@ -33,6 +40,29 @@ class VideoListViewModel: ObservableObject {
     }
   }
   
+  @MainActor
+  func loadThumbnailIfNeeded(libraryId: Int, videoId: String) async {
+    if thumbnails[videoId] != nil {
+      return
+    }
+    
+    do {
+      let thumbnailUrl = try await videoPlayerConfigLoader.loadVideoThumbnail(
+        libraryId: libraryId,
+        videoId: videoId
+      )
+      guard let url = URL(string: thumbnailUrl) else {
+        return
+      }
+      thumbnails[videoId] = url
+    } catch {
+      ///
+    }
+  }
+}
+
+// MARK: - Private
+private extension VideoListViewModel {
   private func handle(output: Operations.listVideos.Output) {
     switch output {
     case .ok(let okResponse):
