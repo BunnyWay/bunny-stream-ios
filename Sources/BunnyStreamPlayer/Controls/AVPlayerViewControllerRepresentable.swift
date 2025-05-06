@@ -6,20 +6,16 @@ struct AVPlayerViewControllerRepresentable: UIViewControllerRepresentable {
   var player: AVPlayer
   var setupAds: ((ViewController) -> Void)?
   
-  func makeUIViewController(context: Context) -> AVPlayerViewController {
-    let controller = AVPlayerViewController()
-    controller.player = player
+  func makeUIViewController(context: Context) -> PlayerViewController {
+    let controller = PlayerViewController(playerLayer: .init(player: player))
+    controller.view.backgroundColor = .black
     context.coordinator.avPlayerViewController = controller
-    controller.showsPlaybackControls = false
-    if #available(iOS 16.0, *) {
-      controller.allowsVideoFrameAnalysis = false
-    }
     return controller
   }
   
-  func updateUIViewController(_ uiViewController: AVPlayerViewController, context: Context) {
-    uiViewController.player = player
-    setupAds?(uiViewController)
+  func updateUIViewController(_ viewController: PlayerViewController, context: Context) {
+    viewController.playerLayer.player = player
+    setupAds?(viewController)
   }
   
   func makeCoordinator() -> Coordinator {
@@ -27,12 +23,31 @@ struct AVPlayerViewControllerRepresentable: UIViewControllerRepresentable {
   }
   
   class Coordinator: NSObject {
-    var avPlayerViewController: AVPlayerViewController?
+    var avPlayerViewController: PlayerViewController?
     var parent: AVPlayerViewControllerRepresentable
     
     init(_ parent: AVPlayerViewControllerRepresentable) {
       self.parent = parent
     }
+  }
+}
+
+class PlayerViewController: UIViewController {
+  let playerLayer: AVPlayerLayer
+  
+  init(playerLayer: AVPlayerLayer) {
+    self.playerLayer = playerLayer
+    super.init(nibName: nil, bundle: nil)
+    view.layer.addSublayer(playerLayer)
+  }
+  
+  required init?(coder: NSCoder) {
+    fatalError("init(coder:) has not been implemented")
+  }
+  
+  override func viewDidLayoutSubviews() {
+    super.viewDidLayoutSubviews()
+    playerLayer.frame = view.frame
   }
 }
 
