@@ -11,11 +11,14 @@ import BunnyStreamPlayer
 struct VideoPlayerDemoView: View {
   var dependenciesManager: DependenciesManager
   var videoInfo: VideoResponseInfo
+  var deleteVideoCallback: () -> Void
   
   init(dependenciesManager: DependenciesManager,
-       videoInfo: VideoResponseInfo) {
+       videoInfo: VideoResponseInfo,
+       deleteVideoCallback: @escaping () -> Void) {
     self.dependenciesManager = dependenciesManager
     self.videoInfo = videoInfo
+    self.deleteVideoCallback = deleteVideoCallback
   }
   
   var body: some View {
@@ -65,6 +68,20 @@ extension VideoPlayerDemoView {
             .frame(width: 20, height: 20)
             .foregroundStyle(.gray)
           Text(videoInfo.formattedFileSize)
+        }
+        
+        Button {
+          deleteVideoCallback()
+        } label: {
+          HStack(spacing: 12) {
+            Image(systemName: "trash")
+              .resizable()
+              .aspectRatio(contentMode: .fit)
+              .frame(width: 20, height: 20)
+              .foregroundStyle(.red)
+            Text("Delete video")
+              .foregroundStyle(.red)
+          }
         }
       }
     }
