@@ -16,7 +16,7 @@ class VideoListViewModel: ObservableObject {
   let videoPlayerConfigLoader: VideoPlayerConfigLoader
   @Published var videoInfos: [VideoResponseInfo] = []
   @Published var loadingState: LoadingState = .loading
-  @Published var thumbnails: [String: URL] = [:]
+  @Published var thumbnails: [VideoResponseInfo: URL] = [:]
   
   enum LoadingState {
     case loading, loaded, failed(String)
@@ -33,28 +33,49 @@ class VideoListViewModel: ObservableObject {
   func loadVideos(libraryId: Int64) async {
     do {
       loadingState = .loading
-      let output = try await bunnyStreamAPI.client.listVideos(path: .init(libraryId: Int64(libraryId)))
+      let output = try await bunnyStreamAPI.client.listVideos(path: .init(libraryId: libraryId))
       handle(output: output)
     } catch {
       loadingState = .failed(error.localizedDescription)
     }
   }
   
+  func deleteVideo(_ video: VideoResponseInfo) async {
+    do {
+      let result = try await bunnyStreamAPI.client.deleteVideo(path: .init(
+        libraryId: video.libraryId,
+        videoId: video.id
+      ))
+      switch result {
+      case .ok:
+        if let index = videoInfos.firstIndex(where: { $0.id == video.id }) {
+          withAnimation {
+            _ = videoInfos.remove(at: index)
+          }
+        }
+      case _:
+        break
+      }
+    } catch {
+      ///
+    }
+  }
+  
   @MainActor
-  func loadThumbnailIfNeeded(libraryId: Int, videoId: String) async {
-    if thumbnails[videoId] != nil {
+  func loadThumbnailIfNeeded(_ video: VideoResponseInfo) async {
+    if thumbnails[video] != nil {
       return
     }
     
     do {
       let thumbnailUrl = try await videoPlayerConfigLoader.loadVideoThumbnail(
-        libraryId: libraryId,
-        videoId: videoId
+        libraryId: Int(video.libraryId),
+        videoId: video.id
       )
       guard let url = URL(string: thumbnailUrl) else {
         return
       }
-      thumbnails[videoId] = url
+      thumbnails[video] = url
     } catch {
       ///
     }

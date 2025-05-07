@@ -36,4 +36,12 @@ struct VideoResponseInfo: Hashable, Identifiable {
       return String(format: "%.2f GB", storageSize / oneGB)
     }
   }
+  
+  var isEncodingCompleted: Bool {
+    encodeProgress == 100
+  }
+  
+  func hash(into hasher: inout Hasher) {
+    hasher.combine(id)
+  }
 }
