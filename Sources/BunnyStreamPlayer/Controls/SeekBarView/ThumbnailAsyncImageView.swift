@@ -16,6 +16,7 @@ struct ThumbnailAsyncImageView: View {
 }
 
 private extension ThumbnailAsyncImageView {
+  @MainActor
   var content: some View {
     GeometryReader { geo in
       let frameDuration = video.seekThumbnail.frameDurationPerThumbnail
