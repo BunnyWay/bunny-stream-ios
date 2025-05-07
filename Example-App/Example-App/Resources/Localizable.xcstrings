@@ -17,9 +17,6 @@
     "Actions" : {
 
     },
-    "API Key" : {
-
-    },
     "BunnyStream Configuration" : {
 
     },
@@ -44,7 +41,7 @@
     "Enter Video ID" : {
 
     },
-    "Enter your API Key" : {
+    "Enter your Library API Key" : {
 
     },
     "Enter your Library ID" : {
@@ -104,6 +101,9 @@
 
     },
     "Video ID" : {
+
+    },
+    "Video Library API Key" : {
 
     },
     "Video Library ID" : {

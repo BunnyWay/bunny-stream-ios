@@ -91,17 +91,17 @@ private extension ContentView {
     .sheet(isPresented: $isShowingSheet) {
       NavigationStack {
         Form {
-          Section("API Key") {
-            TextField("Enter your API Key", text: $tempAccessKey)
-              .autocapitalization(.none)
-              .disableAutocorrection(true)
-            
-          }
           Section("Video Library ID") {
             TextField("Enter your Library ID", text: $libraryId)
               .keyboardType(.numberPad)
               .autocapitalization(.none)
               .disableAutocorrection(true)
+          }
+          Section("Video Library API Key") {
+            TextField("Enter your Library API Key", text: $tempAccessKey)
+              .autocapitalization(.none)
+              .disableAutocorrection(true)
+            
           }
         }
         .formStyle(.grouped)
