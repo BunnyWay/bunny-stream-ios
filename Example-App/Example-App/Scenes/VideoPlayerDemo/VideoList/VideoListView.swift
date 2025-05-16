@@ -26,24 +26,18 @@ struct VideoListView: View {
         ScrollView {
           LazyVStack {
             ForEach(viewModel.videoInfos) { videoInfo in
-              if videoInfo.encodeProgress == 100 {
-                Button(action: {
-                  selectedVideoInfo = videoInfo
-                }) {
-                  VideoListRow(
-                    video: videoInfo,
-                    thumbnailURL: viewModel.thumbnails[videoInfo.id]
-                  )
-                }
-                .task {
-                  await viewModel.loadThumbnailIfNeeded(
-                    libraryId: dependenciesManager.libraryId,
-                    videoId: videoInfo.id
-                  )
-                }
-              } else {
-                VideoListRow(video: videoInfo)
+              Button {
+                selectedVideoInfo = videoInfo
+              } label: {
+                VideoListRow(
+                  video: videoInfo,
+                  thumbnailURL: viewModel.thumbnails[videoInfo]
+                )
               }
+              .task {
+                await viewModel.loadThumbnailIfNeeded(videoInfo)
+              }
+              .disabled(!videoInfo.isEncodingCompleted)
             }
           }
           .padding(.vertical, 12)
@@ -57,7 +51,16 @@ struct VideoListView: View {
       await viewModel.loadVideos(libraryId: Int64(dependenciesManager.libraryId))
     }
     .sheet(item: $selectedVideoInfo) { videoInfo in
-      VideoPlayerDemoView(dependenciesManager: dependenciesManager, videoInfo: videoInfo)
+      VideoPlayerDemoView(
+        dependenciesManager: dependenciesManager,
+        videoInfo: videoInfo,
+        deleteVideoCallback: {
+          selectedVideoInfo = nil
+          Task { @MainActor in
+            await viewModel.deleteVideo(videoInfo)
+          }
+        }
+      )
     }
   }
 }
