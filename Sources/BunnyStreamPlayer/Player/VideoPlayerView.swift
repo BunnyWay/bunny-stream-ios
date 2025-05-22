@@ -57,7 +57,7 @@ struct VideoPlayerView: View {
       }
     }
     .onChange(of: controlsViewModel.playbackState) { newState in
-      if newState == .readyToPlay, let tagUrl = videoPlayerConfig.vastTagUrl {
+      if newState == .playing, let tagUrl = videoPlayerConfig.vastTagUrl {
         adComponent.requestAds(adTagUrl: tagUrl)
       }
     }
