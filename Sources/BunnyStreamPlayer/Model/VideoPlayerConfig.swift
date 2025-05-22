@@ -21,6 +21,7 @@ extension VideoPlayerConfig {
 
 extension VideoPlayerConfig {
   enum Control: String, CaseIterable, Equatable {
+    case airplay
     case rewind
     case fastForward = "fast-forward"
     case playLarge = "play-large"

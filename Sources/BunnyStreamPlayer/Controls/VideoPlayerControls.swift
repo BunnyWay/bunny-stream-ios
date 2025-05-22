@@ -118,10 +118,12 @@ extension VideoPlayerControls {
         Spacer()
         captionsButton()
           .shouldAddView(!viewModel.captionsMenuViewModel.captions.isEmpty)
-        
+          .shouldAddView(controlsToCheck: .captions, in: videoPlayerConfig.controls)
+
         optionsButton()
           .shouldAddView(controlsToCheck: .settings, in: videoPlayerConfig.controls)
         airplayButton()
+          .shouldAddView(controlsToCheck: .airplay, in: videoPlayerConfig.controls)
         volumeButton()
           .shouldAddView(controlsToCheck: .mute, in: videoPlayerConfig.controls)
       }

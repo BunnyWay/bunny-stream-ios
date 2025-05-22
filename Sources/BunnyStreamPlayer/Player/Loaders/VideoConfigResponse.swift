@@ -48,6 +48,7 @@ extension VideoConfigResponse {
   }
   
   enum Control: String, Decodable, CaseIterable, Equatable {
+    case airplay
     case rewind
     case fastForward = "fast-forward"
     case playLarge = "play-large"
