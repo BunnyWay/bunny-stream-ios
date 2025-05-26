@@ -1,0 +1,12 @@
+// This file was generated with Lingua command line tool. Please do not change it!
+// Source: https://github.com/poviolabs/Lingua
+
+"caption_menu_title" = "字幕";
+"caption_disabled" = "已禁用";
+"audio_track_menu_title" = "音轨";
+"playback_speed_menu_title" = "速度";
+"playback_speed_normal" = "正常";
+"quality_menu_title" = "画质";
+"quality_auto" = "自动";
+"cancel_action" = "取消";
+"actions_title" = "设置";

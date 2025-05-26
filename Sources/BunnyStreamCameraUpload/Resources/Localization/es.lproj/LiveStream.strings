@@ -1,0 +1,11 @@
+// This file was generated with Lingua command line tool. Please do not change it!
+// Source: https://github.com/poviolabs/Lingua
+
+"open_settings_button" = "Abrir configuración";
+"camera_mic_permissions_error" = "Se requiere acceso a cámara y micrófono.";
+"stream_failed_message" = "¡Error al transmitir!";
+"end_stream_alert_title" = "Terminar transmisión";
+"end_stream_alert_message" = "¿Estás seguro de que quieres terminar la transmisión?";
+"end_stream_alert_confirm_action" = "Terminar transmisión";
+"indicator_live" = "EN VIVO";
+"indicator_offline" = "DESCONECTADO";

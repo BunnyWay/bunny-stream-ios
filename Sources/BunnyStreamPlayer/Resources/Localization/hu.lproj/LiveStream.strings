@@ -1,0 +1,11 @@
+// This file was generated with Lingua command line tool. Please do not change it!
+// Source: https://github.com/poviolabs/Lingua
+
+"open_settings_button" = "Beállítások megnyitása";
+"camera_mic_permissions_error" = "Kamera és mikrofon hozzáférés szükséges.";
+"stream_failed_message" = "A streamelés sikertelen!";
+"end_stream_alert_title" = "Stream befejezése";
+"end_stream_alert_message" = "Biztosan be szeretné fejezni a streamet?";
+"end_stream_alert_confirm_action" = "Stream befejezése";
+"indicator_live" = "ÉLŐ";
+"indicator_offline" = "OFFLINE";

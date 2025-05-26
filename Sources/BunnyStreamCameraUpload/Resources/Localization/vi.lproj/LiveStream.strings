@@ -1,0 +1,11 @@
+// This file was generated with Lingua command line tool. Please do not change it!
+// Source: https://github.com/poviolabs/Lingua
+
+"open_settings_button" = "Mở cài đặt";
+"camera_mic_permissions_error" = "Cần quyền truy cập camera và micro.";
+"stream_failed_message" = "Không thể phát trực tuyến!";
+"end_stream_alert_title" = "Kết thúc phát trực tuyến";
+"end_stream_alert_message" = "Bạn có chắc chắn muốn kết thúc phát trực tuyến không?";
+"end_stream_alert_confirm_action" = "Kết thúc phát trực tuyến";
+"indicator_live" = "TRỰC TIẾP";
+"indicator_offline" = "NGOẠI TUYẾN";

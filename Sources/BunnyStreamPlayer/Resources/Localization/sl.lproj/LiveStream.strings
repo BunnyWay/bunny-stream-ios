@@ -1,0 +1,11 @@
+// This file was generated with Lingua command line tool. Please do not change it!
+// Source: https://github.com/poviolabs/Lingua
+
+"open_settings_button" = "Odpri nastavitve";
+"camera_mic_permissions_error" = "Potreben je dostop do kamere in mikrofona.";
+"stream_failed_message" = "Pretočno predvajanje neuspešno!";
+"end_stream_alert_title" = "Končaj pretočno predvajanje";
+"end_stream_alert_message" = "Ali ste prepričani, da želite končati pretočno predvajanje?";
+"end_stream_alert_confirm_action" = "Končaj pretočno predvajanje";
+"indicator_live" = "V ŽIVO";
+"indicator_offline" = "BREZ POVEZAVE";

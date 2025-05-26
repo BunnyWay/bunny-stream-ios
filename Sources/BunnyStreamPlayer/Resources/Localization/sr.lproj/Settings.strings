@@ -1,0 +1,12 @@
+// This file was generated with Lingua command line tool. Please do not change it!
+// Source: https://github.com/poviolabs/Lingua
+
+"caption_menu_title" = "Титлови";
+"caption_disabled" = "Онемогућено";
+"audio_track_menu_title" = "Аудио трака";
+"playback_speed_menu_title" = "Брзина";
+"playback_speed_normal" = "Нормално";
+"quality_menu_title" = "Квалитет";
+"quality_auto" = "Аутоматски";
+"cancel_action" = "Откажи";
+"actions_title" = "Подешавања";

@@ -33,7 +33,6 @@
 		77950FA22ADDA60F0091A498 /* VideoUploaderView+Factory.swift in Sources */ = {isa = PBXBuildFile; fileRef = 77950FA12ADDA60F0091A498 /* VideoUploaderView+Factory.swift */; };
 		77950FA72ADEBB0D0091A498 /* VideoListRow.swift in Sources */ = {isa = PBXBuildFile; fileRef = 77950FA62ADEBB0D0091A498 /* VideoListRow.swift */; };
 		77950FB02AE2D3340091A498 /* VideoPlayerDemoView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 77950FAF2AE2D3340091A498 /* VideoPlayerDemoView.swift */; };
-		779D61ED2B0669EE0073E47D /* Localizable.xcstrings in Resources */ = {isa = PBXBuildFile; fileRef = 779D61EC2B0669EE0073E47D /* Localizable.xcstrings */; };
 		779D61EF2B0778B80073E47D /* BunnyStreamPlayer+Default.swift in Sources */ = {isa = PBXBuildFile; fileRef = 779D61EE2B0778B80073E47D /* BunnyStreamPlayer+Default.swift */; };
 		77FB975D2AD9AD0B004CED84 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 77FB975C2AD9AD0B004CED84 /* AppDelegate.swift */; };
 		77FB976B2ADD339C004CED84 /* VideoUploaderViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 77FB976A2ADD339C004CED84 /* VideoUploaderViewModel.swift */; };
@@ -74,7 +73,6 @@
 		77950FA12ADDA60F0091A498 /* VideoUploaderView+Factory.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "VideoUploaderView+Factory.swift"; sourceTree = "<group>"; };
 		77950FA62ADEBB0D0091A498 /* VideoListRow.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VideoListRow.swift; sourceTree = "<group>"; };
 		77950FAF2AE2D3340091A498 /* VideoPlayerDemoView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = VideoPlayerDemoView.swift; sourceTree = "<group>"; };
-		779D61EC2B0669EE0073E47D /* Localizable.xcstrings */ = {isa = PBXFileReference; lastKnownFileType = text.json.xcstrings; path = Localizable.xcstrings; sourceTree = "<group>"; };
 		779D61EE2B0778B80073E47D /* BunnyStreamPlayer+Default.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "BunnyStreamPlayer+Default.swift"; sourceTree = "<group>"; };
 		77C1421F2AD02EF100B419FB /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
 		77FB975C2AD9AD0B004CED84 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
@@ -172,7 +170,6 @@
 			isa = PBXGroup;
 			children = (
 				7789473F2ACFFEFF00DAF8DB /* Assets.xcassets */,
-				779D61EC2B0669EE0073E47D /* Localizable.xcstrings */,
 			);
 			path = Resources;
 			sourceTree = "<group>";
@@ -340,6 +337,35 @@
 				en,
 				Base,
 				de,
+				ar,
+				nl,
+				sl,
+				el,
+				es,
+				bg,
+				cs,
+				da,
+				fi,
+				fr,
+				hu,
+				id,
+				it,
+				ja,
+				ko,
+				mk,
+				nb,
+				pl,
+				pt,
+				ro,
+				ru,
+				sk,
+				sr,
+				sv,
+				th,
+				tr,
+				uk,
+				vi,
+				zh,
 			);
 			mainGroup = 7789472F2ACFFEFD00DAF8DB;
 			packageReferences = (
@@ -360,7 +386,6 @@
 			files = (
 				778947432ACFFEFF00DAF8DB /* Preview Assets.xcassets in Resources */,
 				778947402ACFFEFF00DAF8DB /* Assets.xcassets in Resources */,
-				779D61ED2B0669EE0073E47D /* Localizable.xcstrings in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -532,7 +557,7 @@
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 10;
+				CURRENT_PROJECT_VERSION = 12;
 				DEVELOPMENT_ASSET_PATHS = "\"Example-App/Preview Content\"";
 				DEVELOPMENT_TEAM = GX6PPA6X9F;
 				ENABLE_PREVIEWS = YES;
@@ -569,7 +594,7 @@
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 10;
+				CURRENT_PROJECT_VERSION = 12;
 				DEVELOPMENT_ASSET_PATHS = "\"Example-App/Preview Content\"";
 				DEVELOPMENT_TEAM = GX6PPA6X9F;
 				ENABLE_PREVIEWS = YES;

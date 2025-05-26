@@ -1,0 +1,12 @@
+// This file was generated with Lingua command line tool. Please do not change it!
+// Source: https://github.com/poviolabs/Lingua
+
+"caption_menu_title" = "Ondertitels";
+"caption_disabled" = "Uitgeschakeld";
+"audio_track_menu_title" = "Audiospoor";
+"playback_speed_menu_title" = "Snelheid";
+"playback_speed_normal" = "Normaal";
+"quality_menu_title" = "Kwaliteit";
+"quality_auto" = "Automatisch";
+"cancel_action" = "Annuleren";
+"actions_title" = "Instellingen";

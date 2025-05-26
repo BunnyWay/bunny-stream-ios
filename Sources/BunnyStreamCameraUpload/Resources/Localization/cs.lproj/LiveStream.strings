@@ -1,0 +1,11 @@
+// This file was generated with Lingua command line tool. Please do not change it!
+// Source: https://github.com/poviolabs/Lingua
+
+"open_settings_button" = "Otevřít nastavení";
+"camera_mic_permissions_error" = "Je vyžadován přístup ke kameře a mikrofonu.";
+"stream_failed_message" = "Streamování selhalo!";
+"end_stream_alert_title" = "Ukončit stream";
+"end_stream_alert_message" = "Opravdu chcete ukončit stream?";
+"end_stream_alert_confirm_action" = "Ukončit stream";
+"indicator_live" = "ŽIVĚ";
+"indicator_offline" = "OFFLINE";

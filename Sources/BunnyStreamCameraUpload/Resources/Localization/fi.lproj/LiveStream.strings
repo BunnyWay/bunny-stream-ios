@@ -1,0 +1,11 @@
+// This file was generated with Lingua command line tool. Please do not change it!
+// Source: https://github.com/poviolabs/Lingua
+
+"open_settings_button" = "Avaa asetukset";
+"camera_mic_permissions_error" = "Kamera- ja mikrofonilupa vaaditaan.";
+"stream_failed_message" = "Striimaus epäonnistui!";
+"end_stream_alert_title" = "Lopeta striimi";
+"end_stream_alert_message" = "Haluatko varmasti lopettaa striimin?";
+"end_stream_alert_confirm_action" = "Lopeta striimi";
+"indicator_live" = "LIVE";
+"indicator_offline" = "OFFLINE";

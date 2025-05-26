@@ -1,0 +1,4 @@
+// This file was generated with Lingua command line tool. Please do not change it!
+// Source: https://github.com/poviolabs/Lingua
+
+"audio_error" = "Il y a eu un problème lors de la configuration audio. Veuillez vérifier vos paramètres et réessayer.";

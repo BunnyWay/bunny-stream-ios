@@ -1,0 +1,12 @@
+// This file was generated with Lingua command line tool. Please do not change it!
+// Source: https://github.com/poviolabs/Lingua
+
+"caption_menu_title" = "คำบรรยาย";
+"caption_disabled" = "ปิดใช้งาน";
+"audio_track_menu_title" = "แทร็กเสียง";
+"playback_speed_menu_title" = "ความเร็ว";
+"playback_speed_normal" = "ปกติ";
+"quality_menu_title" = "คุณภาพ";
+"quality_auto" = "อัตโนมัติ";
+"cancel_action" = "ยกเลิก";
+"actions_title" = "การตั้งค่า";

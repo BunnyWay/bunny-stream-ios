@@ -1,0 +1,4 @@
+// This file was generated with Lingua command line tool. Please do not change it!
+// Source: https://github.com/poviolabs/Lingua
+
+"audio_error" = "Có vấn đề khi thiết lập âm thanh. Vui lòng kiểm tra cài đặt và thử lại.";

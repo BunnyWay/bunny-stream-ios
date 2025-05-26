@@ -1,0 +1,11 @@
+// This file was generated with Lingua command line tool. Please do not change it!
+// Source: https://github.com/poviolabs/Lingua
+
+"open_settings_button" = "Άνοιγμα ρυθμίσεων";
+"camera_mic_permissions_error" = "Απαιτείται πρόσβαση στην κάμερα και το μικρόφωνο.";
+"stream_failed_message" = "Αποτυχία μετάδοσης!";
+"end_stream_alert_title" = "Τερματισμός μετάδοσης";
+"end_stream_alert_message" = "Είστε βέβαιοι ότι θέλετε να τερματίσετε τη μετάδοση;";
+"end_stream_alert_confirm_action" = "Τερματισμός μετάδοσης";
+"indicator_live" = "ΖΩΝΤΑΝΑ";
+"indicator_offline" = "ΕΚΤΟΣ ΣΥΝΔΕΣΗΣ";

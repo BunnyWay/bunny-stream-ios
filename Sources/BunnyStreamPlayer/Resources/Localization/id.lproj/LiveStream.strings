@@ -1,0 +1,11 @@
+// This file was generated with Lingua command line tool. Please do not change it!
+// Source: https://github.com/poviolabs/Lingua
+
+"open_settings_button" = "Buka Pengaturan";
+"camera_mic_permissions_error" = "Akses kamera dan mikrofon diperlukan.";
+"stream_failed_message" = "Gagal melakukan streaming!";
+"end_stream_alert_title" = "Akhiri Streaming";
+"end_stream_alert_message" = "Apakah Anda yakin ingin mengakhiri streaming?";
+"end_stream_alert_confirm_action" = "Akhiri Streaming";
+"indicator_live" = "LIVE";
+"indicator_offline" = "OFFLINE";

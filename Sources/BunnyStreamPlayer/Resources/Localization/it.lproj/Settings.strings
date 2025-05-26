@@ -1,0 +1,12 @@
+// This file was generated with Lingua command line tool. Please do not change it!
+// Source: https://github.com/poviolabs/Lingua
+
+"caption_menu_title" = "Sottotitoli";
+"caption_disabled" = "Disabilitato";
+"audio_track_menu_title" = "Traccia audio";
+"playback_speed_menu_title" = "Velocità";
+"playback_speed_normal" = "Normale";
+"quality_menu_title" = "Qualità";
+"quality_auto" = "Automatico";
+"cancel_action" = "Annulla";
+"actions_title" = "Impostazioni";

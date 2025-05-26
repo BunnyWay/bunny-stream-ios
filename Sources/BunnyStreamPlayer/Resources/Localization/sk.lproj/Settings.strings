@@ -1,0 +1,12 @@
+// This file was generated with Lingua command line tool. Please do not change it!
+// Source: https://github.com/poviolabs/Lingua
+
+"caption_menu_title" = "Titulky";
+"caption_disabled" = "Zakázané";
+"audio_track_menu_title" = "Zvuková stopa";
+"playback_speed_menu_title" = "Rýchlosť";
+"playback_speed_normal" = "Normálna";
+"quality_menu_title" = "Kvalita";
+"quality_auto" = "Automaticky";
+"cancel_action" = "Zrušiť";
+"actions_title" = "Nastavenia";

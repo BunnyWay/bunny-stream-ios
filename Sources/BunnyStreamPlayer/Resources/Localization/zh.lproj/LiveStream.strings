@@ -1,0 +1,11 @@
+// This file was generated with Lingua command line tool. Please do not change it!
+// Source: https://github.com/poviolabs/Lingua
+
+"open_settings_button" = "打开设置";
+"camera_mic_permissions_error" = "需要相机和麦克风访问权限。";
+"stream_failed_message" = "推流失败！";
+"end_stream_alert_title" = "结束直播";
+"end_stream_alert_message" = "您确定要结束直播吗？";
+"end_stream_alert_confirm_action" = "结束直播";
+"indicator_live" = "直播";
+"indicator_offline" = "离线";

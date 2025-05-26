@@ -4,29 +4,29 @@
 
 import Foundation
 
-enum Lingua {
-	enum Error {
+public enum Lingua {
+	public enum Error {
 		/// There was a problem setting up the audio. Please check your settings and try again.
-		static let audioError = tr("Error", "audio_error")
+		public static let audioError = tr("Error", "audio_error")
 	}
 
-	enum LiveStream {
+	public enum LiveStream {
 		/// Camera and Microphone access is required.
-		static let cameraMicPermissionsError = tr("LiveStream", "camera_mic_permissions_error")
+		public static let cameraMicPermissionsError = tr("LiveStream", "camera_mic_permissions_error")
 		/// End Stream
-		static let endStreamAlertConfirmAction = tr("LiveStream", "end_stream_alert_confirm_action")
+		public static let endStreamAlertConfirmAction = tr("LiveStream", "end_stream_alert_confirm_action")
 		/// Are you sure you want to end the stream?
-		static let endStreamAlertMessage = tr("LiveStream", "end_stream_alert_message")
+		public static let endStreamAlertMessage = tr("LiveStream", "end_stream_alert_message")
 		/// End Stream
-		static let endStreamAlertTitle = tr("LiveStream", "end_stream_alert_title")
+		public static let endStreamAlertTitle = tr("LiveStream", "end_stream_alert_title")
 		/// LIVE
-		static let indicatorLive = tr("LiveStream", "indicator_live")
+		public static let indicatorLive = tr("LiveStream", "indicator_live")
 		/// OFFLINE
-		static let indicatorOffline = tr("LiveStream", "indicator_offline")
+		public static let indicatorOffline = tr("LiveStream", "indicator_offline")
 		/// Open Settings
-		static let openSettingsButton = tr("LiveStream", "open_settings_button")
+		public static let openSettingsButton = tr("LiveStream", "open_settings_button")
 		/// Failed to stream!
-		static let streamFailedMessage = tr("LiveStream", "stream_failed_message")
+		public static let streamFailedMessage = tr("LiveStream", "stream_failed_message")
 	}
     
 	private static func tr(_ table: String, _ key: String, _ args: CVarArg...) -> String {

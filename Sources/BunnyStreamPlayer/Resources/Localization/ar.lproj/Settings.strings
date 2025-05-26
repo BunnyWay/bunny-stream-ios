@@ -1,0 +1,12 @@
+// This file was generated with Lingua command line tool. Please do not change it!
+// Source: https://github.com/poviolabs/Lingua
+
+"caption_menu_title" = "الترجمة النصية";
+"caption_disabled" = "معطّل";
+"audio_track_menu_title" = "المسار الصوتي";
+"playback_speed_menu_title" = "السرعة";
+"playback_speed_normal" = "عادي";
+"quality_menu_title" = "الجودة";
+"quality_auto" = "تلقائي";
+"cancel_action" = "إلغاء";
+"actions_title" = "الإعدادات";

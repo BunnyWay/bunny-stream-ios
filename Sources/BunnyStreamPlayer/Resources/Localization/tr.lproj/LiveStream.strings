@@ -1,0 +1,11 @@
+// This file was generated with Lingua command line tool. Please do not change it!
+// Source: https://github.com/poviolabs/Lingua
+
+"open_settings_button" = "Ayarları aç";
+"camera_mic_permissions_error" = "Kamera ve mikrofon erişimi gereklidir.";
+"stream_failed_message" = "Yayın başarısız!";
+"end_stream_alert_title" = "Yayını sonlandır";
+"end_stream_alert_message" = "Yayını sonlandırmak istediğinizden emin misiniz?";
+"end_stream_alert_confirm_action" = "Yayını sonlandır";
+"indicator_live" = "CANLI";
+"indicator_offline" = "ÇEVRİMDIŞI";

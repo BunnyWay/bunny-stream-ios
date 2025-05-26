@@ -1,0 +1,11 @@
+// This file was generated with Lingua command line tool. Please do not change it!
+// Source: https://github.com/poviolabs/Lingua
+
+"open_settings_button" = "Instellingen openen";
+"camera_mic_permissions_error" = "Toegang tot camera en microfoon is vereist.";
+"stream_failed_message" = "Streamen mislukt!";
+"end_stream_alert_title" = "Stream beëindigen";
+"end_stream_alert_message" = "Weet je zeker dat je de stream wilt beëindigen?";
+"end_stream_alert_confirm_action" = "Stream beëindigen";
+"indicator_live" = "LIVE";
+"indicator_offline" = "OFFLINE";

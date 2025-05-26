@@ -1,0 +1,4 @@
+// This file was generated with Lingua command line tool. Please do not change it!
+// Source: https://github.com/poviolabs/Lingua
+
+"audio_error" = "Ses kurulumunda bir sorun oluştu. Lütfen ayarlarınızı kontrol edin ve tekrar deneyin.";

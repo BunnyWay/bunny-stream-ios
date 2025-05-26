@@ -1,0 +1,12 @@
+// This file was generated with Lingua command line tool. Please do not change it!
+// Source: https://github.com/poviolabs/Lingua
+
+"caption_menu_title" = "Feliratok";
+"caption_disabled" = "Letiltva";
+"audio_track_menu_title" = "Hangsáv";
+"playback_speed_menu_title" = "Sebesség";
+"playback_speed_normal" = "Normál";
+"quality_menu_title" = "Minőség";
+"quality_auto" = "Automatikus";
+"cancel_action" = "Mégse";
+"actions_title" = "Beállítások";

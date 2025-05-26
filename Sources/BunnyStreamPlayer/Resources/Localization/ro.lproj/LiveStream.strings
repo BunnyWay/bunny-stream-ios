@@ -1,0 +1,11 @@
+// This file was generated with Lingua command line tool. Please do not change it!
+// Source: https://github.com/poviolabs/Lingua
+
+"open_settings_button" = "Deschide setările";
+"camera_mic_permissions_error" = "Este necesar accesul la cameră și microfon.";
+"stream_failed_message" = "Streaming eșuat!";
+"end_stream_alert_title" = "Închide streaming";
+"end_stream_alert_message" = "Sigur doriți să închideți streaming-ul?";
+"end_stream_alert_confirm_action" = "Închide streaming";
+"indicator_live" = "LIVE";
+"indicator_offline" = "OFFLINE";

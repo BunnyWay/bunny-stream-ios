@@ -1,0 +1,11 @@
+// This file was generated with Lingua command line tool. Please do not change it!
+// Source: https://github.com/poviolabs/Lingua
+
+"open_settings_button" = "เปิดการตั้งค่า";
+"camera_mic_permissions_error" = "จำเป็นต้องมีการเข้าถึงกล้องและไมโครโฟน";
+"stream_failed_message" = "การสตรีมล้มเหลว!";
+"end_stream_alert_title" = "จบการสตรีม";
+"end_stream_alert_message" = "คุณแน่ใจหรือไม่ว่าต้องการจบการสตรีม?";
+"end_stream_alert_confirm_action" = "จบการสตรีม";
+"indicator_live" = "สด";
+"indicator_offline" = "ออฟไลน์";

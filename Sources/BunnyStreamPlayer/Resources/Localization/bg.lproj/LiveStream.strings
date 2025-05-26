@@ -1,0 +1,11 @@
+// This file was generated with Lingua command line tool. Please do not change it!
+// Source: https://github.com/poviolabs/Lingua
+
+"open_settings_button" = "Отвори настройки";
+"camera_mic_permissions_error" = "Необходим е достъп до камера и микрофон.";
+"stream_failed_message" = "Неуспешно излъчване!";
+"end_stream_alert_title" = "Край на излъчването";
+"end_stream_alert_message" = "Сигурни ли сте, че искате да приключите излъчването?";
+"end_stream_alert_confirm_action" = "Край на излъчването";
+"indicator_live" = "НА ЖИВО";
+"indicator_offline" = "ОФЛАЙН";
