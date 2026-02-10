@@ -19,9 +19,9 @@ public struct BunnyStreamPlayer: View {
   let videoId: String
   /// The ID of the video library.
   let libraryId: Int
-  /// The CDN token authentication token. Required when token authentication is enabled on the pull zone.
+  /// The embed view token. Required when token authentication is enabled for the video library.
   let token: String?
-  /// The expiration timestamp for the CDN token.
+  /// The expiration timestamp for the embed view token.
   let expires: Int64?
 
   /// The loading state of the video player.
@@ -57,8 +57,8 @@ public struct BunnyStreamPlayer: View {
   ///   - accessKey: The access key for authentication. Can be `nil` for public videos.
   ///   - videoId: The unique ID of the video to be played.
   ///   - libraryId: The ID of the video library.
-  ///   - token: The CDN token authentication token. Required when token authentication is enabled on the pull zone.
-  ///   - expires: The expiration timestamp for the CDN token.
+  ///   - token: The embed view token. Required when token authentication is enabled for the video library.
+  ///   - expires: The expiration timestamp for the embed view token.
   ///   - playerIcons: Optional custom icons for the video player.
   ///
   /// ### Usage Example:
