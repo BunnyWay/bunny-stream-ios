@@ -19,6 +19,10 @@ public struct BunnyStreamPlayer: View {
   let videoId: String
   /// The ID of the video library.
   let libraryId: Int
+  /// The CDN token authentication token. Required when token authentication is enabled on the pull zone.
+  let token: String?
+  /// The expiration timestamp for the CDN token.
+  let expires: Int64?
 
   /// The loading state of the video player.
   @State private var loadingState: VideoLoadingState = .loading
@@ -53,6 +57,8 @@ public struct BunnyStreamPlayer: View {
   ///   - accessKey: The access key for authentication. Can be `nil` for public videos.
   ///   - videoId: The unique ID of the video to be played.
   ///   - libraryId: The ID of the video library.
+  ///   - token: The CDN token authentication token. Required when token authentication is enabled on the pull zone.
+  ///   - expires: The expiration timestamp for the CDN token.
   ///   - playerIcons: Optional custom icons for the video player.
   ///
   /// ### Usage Example:
@@ -61,7 +67,9 @@ public struct BunnyStreamPlayer: View {
   ///     var body: some View {
   ///         BunnyStreamPlayer(accessKey: "your_access_key",
   ///                          videoId: "your_video_id",
-  ///                          libraryId: 123)
+  ///                          libraryId: 123,
+  ///                          token: "cdn_token",
+  ///                          expires: 1234567890)
   ///         .navigationBarTitle(Text("Video Player"), displayMode: .inline)
   ///     }
   /// }
@@ -70,11 +78,15 @@ public struct BunnyStreamPlayer: View {
     accessKey: String?,
     videoId: String,
     libraryId: Int,
+    token: String? = nil,
+    expires: Int64? = nil,
     playerIcons: PlayerIcons? = nil
   ) {
     self.accessKey = accessKey
     self.videoId = videoId
     self.libraryId = libraryId
+    self.token = token
+    self.expires = expires
     if let accessKey {
       self.heatmapLoader = HeatmapLoader(bunnyStreamAPI: .init(accessKey: accessKey))
     }
@@ -119,7 +131,7 @@ public struct BunnyStreamPlayer: View {
   func loadVideo() async {
     loadingState = .loading
     do {
-      let videoConfigResponse = try await videoPlayerConfigLoader.load(libraryId: libraryId, videoId: videoId)
+      let videoConfigResponse = try await videoPlayerConfigLoader.load(libraryId: libraryId, videoId: videoId, token: token, expires: expires)
       var video = Video(response: videoConfigResponse)
       // If Public Video (no access key), heatmap is not loaded - heatmapLoader is nil
       let heatmap = try? await heatmapLoader?.loadHeatmap(videoId: videoId, libraryId: libraryId)
