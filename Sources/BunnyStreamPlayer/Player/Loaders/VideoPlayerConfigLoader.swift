@@ -4,11 +4,26 @@ import SwiftUI
 public struct VideoPlayerConfigLoader {
   public init() {}
   
-  func load(libraryId: Int, videoId: String) async throws -> VideoConfigResponse {
-    guard let url = URL(string: "https://video.bunnycdn.com/library/\(libraryId)/videos/\(videoId)/play") else {
+  func load(libraryId: Int, videoId: String, token: String? = nil, expires: Int64? = nil) async throws -> VideoConfigResponse {
+    guard var components = URLComponents(string: "https://video.bunnycdn.com/library/\(libraryId)/videos/\(videoId)/play") else {
       throw VideoPlayerError.unknownError
     }
-    
+
+    var queryItems: [URLQueryItem] = []
+    if let token {
+      queryItems.append(URLQueryItem(name: "token", value: token))
+    }
+    if let expires {
+      queryItems.append(URLQueryItem(name: "expires", value: String(expires)))
+    }
+    if !queryItems.isEmpty {
+      components.queryItems = queryItems
+    }
+
+    guard let url = components.url else {
+      throw VideoPlayerError.unknownError
+    }
+
     var request = URLRequest(url: url)
     request.httpMethod = "GET"
     request.addValue("application/json", forHTTPHeaderField: "Accept")
@@ -41,8 +56,8 @@ public struct VideoPlayerConfigLoader {
     }
   }
   
-  public func loadVideoThumbnail(libraryId: Int, videoId: String) async throws -> String {
-    try await load(libraryId: libraryId, videoId: videoId).thumbnailUrl
+  public func loadVideoThumbnail(libraryId: Int, videoId: String, token: String? = nil, expires: Int64? = nil) async throws -> String {
+    try await load(libraryId: libraryId, videoId: videoId, token: token, expires: expires).thumbnailUrl
   }
 }
 
