@@ -10,7 +10,7 @@ on:
 jobs:
   build:
 
-    runs-on: macos-13
+    runs-on: macos-15
 
     steps:
       
@@ -32,7 +32,7 @@ jobs:
       run: swift package clean
 
     - name: Build project
-      run: set -o pipefail && env NSUnbufferedIO=YES xcodebuild build-for-testing -destination 'name=iPhone 14 Pro' -scheme 'Bunny-Package' -skipPackagePluginValidation | xcpretty
+      run: set -o pipefail && env NSUnbufferedIO=YES xcodebuild build-for-testing -destination 'name=iPhone 16 Pro' -scheme 'Bunny-Package' -skipPackagePluginValidation | xcpretty
 
     - name: Run tests
-      run: set -o pipefail && env NSUnbufferedIO=YES xcodebuild test-without-building -destination 'name=iPhone 14 Pro' -scheme 'Bunny-Package' -skipPackagePluginValidation | xcpretty
+      run: set -o pipefail && env NSUnbufferedIO=YES xcodebuild test-without-building -destination 'name=iPhone 16 Pro' -scheme 'Bunny-Package' -skipPackagePluginValidation | xcpretty
