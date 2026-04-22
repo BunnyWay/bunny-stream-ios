@@ -23,6 +23,9 @@ public struct BunnyStreamPlayer: View {
   let token: String?
   /// The expiration timestamp for the embed view token.
   let expires: Int64?
+  /// Optional HTTP headers to be passed to the underlying video player's network requests.
+  /// Useful for bypassing CDN restrictions, such as passing a `Referer`
+  let headers: [String: String]?
 
   /// The loading state of the video player.
   @State private var loadingState: VideoLoadingState = .loading
@@ -80,13 +83,15 @@ public struct BunnyStreamPlayer: View {
     libraryId: Int,
     token: String? = nil,
     expires: Int64? = nil,
-    playerIcons: PlayerIcons? = nil
+    playerIcons: PlayerIcons? = nil,
+    headers: [String: String]? = nil
   ) {
     self.accessKey = accessKey
     self.videoId = videoId
     self.libraryId = libraryId
     self.token = token
     self.expires = expires
+    self.headers = headers
     if let accessKey {
       self.heatmapLoader = HeatmapLoader(bunnyStreamAPI: .init(accessKey: accessKey))
     }
@@ -137,7 +142,7 @@ public struct BunnyStreamPlayer: View {
       let heatmap = try? await heatmapLoader?.loadHeatmap(videoId: videoId, libraryId: libraryId)
       
       VideoPlayerConfig(response: videoConfigResponse).map { self.videoConfig = $0 }
-      let player = MediaPlayer.make(video: video)
+      let player = MediaPlayer.make(video: video, headers: self.headers)
       self.player = player
       video.adjustLength(player.duration)
       self.theme = VideoPlayerTheme(config: videoConfigResponse) ?? theme

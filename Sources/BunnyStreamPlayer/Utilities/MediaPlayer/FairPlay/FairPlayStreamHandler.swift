@@ -5,15 +5,21 @@ class FairPlayStreamHandler: NSObject, AVAssetResourceLoaderDelegate {
   private let libraryId: Int
   private let urlSession = URLSession(configuration: .default)
   private var fairPlayURL: URL
+  private var headers: [String: String]?
   
-  init(videoId: String, libraryId: Int) {
+  init(videoId: String, libraryId: Int, headers: [String: String]? = nil) {
     self.videoId = videoId
     self.libraryId = libraryId
     self.fairPlayURL = URL(string: "\(Constants.videoCoreBaseUrlString)/FairPlayLicense/\(libraryId)/\(videoId)")!
+    self.headers = headers
   }
   
   func setupAssetPlayback(url: URL) -> AVPlayerItem {
-    let asset = AVURLAsset(url: url)
+    var options: [String: Any]? = nil
+    if let headers = self.headers {
+      options = ["AVURLAssetHTTPHeaderFieldsKey": headers]
+    }
+    let asset = AVURLAsset(url: url, options: options)
     asset.resourceLoader.setDelegate(self, queue: DispatchQueue.main)
     return AVPlayerItem(asset: asset)
   }

@@ -9,6 +9,7 @@ extension MediaPlayer {
   ///
   /// - Parameters:
   ///   - video: A `Video` for the video to be played.
+  ///   - headers: Optional HTTP headers (such as `Referer` or `User-Agent`) to inject into the underlying asset's network requests.
   ///
   /// - Returns: A `MediaPlayer` instance.
   ///
@@ -16,9 +17,9 @@ extension MediaPlayer {
   /// ```
   /// let player = MediaPlayer.make(video: video)
   /// ```
-  static func make(video: Video) -> MediaPlayer {
+  static func make(video: Video, headers: [String: String]? = nil) -> MediaPlayer {
     let url = URL(string: video.playlistUrl ?? "")!
-    let fairPlayHandler = FairPlayStreamHandler(videoId: video.guid, libraryId: video.libraryId)
+    let fairPlayHandler = FairPlayStreamHandler(videoId: video.guid, libraryId: video.libraryId, headers: headers)
     let subtitlesProvider = MediaPlayerSubtitlesProvider(video: video)
     let mediaPlayer = MediaPlayer(
       url: url,
