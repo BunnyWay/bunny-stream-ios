@@ -17,6 +17,7 @@ class VideoPlayerControlsViewModel: ObservableObject {
   @Published var isOptionsMenuActive = false
   @Published var captions: String?
   @Published var isAdPlaying: Bool = false
+  @Published var isAtLiveEdge: Bool = true
   private var cancellables = Set<AnyCancellable>()
   
   
@@ -34,6 +35,14 @@ class VideoPlayerControlsViewModel: ObservableObject {
 extension VideoPlayerControlsViewModel {
   var duration: Double {
     ceil(player.duration)
+  }
+
+  var isLive: Bool {
+    player.kind == .live || player.kind == .event
+  }
+
+  func snapToLiveEdge() {
+    player.snapToLiveEdge()
   }
   
   var currentFormattedTime: String {
@@ -121,7 +130,16 @@ extension VideoPlayerControlsViewModel: MediaPlayerDelegate {
   }
   
   func mediaPlayer(_ player: MediaPlayer, didProgressToTime seconds: Double) {
-    seekBarViewModel.elapsedTime = seconds
+    isAtLiveEdge = player.isAtLiveEdge
+    if player.kind == .event,
+       let range = player.currentItem?.seekableTimeRanges.last?.timeRangeValue,
+       range.duration.seconds > 0 {
+      seekBarViewModel.seekableRange = range.start.seconds...range.end.seconds
+      seekBarViewModel.elapsedTime = max(0, seconds - range.start.seconds)
+    } else {
+      seekBarViewModel.seekableRange = nil
+      seekBarViewModel.elapsedTime = seconds
+    }
   }
   
   func mediaPlayer(_ player: MediaPlayer, didFailWithError error: Error) {

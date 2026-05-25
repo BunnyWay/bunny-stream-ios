@@ -44,6 +44,8 @@ class MediaPlayer: AVPlayer {
   ///
   /// The default value is `false`.
   var allowsLooping = false
+
+  var kind: PlaybackKind = .vod
   
   /// The time interval in milliseconds at which the player observes the playback time.
   /// This property determines how often the player updates the playback progress.
@@ -59,6 +61,7 @@ class MediaPlayer: AVPlayer {
   
   /// The total duration of the current media item in seconds. This duration does not take into account any custom playback interval set.
   var duration: Double {
+    guard kind != .live else { return .infinity }
     guard let duration = currentItem?.asset.duration, duration.isValid, !duration.seconds.isNaN else { return 0 }
     return duration.seconds
   }

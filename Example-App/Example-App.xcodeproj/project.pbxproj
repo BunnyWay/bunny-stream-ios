@@ -8,6 +8,7 @@
 
 /* Begin PBXBuildFile section */
 		65FC6F442D9D64AE00D29974 /* PublicVideoDemoView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 65FC6F432D9D64A700D29974 /* PublicVideoDemoView.swift */; };
+		6A86ED722FBA727B00A713E8 /* LiveStreamDemoView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6A86ED702FBA727B00A713E8 /* LiveStreamDemoView.swift */; };
 		770375792AD832B40034C47F /* VideoPicker.swift in Sources */ = {isa = PBXBuildFile; fileRef = 770375782AD832B40034C47F /* VideoPicker.swift */; };
 		7703757B2AD877040034C47F /* DefaultTextFieldStyle.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7703757A2AD877040034C47F /* DefaultTextFieldStyle.swift */; };
 		77116BD92AFE6774000BB64C /* VideoResponseInfo.swift in Sources */ = {isa = PBXBuildFile; fileRef = 77116BD82AFE6774000BB64C /* VideoResponseInfo.swift */; };
@@ -46,6 +47,7 @@
 
 /* Begin PBXFileReference section */
 		65FC6F432D9D64A700D29974 /* PublicVideoDemoView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PublicVideoDemoView.swift; sourceTree = "<group>"; };
+		6A86ED702FBA727B00A713E8 /* LiveStreamDemoView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LiveStreamDemoView.swift; sourceTree = "<group>"; };
 		770375782AD832B40034C47F /* VideoPicker.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VideoPicker.swift; sourceTree = "<group>"; };
 		7703757A2AD877040034C47F /* DefaultTextFieldStyle.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DefaultTextFieldStyle.swift; sourceTree = "<group>"; };
 		77116BD82AFE6774000BB64C /* VideoResponseInfo.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VideoResponseInfo.swift; sourceTree = "<group>"; };
@@ -96,6 +98,14 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		6A86ED712FBA727B00A713E8 /* LiveStreamDemo */ = {
+			isa = PBXGroup;
+			children = (
+				6A86ED702FBA727B00A713E8 /* LiveStreamDemoView.swift */,
+			);
+			path = LiveStreamDemo;
+			sourceTree = "<group>";
+		};
 		77116BDC2AFEC3D9000BB64C /* Player */ = {
 			isa = PBXGroup;
 			children = (
@@ -177,6 +187,7 @@
 		7789474B2AD002CA00DAF8DB /* Scenes */ = {
 			isa = PBXGroup;
 			children = (
+				6A86ED712FBA727B00A713E8 /* LiveStreamDemo */,
 				77950FAE2AE2D3340091A498 /* VideoPlayerDemo */,
 				7789CFA82AD6C8AB00CC8BCE /* Components */,
 				7789CF992AD6AABC00CC8BCE /* VideoUploaderDemo */,
@@ -369,6 +380,7 @@
 			);
 			mainGroup = 7789472F2ACFFEFD00DAF8DB;
 			packageReferences = (
+				6A86ED802FBA800000A713E8 /* XCLocalSwiftPackageReference ".." */,
 			);
 			productRefGroup = 778947392ACFFEFD00DAF8DB /* Products */;
 			projectDirPath = "";
@@ -411,6 +423,7 @@
 				7789473E2ACFFEFD00DAF8DB /* ContentView.swift in Sources */,
 				7789474E2AD0032900DAF8DB /* VideoListView.swift in Sources */,
 				7789CFAC2AD6C8D700CC8BCE /* UploadListCategory.swift in Sources */,
+				6A86ED722FBA727B00A713E8 /* LiveStreamDemoView.swift in Sources */,
 				77116BDB2AFEBFA8000BB64C /* DefaultTextField.swift in Sources */,
 				7789CFAA2AD6C8B600CC8BCE /* UploadStatusIndicator.swift in Sources */,
 				65FC6F442D9D64AE00D29974 /* PublicVideoDemoView.swift in Sources */,
@@ -559,7 +572,7 @@
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 12;
 				DEVELOPMENT_ASSET_PATHS = "\"Example-App/Preview Content\"";
-				DEVELOPMENT_TEAM = GX6PPA6X9F;
+				DEVELOPMENT_TEAM = 9JUDK7LK5C;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = "Example-App/Info.plist";
@@ -596,7 +609,7 @@
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 12;
 				DEVELOPMENT_ASSET_PATHS = "\"Example-App/Preview Content\"";
-				DEVELOPMENT_TEAM = GX6PPA6X9F;
+				DEVELOPMENT_TEAM = 9JUDK7LK5C;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = "Example-App/Info.plist";
@@ -647,21 +660,32 @@
 		};
 /* End XCConfigurationList section */
 
+/* Begin XCLocalSwiftPackageReference section */
+		6A86ED802FBA800000A713E8 /* XCLocalSwiftPackageReference ".." */ = {
+			isa = XCLocalSwiftPackageReference;
+			relativePath = ..;
+		};
+/* End XCLocalSwiftPackageReference section */
+
 /* Begin XCSwiftPackageProductDependency section */
 		972F244A2D77353B00D716F5 /* BunnyStreamCameraUpload */ = {
 			isa = XCSwiftPackageProductDependency;
+			package = 6A86ED802FBA800000A713E8 /* XCLocalSwiftPackageReference ".." */;
 			productName = BunnyStreamCameraUpload;
 		};
 		972F244C2D77353B00D716F5 /* BunnyStreamPlayer */ = {
 			isa = XCSwiftPackageProductDependency;
+			package = 6A86ED802FBA800000A713E8 /* XCLocalSwiftPackageReference ".." */;
 			productName = BunnyStreamPlayer;
 		};
 		972F244E2D77353B00D716F5 /* BunnyStreamUploader */ = {
 			isa = XCSwiftPackageProductDependency;
+			package = 6A86ED802FBA800000A713E8 /* XCLocalSwiftPackageReference ".." */;
 			productName = BunnyStreamUploader;
 		};
 		97A123872D805E5E00EB3B71 /* BunnyStreamAPI */ = {
 			isa = XCSwiftPackageProductDependency;
+			package = 6A86ED802FBA800000A713E8 /* XCLocalSwiftPackageReference ".." */;
 			productName = BunnyStreamAPI;
 		};
 /* End XCSwiftPackageProductDependency section */

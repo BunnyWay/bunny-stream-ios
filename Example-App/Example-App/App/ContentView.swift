@@ -45,6 +45,9 @@ struct ContentView: View {
           } label: {
             Text("Direct Video Play")
           }
+          NavigationLink("Live Stream") {
+            LiveStreamDemoView(dependenciesManager: dependenciesManager)
+          }
         }
         
         Section("Configuration") {

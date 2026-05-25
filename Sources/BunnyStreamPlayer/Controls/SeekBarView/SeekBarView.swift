@@ -216,9 +216,8 @@ private extension SeekBarView {
     let duration = viewModel.duration
     guard duration != .zero else { return }
     let percentage = Double(dragPosition / size.width)
-    let seekTimeSeconds = duration * percentage
-    viewModel.elapsedTime = seekTimeSeconds
-    viewModel.player.jump(to: seekTimeSeconds)
+    viewModel.elapsedTime = duration * percentage
+    viewModel.seek(to: percentage)
   }
   
   func updateSizeAndPosition(with newSize: CGSize) {

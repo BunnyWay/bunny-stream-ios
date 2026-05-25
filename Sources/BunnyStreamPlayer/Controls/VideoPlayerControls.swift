@@ -63,6 +63,8 @@ struct VideoPlayerControls: View {
 extension VideoPlayerControls {
   func topControlsView() -> some View {
     HStack {
+      liveBadgeView()
+        .shouldAddView(viewModel.isLive)
       Spacer()
       fullScreenButton()
         .shouldAddView(controlsToCheck: .fullScreen, in: videoPlayerConfig.controls)
@@ -115,6 +117,9 @@ extension VideoPlayerControls {
       
       HStack {
         timeView()
+          .shouldAddView(!viewModel.isLive)
+        goToLiveButton()
+          .shouldAddView(viewModel.isLive && !viewModel.isAtLiveEdge)
         Spacer()
         captionsButton()
           .shouldAddView(!viewModel.captionsMenuViewModel.captions.isEmpty)
@@ -218,6 +223,31 @@ extension VideoPlayerControls {
     }
   }
   
+  func liveBadgeView() -> some View {
+    HStack(spacing: 4) {
+      Circle()
+        .fill(viewModel.isAtLiveEdge ? Color.red : Color.gray)
+        .frame(width: 8, height: 8)
+      Text(Lingua.LiveStream.indicatorLive)
+        .font(.caption.bold())
+        .foregroundColor(.white)
+    }
+    .padding(.horizontal, 8)
+    .padding(.vertical, 4)
+    .background(Capsule().fill(Color.black.opacity(0.5)))
+  }
+
+  func goToLiveButton() -> some View {
+    Button(action: viewModel.snapToLiveEdge) {
+      Text(Lingua.LiveStream.indicatorLive)
+        .font(.caption.bold())
+        .foregroundColor(.white)
+        .padding(.horizontal, 8)
+        .padding(.vertical, 4)
+        .background(Capsule().fill(Color.red))
+    }
+  }
+
   func seekBarView() -> some View {
     SeekBarView(viewModel: viewModel.seekBarViewModel, isDraggingOutside: $viewModel.isDraggingSeekBar)
       .environment(\.videoPlayerConfig, videoPlayerConfig)
