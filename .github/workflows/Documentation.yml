@@ -1,66 +1,77 @@
-# For more information see: https://docs.github.com/en/actions/automating-builds-and-tests/building-and-testing-swift
-
 name: Generate and Deploy Documentation
 
 on:
   push:
     branches:
       - main
-      - develop
-      - feature/documentation
+  pull_request:
+    branches:
+      - main
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: false
 
 jobs:
-  build-and-deploy:
+  build:
     runs-on: macos-15
-    
     steps:
-    - name: Checkout Repository
-      uses: actions/checkout@v3
-      
-    - name: Update Xcode Settings
-      run: |
-        set -euo pipefail
-        defaults write com.apple.dt.Xcode IDESkipPackagePluginFingerprintValidatation -bool YES
-      
-    - name: Load Latest Xcode
-      uses: maxim-lobanov/setup-xcode@v1
-      with:
-        xcode-version: latest-stable
-    
-    - name: Install SourceDocs
-      run: brew install sourcedocs
-      
-    - name: Build project
-      run: swift build
-    
-    - name: Remove Unwanted Remark Lines
-      run: |
-        find . -type f -name "*.swift" -print0 | xargs -0 sed -i '' '/^[[:space:]]*\/\/\/ - Remark:/d'
+      - name: Checkout Repository
+        uses: actions/checkout@v4
 
-    - name: Generate Documentation
-      run: sourcedocs generate --all-modules
+      - name: Update Xcode Settings
+        run: |
+          set -euo pipefail
+          defaults write com.apple.dt.Xcode IDESkipPackagePluginFingerprintValidatation -bool YES
 
-    - name: Process Documentation
-      run: |
-        # Make the script executable
-        chmod +x ./fix_readme.sh
-        # Run the script
-        ./fix_readme.sh
+      - name: Load Latest Xcode
+        uses: maxim-lobanov/setup-xcode@v1
+        with:
+          xcode-version: latest-stable
 
-    - name: Commit Documentation
-      run: |
-        git config --local user.email "action@github.com"
-        git config --local user.name "GitHub Action"
-        git add -A
-        if git diff --cached --quiet; then
-          echo "No documentation updates to commit; skipping commit step."
-        else
-          git commit -m "Update documentation"
-        fi
-    
-    - name: Push Changes
-      uses: ad-m/github-push-action@master
-      with:
-        github_token: ${{ secrets.GITHUB_TOKEN }}
-        branch: ${{ github.ref_name }}
-        force: true
+      - name: Generate DocC documentation
+        run: |
+          swift package --allow-writing-to-directory ./docs \
+            generate-documentation \
+            --target BunnyStreamAPI \
+            --target BunnyStreamUploader \
+            --target BunnyStreamPlayer \
+            --target BunnyStreamCameraUpload \
+            --enable-experimental-combined-documentation \
+            --disable-indexing \
+            --transform-for-static-hosting \
+            --hosting-base-path bunny-stream-ios \
+            --output-path ./docs
+
+      - name: Add root redirect
+        run: |
+          cat > docs/index.html <<'EOF'
+          <!DOCTYPE html>
+          <meta charset="utf-8">
+          <title>Bunny Stream iOS SDK Documentation</title>
+          <meta http-equiv="refresh" content="0; url=./documentation/">
+          <link rel="canonical" href="./documentation/">
+          EOF
+
+      - name: Upload Pages artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: ./docs
+
+  deploy:
+    needs: build
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
