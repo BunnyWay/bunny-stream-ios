@@ -13,6 +13,9 @@
     <a href="https://github.com/BunnyWay/bunny-stream-ios/actions/workflows/BuildAndTest.yml" alt="Tests Status">
         <img src="https://github.com/BunnyWay/bunny-stream-ios/actions/workflows/BuildAndTest.yml/badge.svg" />
     </a>
+    <a href="https://bunnyway.github.io/bunny-stream-ios/documentation/" alt="Documentation">
+        <img src="https://img.shields.io/badge/Documentation-DocC-blue.svg" />
+    </a>
 </p>
 
 ## What is Bunny Stream?
