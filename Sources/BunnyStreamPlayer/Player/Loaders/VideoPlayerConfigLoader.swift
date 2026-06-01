@@ -60,13 +60,3 @@ public struct VideoPlayerConfigLoader {
     try await load(libraryId: libraryId, videoId: videoId, token: token, expires: expires).thumbnailUrl
   }
 }
-
-
-extension VideoPlayerConfigLoader {
-  enum VideoPlayerError: Error {
-    case unauthorized
-    case notFound
-    case internalServerError
-    case unknownError
-  }
-}
