@@ -15,8 +15,8 @@ final class BunnyStreamCameraUploadViewModel: ObservableObject {
   private var startStreamingTime: Date?
   private var totalCountdownDuration: Int = 4
   private var videoId: String?
-  private let videoCreator: VideoCreator
-  
+  private let videoCreator: VideoCreator?
+
   @Published var snackbarMessage: String? = nil
   @Published var countdownProgress: CGFloat = 1.0
   @Published var state: StreamState = .notStreaming
@@ -25,9 +25,8 @@ final class BunnyStreamCameraUploadViewModel: ObservableObject {
   @Published var rtmpStream: RTMPStream
   @Published var currentPosition: AVCaptureDevice.Position = .back
   @Published var elapsedTime: String?
-  
-  init(streamConfig: StreamConfig,
-       videoCreator: VideoCreator) {
+
+  init(streamConfig: StreamConfig, videoCreator: VideoCreator? = nil) {
     self.streamConfig = streamConfig
     self.rtmpStream = RTMPStream(connection: rtmpConnection)
     self.videoCreator = videoCreator
@@ -90,19 +89,27 @@ extension BunnyStreamCameraUploadViewModel {
   func startStreamingCountdown() {
     Task {
       do {
-        await MainActor.run { isCreatingVideo = true }
-        if videoId == nil {
-          videoId = try await videoCreator.createVideo()
+        if videoId == nil, let creator = videoCreator {
+            await MainActor.run {
+                isCreatingVideo = true
+            }
+            
+          videoId = try await creator.createVideo()
+            
+            await MainActor.run {
+                isCreatingVideo = false
+            }
         }
-        await MainActor.run { isCreatingVideo = false }
         streamConfig.videoId = videoId
         await startTimer()
       } catch let error as VideoCreator.VideoCreatorError {
         await MainActor.run {
+          isCreatingVideo = false
           snackbarMessage = error.errorDescription
         }
       } catch {
         await MainActor.run {
+          isCreatingVideo = false
           snackbarMessage = "Failed to start streaming!"
         }
       }

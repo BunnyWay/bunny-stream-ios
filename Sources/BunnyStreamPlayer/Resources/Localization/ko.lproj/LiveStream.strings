@@ -9,3 +9,7 @@
 "end_stream_alert_confirm_action" = "스트림 종료";
 "indicator_live" = "라이브";
 "indicator_offline" = "오프라인";
+"stream_not_active" = "Live stream not active";
+"stream_ended" = "Live stream ended";
+"stream_error" = "Live stream error";
+"stream_starting_soon" = "Starting soon…";

@@ -1,123 +1,244 @@
 import AVFoundation
 import BunnyStreamAPI
+#if canImport(UIKit)
+import UIKit
+#endif
 
 final class LivePlaybackController: ObservableObject {
-  enum State {
-    case connecting
-    case live(MediaPlayer)
-    case offline(retryIn: TimeInterval)
-    case error(Error)
-  }
+    enum State {
+        case loading
+        case playable(MediaPlayer)
+        case countdown(until: Date)
+        case trailer(vodId: String, scheduledStart: Date?)
+        case offline(message: String, thumbnailUrl: URL?)
+        case error(message: String, thumbnailUrl: URL?)
+    }
 
-  @Published private(set) var state: State = .connecting
+    @Published private(set) var state: State = .loading
+    var userWantsPlay = false
 
-  private let loader: LiveStreamPlayDataLoader
-  private let libraryId: Int
-  private let streamId: String
-  private var reconnectAttempt: Int = 0
-  private var reconnectTask: Task<Void, Never>?
-  private var stallObserver: NSObjectProtocol?
-  private var failureObserver: NSObjectProtocol?
+    private let api: BunnyStreamAPI
+    private let libraryId: Int
+    private let streamId: String
+    private let playDataLoader: LiveStreamPlayDataLoader
 
-  init(bunnyStreamAPI: BunnyStreamAPI, libraryId: Int, streamId: String) {
-    self.loader = LiveStreamPlayDataLoader(bunnyStreamAPI: bunnyStreamAPI)
-    self.libraryId = libraryId
-    self.streamId = streamId
-  }
+    private var pollTask: Task<Void, Never>?
+    private var isStopped = false
 
-  deinit {
-    reconnectTask?.cancel()
-    removeItemObservers()
-  }
+    private var stallObserver: NSObjectProtocol?
+    private var failureObserver: NSObjectProtocol?
+    private var lifecycleObservers: [NSObjectProtocol] = []
 
-  func start() {
-    reconnectAttempt = 0
-    connect()
-  }
+    init(bunnyStreamAPI: BunnyStreamAPI, libraryId: Int, streamId: String) {
+        self.api = bunnyStreamAPI
+        self.libraryId = libraryId
+        self.streamId = streamId
+        self.playDataLoader = LiveStreamPlayDataLoader(bunnyStreamAPI: bunnyStreamAPI)
+    }
 
-  func stop() {
-    reconnectTask?.cancel()
-    reconnectTask = nil
-    removeItemObservers()
-      if case .live(let player) = state {
-          player.pause()
-      }
-    state = .connecting
-  }
+    deinit {
+        pollTask?.cancel()
+        removeItemObservers()
+        lifecycleObservers.forEach(NotificationCenter.default.removeObserver)
+    }
+
+    func start() {
+        isStopped = false
+        observeLifecycle()
+        firePoll()
+    }
+
+    func stop() {
+        isStopped = true
+        pollTask?.cancel()
+        pollTask = nil
+        removeItemObservers()
+        teardownCurrentPlayer()
+        lifecycleObservers.forEach(NotificationCenter.default.removeObserver)
+        lifecycleObservers = []
+        state = .loading
+    }
 }
 
+// MARK: - Polling loop
+
 private extension LivePlaybackController {
-  func connect() {
-    state = .connecting
-    reconnectTask = Task { [weak self] in
-      guard let self else { return }
-        
-      do {
-        let playData = try await loader.load(libraryId: libraryId, streamId: streamId)
-          guard !Task.isCancelled else {
-              return
-          }
-          
-        let player = MediaPlayer.makeLive(url: playData.playbackURL, seekableWindowSeconds: playData.seekableWindow)
-        observeItem(player)
-        player.play()
-          
-          await MainActor.run {
-              self.state = .live(player)
-          }
-          
-        reconnectAttempt = 0
-      } catch {
-          guard !Task.isCancelled else {
-              return
-          }
-          
-        await MainActor.run { self.scheduleReconnect() }
-      }
-    }
-  }
+    static let pollInterval: UInt64 = 5_000_000_000 // 5s in nanoseconds
 
-  func scheduleReconnect() {
-    let delay = min(pow(2.0, Double(reconnectAttempt)), 60.0)
-    reconnectAttempt += 1
-    state = .offline(retryIn: delay)
-    reconnectTask = Task { [weak self] in
-      try? await Task.sleep(nanoseconds: UInt64(delay * 1_000_000_000))
-        guard !Task.isCancelled else {
-            return
-        }
-        
-        await MainActor.run {
-            self?.connect()
+    func firePoll() {
+        guard !isStopped else { return }
+        pollTask?.cancel()
+        pollTask = Task { [weak self] in
+            while !Task.isCancelled {
+                await self?.executePoll()
+                guard !Task.isCancelled, self?.isStopped != true else { break }
+                try? await Task.sleep(nanoseconds: Self.pollInterval)
+            }
         }
     }
-  }
 
-  func observeItem(_ player: MediaPlayer) {
-    removeItemObservers()
-    let center = NotificationCenter.default
-    stallObserver = center.addObserver(
-      forName: AVPlayerItem.playbackStalledNotification,
-      object: player.currentItem,
-      queue: .main
-    ) { [weak self] _ in self?.handlePlaybackFailure() }
+    func executePoll() async {
+        guard !isStopped else { return }
+        do {
+            let model = try await fetchStreamModel()
+            guard !Task.isCancelled else { return }
+            let displayState = resolveDisplayState(from: model)
+            await MainActor.run { [weak self] in self?.apply(displayState: displayState) }
+        } catch PollError.permanent {
+            await MainActor.run { [weak self] in
+                self?.isStopped = true
+                self?.state = .error(message: Lingua.LiveStream.streamError, thumbnailUrl: nil)
+            }
+        } catch {
+            // Transient (5xx, network) — loop continues after sleep
+        }
+    }
+}
 
-    failureObserver = center.addObserver(
-      forName: AVPlayerItem.failedToPlayToEndTimeNotification,
-      object: player.currentItem,
-      queue: .main
-    ) { [weak self] _ in self?.handlePlaybackFailure() }
-  }
+// MARK: - API fetch
 
-  func handlePlaybackFailure() {
-    removeItemObservers()
-    scheduleReconnect()
-  }
+private extension LivePlaybackController {
+    enum PollError: Error { case permanent }
 
-  func removeItemObservers() {
-    stallObserver.map(NotificationCenter.default.removeObserver)
-    failureObserver.map(NotificationCenter.default.removeObserver)
-    stallObserver = nil
-    failureObserver = nil
-  }
+    func fetchStreamModel() async throws -> Components.Schemas.LiveStreamModel {
+        let output = try await api.client.liveStreamGet(
+            path: .init(libraryId: Int64(libraryId), streamId: streamId)
+        )
+        switch output {
+        case .ok(let ok):
+            guard case .json(let model) = ok.body else { throw PollError.permanent }
+            return model
+        case .unauthorized:
+            throw PollError.permanent
+        case .notFound:
+            throw PollError.permanent
+        case .internalServerError:
+            throw URLError(.badServerResponse)
+        default:
+            throw URLError(.unknown)
+        }
+    }
+}
+
+// MARK: - State application
+
+private extension LivePlaybackController {
+    func apply(displayState: LiveStreamDisplayState) {
+        switch displayState {
+        case .playable(let url, let isVodRecording):
+            handlePlayable(url: url, isVodRecording: isVodRecording)
+        case .countdown(let date):
+            teardownCurrentPlayer()
+            state = .countdown(until: date)
+        case .trailer(let vodId, let scheduledStart):
+            teardownCurrentPlayer()
+            state = .trailer(vodId: vodId, scheduledStart: scheduledStart)
+        case .offline(let message, let thumbnailUrl):
+            teardownCurrentPlayer()
+            state = .offline(message: message, thumbnailUrl: thumbnailUrl)
+        case .error(let message, let thumbnailUrl):
+            isStopped = true
+            teardownCurrentPlayer()
+            state = .error(message: message, thumbnailUrl: thumbnailUrl)
+        }
+    }
+
+    func handlePlayable(url: URL, isVodRecording: Bool) {
+        // Don't restart if already playing the same URL
+        if case .playable(let existing) = state,
+           (existing.currentItem?.asset as? AVURLAsset)?.url == url { return }
+
+        teardownCurrentPlayer()
+
+        if isVodRecording {
+            // VOD recording: basic player, no live-edge logic
+            let player = MediaPlayer(url: url)
+            observeItem(player)
+            if userWantsPlay { player.play() }
+            state = .playable(player)
+        } else {
+            // Live stream: fetch /play for HLS URL + DVR seekable window
+            Task { [weak self] in
+                guard let self else { return }
+                let player: MediaPlayer
+                do {
+                    let playData = try await playDataLoader.load(libraryId: libraryId, streamId: streamId)
+                    player = MediaPlayer.makeLive(url: playData.playbackURL, seekableWindowSeconds: playData.seekableWindow)
+                } catch {
+                    player = MediaPlayer.makeLive(url: url, seekableWindowSeconds: 0)
+                }
+                observeItem(player)
+                if userWantsPlay { player.play() }
+                await MainActor.run { [weak self] in
+                    guard let self, !self.isStopped else { return }
+                    self.state = .playable(player)
+                }
+            }
+            // Show playable immediately with a placeholder check
+            state = .loading
+        }
+    }
+
+    func teardownCurrentPlayer() {
+        guard case .playable(let player) = state else { return }
+        player.pause()
+        removeItemObservers()
+    }
+}
+
+// MARK: - Player item observation
+
+private extension LivePlaybackController {
+    func observeItem(_ player: MediaPlayer) {
+        removeItemObservers()
+        let center = NotificationCenter.default
+        stallObserver = center.addObserver(
+            forName: AVPlayerItem.playbackStalledNotification,
+            object: player.currentItem,
+            queue: .main
+        ) { [weak self] _ in self?.handlePlayerFailure() }
+
+        failureObserver = center.addObserver(
+            forName: AVPlayerItem.failedToPlayToEndTimeNotification,
+            object: player.currentItem,
+            queue: .main
+        ) { [weak self] _ in self?.handlePlayerFailure() }
+    }
+
+    func handlePlayerFailure() {
+        removeItemObservers()
+        firePoll()
+    }
+
+    func removeItemObservers() {
+        stallObserver.map(NotificationCenter.default.removeObserver)
+        failureObserver.map(NotificationCenter.default.removeObserver)
+        stallObserver = nil
+        failureObserver = nil
+    }
+}
+
+// MARK: - App lifecycle
+
+private extension LivePlaybackController {
+    func observeLifecycle() {
+        lifecycleObservers.forEach(NotificationCenter.default.removeObserver)
+        lifecycleObservers = []
+        #if canImport(UIKit)
+        let center = NotificationCenter.default
+        lifecycleObservers = [
+            center.addObserver(
+                forName: UIApplication.willResignActiveNotification,
+                object: nil, queue: .main
+            ) { [weak self] _ in
+                self?.pollTask?.cancel()
+                self?.pollTask = nil
+            },
+            center.addObserver(
+                forName: UIApplication.didBecomeActiveNotification,
+                object: nil, queue: .main
+            ) { [weak self] _ in self?.firePoll() }
+        ]
+        #endif
+    }
 }

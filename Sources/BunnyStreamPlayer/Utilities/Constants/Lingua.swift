@@ -27,6 +27,14 @@ public enum Lingua {
 		public static let openSettingsButton = tr("LiveStream", "open_settings_button")
 		/// Failed to stream!
 		public static let streamFailedMessage = tr("LiveStream", "stream_failed_message")
+		/// Live stream not active
+		public static let streamNotActive = tr("LiveStream", "stream_not_active")
+		/// Live stream ended
+		public static let streamEnded = tr("LiveStream", "stream_ended")
+		/// Live stream error
+		public static let streamError = tr("LiveStream", "stream_error")
+		/// Starting soon…
+		public static let streamStartingSoon = tr("LiveStream", "stream_starting_soon")
 	}
 
 	public enum Player {

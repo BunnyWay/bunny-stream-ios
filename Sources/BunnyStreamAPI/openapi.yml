@@ -1124,7 +1124,7 @@ paths:
           description: Internal Server Error.
       security:
         - AccessKey: []
-  /library/{libraryId}/streams:
+  /library/{libraryId}/live:
     get:
       tags:
         - Manage Live Streams
@@ -1199,12 +1199,10 @@ paths:
         content:
           application/json:
             schema:
-              nullable: true
-              oneOf:
-                - $ref: '#/components/schemas/CreateLiveStreamModel'
+              $ref: '#/components/schemas/CreateLiveStreamModel'
         required: true
       responses:
-        '200':
+        '201':
           description: The live stream was successfully created.
           content:
             application/json:
@@ -1216,7 +1214,7 @@ paths:
           description: Internal Server Error.
       security:
         - AccessKey: []
-  /library/{libraryId}/streams/{streamId}:
+  /library/{libraryId}/live/{streamId}:
     get:
       tags:
         - Manage Live Streams
@@ -1331,7 +1329,7 @@ paths:
           description: Internal Server Error.
       security:
         - AccessKey: []
-  /library/{libraryId}/streams/{streamId}/activate:
+  /library/{libraryId}/live/{streamId}/activate:
     post:
       tags:
         - Manage Live Streams
@@ -1367,7 +1365,7 @@ paths:
           description: Internal Server Error.
       security:
         - AccessKey: []
-  /library/{libraryId}/streams/{streamId}/complete:
+  /library/{libraryId}/live/{streamId}/complete:
     post:
       tags:
         - Manage Live Streams
@@ -1403,7 +1401,7 @@ paths:
           description: Internal Server Error.
       security:
         - AccessKey: []
-  /library/{libraryId}/streams/{streamId}/play:
+  /library/{libraryId}/live/{streamId}/play:
     get:
       tags:
         - Manage Live Streams
@@ -2327,6 +2325,10 @@ components:
           type: string
           description: The unique identifier of the live stream.
           nullable: true
+        guid:
+          type: string
+          description: The GUID of the live stream (used in API responses).
+          nullable: true
         videoLibraryId:
           type: integer
           description: The ID of the video library that contains the live stream.
@@ -2334,6 +2336,10 @@ components:
         name:
           type: string
           description: The name of the live stream.
+          nullable: true
+        title:
+          type: string
+          description: The title of the live stream.
           nullable: true
         streamKey:
           type: string
@@ -2354,19 +2360,45 @@ components:
         hasArchive:
           type: boolean
           description: Indicates if the live stream is being archived for later playback.
+        recordVod:
+          type: boolean
+          description: Indicates whether a VOD recording will be available after the stream ends.
+        enableCountdown:
+          type: boolean
+          description: Indicates whether a countdown timer should be displayed before the scheduled start.
+        scheduledStartTime:
+          type: string
+          description: The scheduled start time of the live stream in ISO 8601 format.
+          nullable: true
+        preStreamTrailerVideoId:
+          type: string
+          description: The GUID of a VOD video to loop as a trailer before the stream starts.
+          nullable: true
+        startedAt:
+          type: string
+          description: The actual time the live stream started, in ISO 8601 format.
+          nullable: true
+        thumbnailUrl:
+          type: string
+          description: The URL of the thumbnail image to display when the stream is offline.
+          nullable: true
     LiveStreamStatus:
       type: integer
-      description: 'The current status of the live stream: 0 = Idle, 1 = Connecting, 2 = Connected, 3 = Disconnecting.'
+      description: 'The current status of the live stream: 1 = Created, 2 = Scheduled, 4 = Running, 5 = Ended, 6 = VodProcessing, 7 = Error.'
       x-enumNames:
-        - Idle
-        - Connecting
-        - Connected
-        - Disconnecting
+        - Created
+        - Scheduled
+        - Running
+        - Ended
+        - VodProcessing
+        - Error
       enum:
-        - 0
         - 1
         - 2
-        - 3
+        - 4
+        - 5
+        - 6
+        - 7
     LiveStreamPlayDataModel:
       type: object
       description: Contains playback information for a live stream, including the HLS URL, DVR window size, and live status.
@@ -2408,15 +2440,19 @@ components:
             $ref: '#/components/schemas/LiveStreamModel'
     CreateLiveStreamModel:
       type: object
-      description: Schema for creating a new live stream. 'name' is required.
+      description: Schema for creating a new live stream. 'title' is required.
       additionalProperties: true
       required:
-        - name
+        - title
       properties:
-        name:
+        title:
           type: string
-          description: The name of the new live stream.
+          description: The title of the new live stream.
           minLength: 1
+        scheduledStartTime:
+          type: string
+          description: The scheduled start time in ISO 8601 format. When set, stream status becomes Scheduled (Upcoming).
+          nullable: true
     UpdateLiveStreamModel:
       type: object
       description: Schema for updating live stream details.

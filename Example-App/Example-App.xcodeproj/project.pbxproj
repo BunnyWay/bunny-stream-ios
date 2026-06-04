@@ -9,6 +9,10 @@
 /* Begin PBXBuildFile section */
 		65FC6F442D9D64AE00D29974 /* PublicVideoDemoView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 65FC6F432D9D64A700D29974 /* PublicVideoDemoView.swift */; };
 		6A86ED722FBA727B00A713E8 /* LiveStreamDemoView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6A86ED702FBA727B00A713E8 /* LiveStreamDemoView.swift */; };
+		CC000005CC000005CC000005 /* LiveStreamListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = CC000002CC000002CC000002 /* LiveStreamListView.swift */; };
+		DD000002DD000002DD000002 /* CreateLiveStreamView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD000001DD000001DD000001 /* CreateLiveStreamView.swift */; };
+		CC000006CC000006CC000006 /* LiveStreamListViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = CC000003CC000003CC000003 /* LiveStreamListViewModel.swift */; };
+		CC000007CC000007CC000007 /* LiveStreamRowView.swift in Sources */ = {isa = PBXBuildFile; fileRef = CC000004CC000004CC000004 /* LiveStreamRowView.swift */; };
 		770375792AD832B40034C47F /* VideoPicker.swift in Sources */ = {isa = PBXBuildFile; fileRef = 770375782AD832B40034C47F /* VideoPicker.swift */; };
 		7703757B2AD877040034C47F /* DefaultTextFieldStyle.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7703757A2AD877040034C47F /* DefaultTextFieldStyle.swift */; };
 		77116BD92AFE6774000BB64C /* VideoResponseInfo.swift in Sources */ = {isa = PBXBuildFile; fileRef = 77116BD82AFE6774000BB64C /* VideoResponseInfo.swift */; };
@@ -48,6 +52,10 @@
 /* Begin PBXFileReference section */
 		65FC6F432D9D64A700D29974 /* PublicVideoDemoView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PublicVideoDemoView.swift; sourceTree = "<group>"; };
 		6A86ED702FBA727B00A713E8 /* LiveStreamDemoView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LiveStreamDemoView.swift; sourceTree = "<group>"; };
+		CC000002CC000002CC000002 /* LiveStreamListView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LiveStreamListView.swift; sourceTree = "<group>"; };
+		DD000001DD000001DD000001 /* CreateLiveStreamView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CreateLiveStreamView.swift; sourceTree = "<group>"; };
+		CC000003CC000003CC000003 /* LiveStreamListViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LiveStreamListViewModel.swift; sourceTree = "<group>"; };
+		CC000004CC000004CC000004 /* LiveStreamRowView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LiveStreamRowView.swift; sourceTree = "<group>"; };
 		770375782AD832B40034C47F /* VideoPicker.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VideoPicker.swift; sourceTree = "<group>"; };
 		7703757A2AD877040034C47F /* DefaultTextFieldStyle.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DefaultTextFieldStyle.swift; sourceTree = "<group>"; };
 		77116BD82AFE6774000BB64C /* VideoResponseInfo.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VideoResponseInfo.swift; sourceTree = "<group>"; };
@@ -104,6 +112,17 @@
 				6A86ED702FBA727B00A713E8 /* LiveStreamDemoView.swift */,
 			);
 			path = LiveStreamDemo;
+			sourceTree = "<group>";
+		};
+		CC000001CC000001CC000001 /* LiveStreamList */ = {
+			isa = PBXGroup;
+			children = (
+				CC000002CC000002CC000002 /* LiveStreamListView.swift */,
+				CC000003CC000003CC000003 /* LiveStreamListViewModel.swift */,
+				CC000004CC000004CC000004 /* LiveStreamRowView.swift */,
+				DD000001DD000001DD000001 /* CreateLiveStreamView.swift */,
+			);
+			path = LiveStreamList;
 			sourceTree = "<group>";
 		};
 		77116BDC2AFEC3D9000BB64C /* Player */ = {
@@ -187,6 +206,7 @@
 		7789474B2AD002CA00DAF8DB /* Scenes */ = {
 			isa = PBXGroup;
 			children = (
+				CC000001CC000001CC000001 /* LiveStreamList */,
 				6A86ED712FBA727B00A713E8 /* LiveStreamDemo */,
 				77950FAE2AE2D3340091A498 /* VideoPlayerDemo */,
 				7789CFA82AD6C8AB00CC8BCE /* Components */,
@@ -424,6 +444,10 @@
 				7789474E2AD0032900DAF8DB /* VideoListView.swift in Sources */,
 				7789CFAC2AD6C8D700CC8BCE /* UploadListCategory.swift in Sources */,
 				6A86ED722FBA727B00A713E8 /* LiveStreamDemoView.swift in Sources */,
+				CC000005CC000005CC000005 /* LiveStreamListView.swift in Sources */,
+				CC000006CC000006CC000006 /* LiveStreamListViewModel.swift in Sources */,
+				CC000007CC000007CC000007 /* LiveStreamRowView.swift in Sources */,
+				DD000002DD000002DD000002 /* CreateLiveStreamView.swift in Sources */,
 				77116BDB2AFEBFA8000BB64C /* DefaultTextField.swift in Sources */,
 				7789CFAA2AD6C8B600CC8BCE /* UploadStatusIndicator.swift in Sources */,
 				65FC6F442D9D64AE00D29974 /* PublicVideoDemoView.swift in Sources */,

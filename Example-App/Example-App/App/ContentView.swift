@@ -45,8 +45,11 @@ struct ContentView: View {
           } label: {
             Text("Direct Video Play")
           }
-          NavigationLink("Live Stream") {
-            LiveStreamDemoView(dependenciesManager: dependenciesManager)
+          NavigationLink("Live Streams") {
+            LiveStreamListView(
+              viewModel: .init(api: dependenciesManager.bunnyStreamAPI, libraryId: dependenciesManager.libraryId),
+              dependenciesManager: dependenciesManager
+            )
           }
         }
         

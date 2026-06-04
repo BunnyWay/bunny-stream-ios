@@ -1,3 +1,4 @@
+import BunnyStreamAPI
 import HaishinKit
 import SwiftUI
 
@@ -76,6 +77,24 @@ public struct BunnyStreamCameraUploadView: View {
     let videoCreator = VideoCreator(bunnyStreamAPI: .init(accessKey: accessKey), libraryId: libraryId)
     let streamViewModel = BunnyStreamCameraUploadViewModel(streamConfig: config, videoCreator: videoCreator)
     self.init(streamViewModel: streamViewModel)
+  }
+
+  /// Initializes the broadcaster directly from a live stream model returned by the Bunny API.
+  /// Uses the `rtmpUrl` and `streamKey` from the model — no video creation step needed.
+  public init(liveStream: Components.Schemas.LiveStreamModel) {
+    let rtmpUrl = liveStream.rtmpUrl ?? Self.bunnyRtmpUrl(for: liveStream)
+    let config = StreamConfig(
+      rtmpUrl: rtmpUrl,
+      streamKey: liveStream.streamKey ?? ""
+    )
+    let streamViewModel = BunnyStreamCameraUploadViewModel(streamConfig: config)
+    self.init(streamViewModel: streamViewModel)
+  }
+
+  /// Constructs the Bunny RTMP ingest URL when the model doesn't include it directly.
+  /// Bunny ingest format: rtmp://live.bunnycdn.net/bunnylive
+  private static func bunnyRtmpUrl(for model: Components.Schemas.LiveStreamModel) -> String {
+    "rtmp://global.rtmp.mediadelivery.net/live"
   }
 
   /// The body of the view that handles different states:
