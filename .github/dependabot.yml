@@ -1,0 +1,62 @@
+version: 2
+
+updates:
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "08:00"
+      timezone: "Etc/UTC"
+    open-pull-requests-limit: 5
+    commit-message:
+      prefix: "ci"
+      include: "scope"
+    labels:
+      - "dependencies"
+      - "github-actions"
+    groups:
+      github-actions-minor-patch:
+        update-types:
+          - "minor"
+          - "patch"
+
+  - package-ecosystem: "swift"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "tuesday"
+      time: "08:00"
+      timezone: "Etc/UTC"
+    open-pull-requests-limit: 5
+    commit-message:
+      prefix: "deps"
+      include: "scope"
+    labels:
+      - "dependencies"
+      - "swiftpm"
+    groups:
+      apple-openapi-minor-patch:
+        patterns:
+          - "swift-openapi-generator"
+          - "swift-openapi-runtime"
+          - "swift-openapi-urlsession"
+          - "swift-docc-plugin"
+        update-types:
+          - "minor"
+          - "patch"
+      upload-and-streaming-minor-patch:
+        patterns:
+          - "TUSKit"
+          - "HaishinKit.swift"
+        update-types:
+          - "minor"
+          - "patch"
+      player-ui-minor-patch:
+        patterns:
+          - "Kingfisher"
+          - "SwiftSubtitles"
+          - "swift-package-manager-google-interactive-media-ads-ios"
+        update-types:
+          - "minor"
+          - "patch"
