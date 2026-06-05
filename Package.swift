@@ -15,7 +15,7 @@ let package = Package(
   ],
   dependencies: [
     .package(url: "https://github.com/apple/swift-openapi-generator", exact: "1.7.0"),
-    .package(url: "https://github.com/apple/swift-openapi-runtime", exact: "1.8.0"),
+    .package(url: "https://github.com/apple/swift-openapi-runtime", exact: "1.12.0"),
     .package(url: "https://github.com/apple/swift-openapi-urlsession", exact: "1.0.2"),
     .package(url: "https://github.com/tus/TUSKit.git", branch: "main"),
     .package(url: "https://github.com/onevcat/Kingfisher.git", branch: "master"),
