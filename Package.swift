@@ -78,5 +78,10 @@ let package = Package(
       dependencies: ["BunnyStreamUploader"],
       path: "Tests/BunnyStreamUploaderTests"
     ),
+    .testTarget(
+      name: "BunnyStreamPlayerTests",
+      dependencies: ["BunnyStreamPlayer"],
+      path: "Tests/BunnyStreamPlayerTests"
+    ),
   ]
 )

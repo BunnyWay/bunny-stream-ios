@@ -69,7 +69,7 @@ private extension LiveStreamRowView {
     var statusLabel: String {
         switch statusValue {
         case .running:       return "LIVE"
-        case .scheduled:     return "Scheduled"
+        case .scheduled:     return "Upcoming"
         case .created:       return "Idle"
         case .ended:         return "Ended"
         case .vodProcessing: return "Processing"

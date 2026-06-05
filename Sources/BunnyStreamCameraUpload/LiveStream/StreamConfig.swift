@@ -26,10 +26,15 @@ struct StreamConfig {
   }
 
   /// For live-stream broadcast flow: uses rtmpUrl + streamKey from the API directly.
-  init(rtmpUrl: String, streamKey: String) {
+  init(rtmpUrl: String, streamKey: String, accessKey: String = "", libraryId: Int = 0, streamId: String? = nil) {
     self.uri = rtmpUrl
-    self.accessKey = ""
-    self.libraryId = 0
+    self.accessKey = accessKey
+    self.libraryId = libraryId
+    self.streamId = streamId
     self.directStreamKey = streamKey
   }
+
+  /// The live stream ID used for activate/complete API calls.
+  /// Extracted from playbackUrlHls: https://vz-X.b-cdn.net/live/{STREAM_ID}/live.m3u8
+  var streamId: String?
 }

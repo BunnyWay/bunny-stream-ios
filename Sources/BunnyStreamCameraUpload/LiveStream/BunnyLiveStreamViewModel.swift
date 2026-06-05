@@ -1,4 +1,5 @@
 import AVFoundation
+import BunnyStreamAPI
 import Combine
 import SwiftUI
 import HaishinKit
@@ -81,6 +82,7 @@ extension BunnyStreamCameraUploadViewModel {
     rtmpConnection.close()
     rtmpConnection.removeEventListener(.rtmpStatus, selector: #selector(rtmpStatusHandler), observer: self)
     rtmpConnection.removeEventListener(.ioError, selector: #selector(rtmpErrorHandler), observer: self)
+    Task { await completeStream() }
   }
 }
 
@@ -89,6 +91,7 @@ extension BunnyStreamCameraUploadViewModel {
   func startStreamingCountdown() {
     Task {
       do {
+        await activateStream()
         if videoId == nil, let creator = videoCreator {
             await MainActor.run {
                 isCreatingVideo = true
@@ -259,5 +262,23 @@ private extension BunnyStreamCameraUploadViewModel {
       
       startPublish()
     }
+  }
+}
+
+// MARK: - Bunny Live Stream lifecycle (activate / complete)
+
+private extension BunnyStreamCameraUploadViewModel {
+  func activateStream() async {
+    guard let streamId = streamConfig.streamId, !streamConfig.accessKey.isEmpty else { return }
+    _ = try? await BunnyStreamAPI(accessKey: streamConfig.accessKey).client.liveStreamActivate(
+      path: .init(libraryId: Int64(streamConfig.libraryId), streamId: streamId)
+    )
+  }
+
+  func completeStream() async {
+    guard let streamId = streamConfig.streamId, !streamConfig.accessKey.isEmpty else { return }
+    _ = try? await BunnyStreamAPI(accessKey: streamConfig.accessKey).client.liveStreamComplete(
+      path: .init(libraryId: Int64(streamConfig.libraryId), streamId: streamId)
+    )
   }
 }

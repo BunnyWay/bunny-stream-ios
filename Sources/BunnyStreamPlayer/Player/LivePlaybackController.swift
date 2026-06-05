@@ -8,7 +8,7 @@ final class LivePlaybackController: ObservableObject {
     enum State {
         case loading
         case playable(MediaPlayer)
-        case countdown(until: Date)
+        case countdown(until: Date, thumbnailUrl: URL?)
         case trailer(vodId: String, scheduledStart: Date?)
         case offline(message: String, thumbnailUrl: URL?)
         case error(message: String, thumbnailUrl: URL?)
@@ -114,6 +114,8 @@ private extension LivePlaybackController {
             throw PollError.permanent
         case .internalServerError:
             throw URLError(.badServerResponse)
+        case .undocumented(statusCode: let code, _) where [403, 410].contains(code):
+            throw PollError.permanent
         default:
             throw URLError(.unknown)
         }
@@ -127,9 +129,9 @@ private extension LivePlaybackController {
         switch displayState {
         case .playable(let url, let isVodRecording):
             handlePlayable(url: url, isVodRecording: isVodRecording)
-        case .countdown(let date):
+        case .countdown(let date, let thumbnailUrl):
             teardownCurrentPlayer()
-            state = .countdown(until: date)
+            state = .countdown(until: date, thumbnailUrl: thumbnailUrl)
         case .trailer(let vodId, let scheduledStart):
             teardownCurrentPlayer()
             state = .trailer(vodId: vodId, scheduledStart: scheduledStart)
@@ -148,16 +150,15 @@ private extension LivePlaybackController {
         if case .playable(let existing) = state,
            (existing.currentItem?.asset as? AVURLAsset)?.url == url { return }
 
-        teardownCurrentPlayer()
-
         if isVodRecording {
-            // VOD recording: basic player, no live-edge logic
+            teardownCurrentPlayer()
             let player = MediaPlayer(url: url)
             observeItem(player)
             if userWantsPlay { player.play() }
             state = .playable(player)
         } else {
-            // Live stream: fetch /play for HLS URL + DVR seekable window
+            // Fetch /play for HLS URL + DVR seekable window.
+            // Don't change state yet — current state (trailer/countdown) stays visible until player is ready.
             Task { [weak self] in
                 guard let self else { return }
                 let player: MediaPlayer
@@ -171,11 +172,10 @@ private extension LivePlaybackController {
                 if userWantsPlay { player.play() }
                 await MainActor.run { [weak self] in
                     guard let self, !self.isStopped else { return }
+                    self.teardownCurrentPlayer()
                     self.state = .playable(player)
                 }
             }
-            // Show playable immediately with a placeholder check
-            state = .loading
         }
     }
 

@@ -56,7 +56,11 @@ struct LiveStreamListView: View {
             }
         }
         .fullScreenCover(item: $broadcasterStream) { selection in
-            BunnyStreamCameraUploadView(liveStream: selection.stream)
+            BunnyStreamCameraUploadView(
+                liveStream: selection.stream,
+                accessKey: dependenciesManager.accessKey,
+                libraryId: dependenciesManager.libraryId
+            )
         }
     }
 }

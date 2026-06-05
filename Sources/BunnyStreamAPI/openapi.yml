@@ -1329,12 +1329,12 @@ paths:
           description: Internal Server Error.
       security:
         - AccessKey: []
-  /library/{libraryId}/live/{streamId}/activate:
-    post:
+  /library/{libraryId}/live/{streamId}/start:
+    put:
       tags:
         - Manage Live Streams
-      summary: Activate Live Stream
-      description: Activates (starts) the specified live stream and makes it ready to accept an RTMP connection.
+      summary: Start Live Stream
+      description: Starts the specified live stream and makes it ready to accept an RTMP connection.
       operationId: LiveStream_Activate
       parameters:
         - name: libraryId
@@ -1366,7 +1366,7 @@ paths:
       security:
         - AccessKey: []
   /library/{libraryId}/live/{streamId}/complete:
-    post:
+    put:
       tags:
         - Manage Live Streams
       summary: Complete Live Stream
@@ -2352,6 +2352,14 @@ components:
         playbackUrl:
           type: string
           description: The HLS playback URL for the live stream.
+          nullable: true
+        playbackUrlHls:
+          type: string
+          description: The HLS playback URL for the live stream (primary field returned by the API).
+          nullable: true
+        ingestEndpoint:
+          type: string
+          description: The primary RTMP ingest endpoint URL.
           nullable: true
         status:
           description: The current status of the live stream.

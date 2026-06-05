@@ -3,7 +3,7 @@ import BunnyStreamAPI
 
 enum LiveStreamDisplayState {
     case playable(url: URL, isVodRecording: Bool)
-    case countdown(until: Date)
+    case countdown(until: Date, thumbnailUrl: URL?)
     case trailer(vodId: String, scheduledStart: Date?)
     case offline(message: String, thumbnailUrl: URL?)
     case error(message: String, thumbnailUrl: URL?)
@@ -33,7 +33,8 @@ func resolveDisplayState(
     let isRecordingPlayable = (status == .ended || status == .vodProcessing) && model.recordVod == true
 
     if isRunning || isRecordingPlayable {
-        guard let urlString = model.playbackUrl, let url = URL(string: urlString) else {
+        let hlsString = model.playbackUrlHls ?? model.playbackUrl
+        guard let urlString = hlsString, let url = URL(string: urlString) else {
             return .error(message: Lingua.LiveStream.streamError, thumbnailUrl: nil)
         }
         return .playable(url: url, isVodRecording: !isRunning)
@@ -55,7 +56,7 @@ func resolveDisplayState(
        let startString = model.scheduledStartTime,
        let start = Date(bunnyString: startString),
        start > now {
-        return .countdown(until: start)
+        return .countdown(until: start, thumbnailUrl: model.thumbnailUrl.flatMap(URL.init(string:)))
     }
 
     let thumbnailUrl = model.thumbnailUrl.flatMap(URL.init(string:))
@@ -84,7 +85,7 @@ private extension Components.Schemas.LiveStreamModel {
     }
 }
 
-private extension Date {
+extension Date {
     // Bunny returns dates without milliseconds or with varied precision, e.g. "2026-06-03T09:21:41"
     init?(bunnyString: String) {
         let formats = [

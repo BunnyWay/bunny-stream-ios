@@ -81,21 +81,41 @@ public struct BunnyStreamCameraUploadView: View {
 
   /// Initializes the broadcaster directly from a live stream model returned by the Bunny API.
   /// Uses the `rtmpUrl` and `streamKey` from the model — no video creation step needed.
-  public init(liveStream: Components.Schemas.LiveStreamModel) {
-    let rtmpUrl = liveStream.rtmpUrl ?? Self.bunnyRtmpUrl(for: liveStream)
+  public init(liveStream: Components.Schemas.LiveStreamModel, accessKey: String, libraryId: Int) {
+    let rtmpUrl = liveStream.ingestEndpoint
+      ?? liveStream.rtmpUrl
+      ?? BunnyStreamCameraUploadView.bunnyFallbackRtmpUrl
+    let streamId = BunnyStreamCameraUploadView.extractStreamId(from: liveStream)
     let config = StreamConfig(
       rtmpUrl: rtmpUrl,
-      streamKey: liveStream.streamKey ?? ""
+      streamKey: liveStream.streamKey ?? "",
+      accessKey: accessKey,
+      libraryId: libraryId,
+      streamId: streamId
     )
     let streamViewModel = BunnyStreamCameraUploadViewModel(streamConfig: config)
     self.init(streamViewModel: streamViewModel)
   }
 
-  /// Constructs the Bunny RTMP ingest URL when the model doesn't include it directly.
-  /// Bunny ingest format: rtmp://live.bunnycdn.net/bunnylive
-  private static func bunnyRtmpUrl(for model: Components.Schemas.LiveStreamModel) -> String {
-    "rtmp://global.rtmp.mediadelivery.net/live"
+  /// Extracts the live stream ID from playbackUrlHls.
+  /// Format: https://vz-{zone}.b-cdn.net/live/{STREAM_ID}/live.m3u8
+  private static func extractStreamId(from model: Components.Schemas.LiveStreamModel) -> String? {
+    guard let hlsUrl = model.playbackUrlHls,
+          let url = URL(string: hlsUrl) else {
+      return model.guid
+    }
+    let components = url.pathComponents
+    // pathComponents: ["", "live", "{STREAM_ID}", "live.m3u8"]
+    if let liveIndex = components.firstIndex(of: "live"),
+       components.indices.contains(liveIndex + 1) {
+      let candidate = components[liveIndex + 1]
+      if candidate != "live.m3u8" { return candidate }
+    }
+    return model.guid
   }
+
+  /// Bunny global RTMP ingest URL — used when the stream model doesn't include ingestEndpoint.
+  static let bunnyFallbackRtmpUrl = "rtmp://global.rtmp.mediadelivery.net/live"
 
   /// The body of the view that handles different states:
   /// - Loading state while checking permissions

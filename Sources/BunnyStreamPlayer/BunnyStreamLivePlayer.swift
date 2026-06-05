@@ -37,8 +37,8 @@ public struct BunnyStreamLivePlayer: View {
                 loadingView
             case .playable(let player):
                 liveContainerView(player)
-            case .countdown(let date):
-                countdownView(until: date)
+            case .countdown(let date, let thumbnailUrl):
+                countdownView(until: date, thumbnailUrl: thumbnailUrl)
             case .trailer(let vodId, let scheduledStart):
                 trailerWithCountdown(vodId: vodId, scheduledStart: scheduledStart)
             case .offline(let message, let thumbnailUrl):
@@ -88,9 +88,22 @@ private extension BunnyStreamLivePlayer {
         return BunnyStreamPlayerContainerView(player: player, video: video, heatmap: Heatmap(data: [:]))
     }
 
-    func countdownView(until date: Date) -> some View {
+    func countdownView(until date: Date, thumbnailUrl: URL?) -> some View {
         ZStack {
-            Color.black
+            if let thumbnailUrl {
+                AsyncImage(url: thumbnailUrl) { phase in
+                    if case .success(let image) = phase {
+                        image
+                            .resizable()
+                            .aspectRatio(contentMode: .fill)
+                            .overlay(Color.black.opacity(0.5))
+                    } else {
+                        Color.black
+                    }
+                }
+            } else {
+                Color.black
+            }
             VStack(spacing: 16) {
                 Image(systemName: "clock")
                     .font(.system(size: 40))
