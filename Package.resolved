@@ -73,6 +73,24 @@
       }
     },
     {
+      "identity" : "swift-docc-plugin",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/apple/swift-docc-plugin",
+      "state" : {
+        "revision" : "647c708be89f834fa6a6d4945442793a77ddf5b6",
+        "version" : "1.5.0"
+      }
+    },
+    {
+      "identity" : "swift-docc-symbolkit",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/swiftlang/swift-docc-symbolkit",
+      "state" : {
+        "revision" : "b45d1f2ed151d057b54504d653e0da5552844e34",
+        "version" : "1.0.0"
+      }
+    },
+    {
       "identity" : "swift-http-types",
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/apple/swift-http-types",
@@ -122,8 +140,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/googleads/swift-package-manager-google-interactive-media-ads-ios.git",
       "state" : {
-        "revision" : "fed61380cddcc0e39709357418822e9e88ea07ae",
-        "version" : "3.18.4"
+        "revision" : "fdf54991c74edc228b59592a44f33c564abafcc0",
+        "version" : "3.32.0"
       }
     },
     {
