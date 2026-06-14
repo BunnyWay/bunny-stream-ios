@@ -4,12 +4,13 @@ import BunnyStreamAPI
 import UIKit
 #endif
 
+@MainActor
 final class LivePlaybackController: ObservableObject {
     enum State {
         case loading
         case playable(MediaPlayer)
         case countdown(until: Date, thumbnailUrl: URL?)
-        case trailer(vodId: String, scheduledStart: Date?)
+        case trailer(vodId: String, scheduledStart: Date?, statusMessage: String?)
         case offline(message: String, thumbnailUrl: URL?)
         case error(message: String, thumbnailUrl: URL?)
     }
@@ -38,8 +39,6 @@ final class LivePlaybackController: ObservableObject {
 
     deinit {
         pollTask?.cancel()
-        removeItemObservers()
-        lifecycleObservers.forEach(NotificationCenter.default.removeObserver)
     }
 
     func start() {
@@ -132,9 +131,9 @@ private extension LivePlaybackController {
         case .countdown(let date, let thumbnailUrl):
             teardownCurrentPlayer()
             state = .countdown(until: date, thumbnailUrl: thumbnailUrl)
-        case .trailer(let vodId, let scheduledStart):
+        case .trailer(let vodId, let scheduledStart, let statusMessage):
             teardownCurrentPlayer()
-            state = .trailer(vodId: vodId, scheduledStart: scheduledStart)
+            state = .trailer(vodId: vodId, scheduledStart: scheduledStart, statusMessage: statusMessage)
         case .offline(let message, let thumbnailUrl):
             teardownCurrentPlayer()
             state = .offline(message: message, thumbnailUrl: thumbnailUrl)
@@ -196,13 +195,21 @@ private extension LivePlaybackController {
             forName: AVPlayerItem.playbackStalledNotification,
             object: player.currentItem,
             queue: .main
-        ) { [weak self] _ in self?.handlePlayerFailure() }
+        ) {
+            [weak self] _ in MainActor.assumeIsolated {
+                self?.handlePlayerFailure()
+            }
+        }
 
         failureObserver = center.addObserver(
             forName: AVPlayerItem.failedToPlayToEndTimeNotification,
             object: player.currentItem,
             queue: .main
-        ) { [weak self] _ in self?.handlePlayerFailure() }
+        ) {
+            [weak self] _ in MainActor.assumeIsolated {
+                self?.handlePlayerFailure()
+            }
+        }
     }
 
     func handlePlayerFailure() {
@@ -226,18 +233,25 @@ private extension LivePlaybackController {
         lifecycleObservers = []
         #if canImport(UIKit)
         let center = NotificationCenter.default
+        
         lifecycleObservers = [
             center.addObserver(
                 forName: UIApplication.willResignActiveNotification,
                 object: nil, queue: .main
-            ) { [weak self] _ in
-                self?.pollTask?.cancel()
-                self?.pollTask = nil
+            ) {
+                [weak self] _ in MainActor.assumeIsolated {
+                    self?.pollTask?.cancel()
+                    self?.pollTask = nil
+                }
             },
             center.addObserver(
                 forName: UIApplication.didBecomeActiveNotification,
                 object: nil, queue: .main
-            ) { [weak self] _ in self?.firePoll() }
+            ) {
+                [weak self] _ in MainActor.assumeIsolated {
+                    self?.firePoll()
+                }
+            }
         ]
         #endif
     }

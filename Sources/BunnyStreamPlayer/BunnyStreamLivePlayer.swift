@@ -39,8 +39,8 @@ public struct BunnyStreamLivePlayer: View {
                 liveContainerView(player)
             case .countdown(let date, let thumbnailUrl):
                 countdownView(until: date, thumbnailUrl: thumbnailUrl)
-            case .trailer(let vodId, let scheduledStart):
-                trailerWithCountdown(vodId: vodId, scheduledStart: scheduledStart)
+            case .trailer(let vodId, let scheduledStart, let statusMessage):
+                trailerWithOverlay(vodId: vodId, scheduledStart: scheduledStart, statusMessage: statusMessage)
             case .offline(let message, let thumbnailUrl):
                 offlineView(message: message, thumbnailUrl: thumbnailUrl)
             case .error(let message, let thumbnailUrl):
@@ -131,14 +131,27 @@ private extension BunnyStreamLivePlayer {
         }
     }
 
-    func trailerWithCountdown(vodId: String, scheduledStart: Date?) -> some View {
+    func trailerWithOverlay(vodId: String, scheduledStart: Date?, statusMessage: String?) -> some View {
         ZStack(alignment: .bottom) {
             LoopingTrailerView(libraryId: libraryId, vodId: vodId)
                 .ignoresSafeArea()
             if let scheduledStart {
                 trailerCountdownOverlay(until: scheduledStart)
+            } else if let statusMessage {
+                trailerStatusOverlay(message: statusMessage)
             }
         }
+    }
+
+    func trailerStatusOverlay(message: String) -> some View {
+        Text(message)
+            .font(theme.font.size(14))
+            .foregroundStyle(.white)
+            .padding(.horizontal, 14)
+            .padding(.vertical, 8)
+            .background(.black.opacity(0.55))
+            .clipShape(Capsule())
+            .padding(.bottom, 32)
     }
 
     func trailerCountdownOverlay(until date: Date) -> some View {

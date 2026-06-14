@@ -4,7 +4,7 @@ import BunnyStreamAPI
 enum LiveStreamDisplayState {
     case playable(url: URL, isVodRecording: Bool)
     case countdown(until: Date, thumbnailUrl: URL?)
-    case trailer(vodId: String, scheduledStart: Date?)
+    case trailer(vodId: String, scheduledStart: Date?, statusMessage: String?)
     case offline(message: String, thumbnailUrl: URL?)
     case error(message: String, thumbnailUrl: URL?)
 }
@@ -41,13 +41,20 @@ func resolveDisplayState(
     }
 
     // pre-stream trailer: preStreamTrailerVideoId set, stream not yet started
-    let preStreamStatuses: [Components.Schemas.LiveStreamStatus] = [.created, .scheduled, .error]
+    let preStreamStatuses: [Components.Schemas.LiveStreamStatus] = [.created, .scheduled]
     if let vodId = model.preStreamTrailerVideoId,
        !vodId.isEmpty,
        model.startedAt == nil,
        let status, preStreamStatuses.contains(status) {
-        let scheduledStart = model.scheduledStartTime.flatMap { Date(bunnyString: $0) }
-        return .trailer(vodId: vodId, scheduledStart: scheduledStart)
+        let scheduledStart = model.scheduledStartTime.flatMap {
+            Date(bunnyString: $0)
+        }
+        
+        return .trailer(
+            vodId: vodId,
+            scheduledStart: scheduledStart,
+            statusMessage: Lingua.LiveStream.streamNotActive
+        )
     }
 
     // countdown: Scheduled + enableCountdown + scheduledStartTime in the future
@@ -88,18 +95,7 @@ private extension Components.Schemas.LiveStreamModel {
 extension Date {
     // Bunny returns dates without milliseconds or with varied precision, e.g. "2026-06-03T09:21:41"
     init?(bunnyString: String) {
-        let formats = [
-            "yyyy-MM-dd'T'HH:mm:ss.SSSSSSS'Z'",
-            "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'",
-            "yyyy-MM-dd'T'HH:mm:ss.SSS",
-            "yyyy-MM-dd'T'HH:mm:ss'Z'",
-            "yyyy-MM-dd'T'HH:mm:ss",
-        ]
-        let formatter = DateFormatter()
-        formatter.locale = Locale(identifier: "en_US_POSIX")
-        formatter.timeZone = TimeZone(abbreviation: "UTC")
-        for format in formats {
-            formatter.dateFormat = format
+        for formatter in Date.bunnyDateFormatters {
             if let date = formatter.date(from: bunnyString) {
                 self = date
                 return
@@ -107,4 +103,22 @@ extension Date {
         }
         return nil
     }
+
+    private static let bunnyDateFormatters: [DateFormatter] = {
+        let formats = [
+            "yyyy-MM-dd'T'HH:mm:ss.SSSSSSS'Z'",
+            "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'",
+            "yyyy-MM-dd'T'HH:mm:ss.SSS",
+            "yyyy-MM-dd'T'HH:mm:ss'Z'",
+            "yyyy-MM-dd'T'HH:mm:ss",
+        ]
+        
+        return formats.map { format in
+            let f = DateFormatter()
+            f.locale = Locale(identifier: "en_US_POSIX")
+            f.timeZone = TimeZone(abbreviation: "UTC")
+            f.dateFormat = format
+            return f
+        }
+    }()
 }

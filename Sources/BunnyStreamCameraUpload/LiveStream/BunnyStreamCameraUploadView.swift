@@ -97,20 +97,7 @@ public struct BunnyStreamCameraUploadView: View {
     self.init(streamViewModel: streamViewModel)
   }
 
-  /// Extracts the live stream ID from playbackUrlHls.
-  /// Format: https://vz-{zone}.b-cdn.net/live/{STREAM_ID}/live.m3u8
   private static func extractStreamId(from model: Components.Schemas.LiveStreamModel) -> String? {
-    guard let hlsUrl = model.playbackUrlHls,
-          let url = URL(string: hlsUrl) else {
-      return model.guid
-    }
-    let components = url.pathComponents
-    // pathComponents: ["", "live", "{STREAM_ID}", "live.m3u8"]
-    if let liveIndex = components.firstIndex(of: "live"),
-       components.indices.contains(liveIndex + 1) {
-      let candidate = components[liveIndex + 1]
-      if candidate != "live.m3u8" { return candidate }
-    }
     return model.guid
   }
 
@@ -127,9 +114,9 @@ public struct BunnyStreamCameraUploadView: View {
         ProgressView()
           .frame(maxWidth: .infinity)
       } else if permissionsViewModel.arePermissionsGranted {
-        permissionsView()
-      } else {
         liveStreamView()
+      } else {
+        permissionsView()
       }
     }
     .overlay(alignment: .bottom) {
