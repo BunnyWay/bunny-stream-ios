@@ -42,11 +42,9 @@ extension CMCDResourceLoader: AVAssetResourceLoaderDelegate {
     ) -> Bool {
         guard let url = loadingRequest.request.url,
               url.scheme == Self.customScheme else {
-            print("[CMCD] ❌ ignored scheme:", loadingRequest.request.url?.scheme ?? "nil")
             return false
         }
         let realURL = Self.restore(url)
-        print("[CMCD] ✅ intercepted:", realURL.lastPathComponent)
         startLoad(loadingRequest, realURL: realURL)
         return true
     }

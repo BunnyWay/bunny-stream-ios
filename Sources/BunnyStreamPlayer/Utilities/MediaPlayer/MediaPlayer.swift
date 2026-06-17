@@ -152,7 +152,6 @@ class MediaPlayer: AVPlayer {
     let cmcdSession = CMCDSession(contentId: contentId, streamType: streamType)
     let loader = CMCDResourceLoader(session: cmcdSession)
     let rewrittenURL = CMCDResourceLoader.rewrite(url)
-    print("[CMCD] rewritten URL scheme:", rewrittenURL.scheme ?? "nil", "path:", rewrittenURL.lastPathComponent)
     let asset = AVURLAsset(url: rewrittenURL)
     let loaderQueue = DispatchQueue(label: "net.bunny.cmcd", qos: .userInitiated)
     asset.resourceLoader.setDelegate(loader, queue: loaderQueue)
