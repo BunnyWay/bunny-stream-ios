@@ -1365,12 +1365,12 @@ paths:
           description: Internal Server Error.
       security:
         - AccessKey: []
-  /library/{libraryId}/live/{streamId}/complete:
+  /library/{libraryId}/live/{streamId}/stop:
     put:
       tags:
         - Manage Live Streams
-      summary: Complete Live Stream
-      description: Completes (stops) the specified live stream.
+      summary: Stop Live Stream
+      description: Stops the specified live stream.
       operationId: LiveStream_Complete
       parameters:
         - name: libraryId
@@ -1385,10 +1385,10 @@ paths:
           required: true
           schema:
             type: string
-          description: The unique identifier of the live stream to complete.
+          description: The unique identifier of the live stream to stop.
       responses:
         '200':
-          description: The live stream was successfully completed.
+          description: The live stream was successfully stopped.
           content:
             application/json:
               schema:

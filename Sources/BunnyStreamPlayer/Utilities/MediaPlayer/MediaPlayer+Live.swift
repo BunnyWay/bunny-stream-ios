@@ -1,8 +1,9 @@
 import AVFoundation
 
 extension MediaPlayer {
-  static func makeLive(url: URL, seekableWindowSeconds: Double) -> MediaPlayer {
-    let player = MediaPlayer(url: url)
+  static func makeLive(url: URL, seekableWindowSeconds: Double, contentId: String) -> MediaPlayer {
+    let streamType: CMCDSession.StreamType = seekableWindowSeconds > 0 ? .event : .live
+    let player = MediaPlayer(liveURL: url, contentId: contentId, streamType: streamType)
     player.automaticallyWaitsToMinimizeStalling = false
     player.kind = seekableWindowSeconds > 0 ? .event : .live
     return player

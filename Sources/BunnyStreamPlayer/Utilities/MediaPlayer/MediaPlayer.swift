@@ -112,7 +112,11 @@ class MediaPlayer: AVPlayer {
   private var volumeObservation: NSKeyValueObservation?
   private var rateObservation: NSKeyValueObservation?
   private var fairPlayHandler: FairPlayStreamHandler?
-  
+  private var cmcdLoader: CMCDResourceLoader?
+
+  /// Original (pre-CMCD-rewrite) URL for players backed by a CMCDResourceLoader.
+  var sourceURL: URL?
+
   override init() {
     super.init()
     setupObservers()
@@ -135,12 +139,29 @@ class MediaPlayer: AVPlayer {
   
   convenience init(url: URL,
                    fairPlayHandler: FairPlayStreamHandler,
-                   subtitlesProvider: MediaPlayerSubtitlesProvider? = .none) {
-    let playerItem = fairPlayHandler.setupAssetPlayback(url: url)
+                   subtitlesProvider: MediaPlayerSubtitlesProvider? = .none,
+                   httpHeaders: [String: String] = [:]) {
+    let playerItem = fairPlayHandler.setupAssetPlayback(url: url, httpHeaders: httpHeaders)
     self.init(playerItem: playerItem)
     self.fairPlayHandler = fairPlayHandler
     self.subtitlesProvider = subtitlesProvider
     self.replaceCurrentItem(with: playerItem)
+  }
+
+  convenience init(liveURL url: URL, contentId: String, streamType: CMCDSession.StreamType) {
+    let cmcdSession = CMCDSession(contentId: contentId, streamType: streamType)
+    let loader = CMCDResourceLoader(session: cmcdSession)
+    let rewrittenURL = CMCDResourceLoader.rewrite(url)
+    print("[CMCD] rewritten URL scheme:", rewrittenURL.scheme ?? "nil", "path:", rewrittenURL.lastPathComponent)
+    let asset = AVURLAsset(url: rewrittenURL)
+    let loaderQueue = DispatchQueue(label: "net.bunny.cmcd", qos: .userInitiated)
+    asset.resourceLoader.setDelegate(loader, queue: loaderQueue)
+    let item = AVPlayerItem(asset: asset)
+    self.init(playerItem: item)
+    self.cmcdLoader = loader
+    self.sourceURL = url
+    cmcdSession.player = self
+    self.replaceCurrentItem(with: item)
   }
   
   // MARK: - methods

@@ -145,9 +145,12 @@ private extension LivePlaybackController {
     }
 
     func handlePlayable(url: URL, isVodRecording: Bool) {
-        // Don't restart if already playing the same URL
-        if case .playable(let existing) = state,
-           (existing.currentItem?.asset as? AVURLAsset)?.url == url { return }
+        // Don't restart if already playing the same URL.
+        // For CMCD-enabled live players, compare sourceURL (pre-rewrite) rather than the asset URL.
+        if case .playable(let existing) = state {
+            let existingURL = existing.sourceURL ?? (existing.currentItem?.asset as? AVURLAsset)?.url
+            if existingURL == url { return }
+        }
 
         if isVodRecording {
             teardownCurrentPlayer()
@@ -163,9 +166,9 @@ private extension LivePlaybackController {
                 let player: MediaPlayer
                 do {
                     let playData = try await playDataLoader.load(libraryId: libraryId, streamId: streamId)
-                    player = MediaPlayer.makeLive(url: playData.playbackURL, seekableWindowSeconds: playData.seekableWindow)
+                    player = MediaPlayer.makeLive(url: playData.playbackURL, seekableWindowSeconds: playData.seekableWindow, contentId: streamId)
                 } catch {
-                    player = MediaPlayer.makeLive(url: url, seekableWindowSeconds: 0)
+                    player = MediaPlayer.makeLive(url: url, seekableWindowSeconds: 0, contentId: streamId)
                 }
                 observeItem(player)
                 if userWantsPlay { player.play() }

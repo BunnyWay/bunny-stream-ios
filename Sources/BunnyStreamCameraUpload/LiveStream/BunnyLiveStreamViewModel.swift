@@ -79,10 +79,13 @@ extension BunnyStreamCameraUploadViewModel {
     setIsIdleTimerDisabled(false)
     state = .notStreaming
     stopStreamingTimer()
-    rtmpConnection.close()
     rtmpConnection.removeEventListener(.rtmpStatus, selector: #selector(rtmpStatusHandler), observer: self)
     rtmpConnection.removeEventListener(.ioError, selector: #selector(rtmpErrorHandler), observer: self)
-    Task { await completeStream() }
+    Task {
+      rtmpStream.close()
+      rtmpConnection.close()
+      await completeStream()
+    }
   }
 }
 

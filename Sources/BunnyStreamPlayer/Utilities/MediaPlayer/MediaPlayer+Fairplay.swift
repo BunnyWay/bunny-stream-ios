@@ -20,14 +20,16 @@ extension MediaPlayer {
     let url = URL(string: video.playlistUrl ?? "")!
     let fairPlayHandler = FairPlayStreamHandler(videoId: video.guid, libraryId: video.libraryId)
     let subtitlesProvider = MediaPlayerSubtitlesProvider(video: video)
+    let cmcdHeaders = CMCDHeaderBuilder.staticSessionHeaders(for: CMCDSession(contentId: video.guid, streamType: .vod))
     let mediaPlayer = MediaPlayer(
       url: url,
       fairPlayHandler: fairPlayHandler,
-      subtitlesProvider: subtitlesProvider
+      subtitlesProvider: subtitlesProvider,
+      httpHeaders: cmcdHeaders
     )
-    
+
     Task { try? await subtitlesProvider.loadSubtitles() }
-    
+
     return mediaPlayer
   }
 }
