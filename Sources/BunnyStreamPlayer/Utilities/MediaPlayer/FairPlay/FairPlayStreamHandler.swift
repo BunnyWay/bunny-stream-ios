@@ -1,4 +1,5 @@
 import AVFoundation
+import BunnyStreamAPI
 
 class FairPlayStreamHandler: NSObject, AVAssetResourceLoaderDelegate {
   private let videoId: String
@@ -48,7 +49,9 @@ private extension FairPlayStreamHandler {
   }
   
   private func fetchCertificate(contentIdentifier: Data) async throws -> Data {
-    let (data, _) = try await urlSession.data(from: fairPlayURL)
+    var request = URLRequest(url: fairPlayURL)
+    request.setValue(SDKInfo.userAgent, forHTTPHeaderField: SDKInfo.userAgentHeaderField)
+    let (data, _) = try await urlSession.data(for: request)
     let certificateResponse = try JSONDecoder().decode(CertificateResponse.self, from: data)
     guard let certificateData = Data(base64Encoded: certificateResponse.certificate) else {
       throw FairPlayHandlerError.invalidCertificateData
@@ -60,6 +63,7 @@ private extension FairPlayStreamHandler {
   private func fetchCKC(spcData: Data) async throws -> Data {
     var request = URLRequest(url: fairPlayURL)
     request.httpMethod = "POST"
+    request.setValue(SDKInfo.userAgent, forHTTPHeaderField: SDKInfo.userAgentHeaderField)
     let spcRequest = SPCRequest(spc: spcData.base64EncodedString())
     request.httpBody = try JSONEncoder().encode(spcRequest)
     request.setValue("application/json", forHTTPHeaderField: "Content-Type")

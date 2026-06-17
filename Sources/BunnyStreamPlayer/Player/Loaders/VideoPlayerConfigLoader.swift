@@ -1,5 +1,6 @@
 import Foundation
 import SwiftUI
+import BunnyStreamAPI
 
 public struct VideoPlayerConfigLoader {
   public init() {}
@@ -28,6 +29,7 @@ public struct VideoPlayerConfigLoader {
     request.httpMethod = "GET"
     request.addValue("application/json", forHTTPHeaderField: "Accept")
     request.addValue("https://iframe.mediadelivery.net/", forHTTPHeaderField: "Referer")
+    request.addValue(SDKInfo.userAgent, forHTTPHeaderField: SDKInfo.userAgentHeaderField)
     
     do {
       let (data, response) = try await URLSession.shared.data(for: request)

@@ -1,3 +1,4 @@
+import BunnyStreamAPI
 import Foundation
 
 /// A protocol that defines the interface for creating upload requests.
@@ -43,7 +44,8 @@ struct URLSessionRequestBuilder: RequestBuilder {
     var request = URLRequest(url: url)
     request.allHTTPHeaderFields = [
       "AccessKey": accessKey,
-      "Content-Type": "application/octet-stream"
+      "Content-Type": "application/octet-stream",
+      SDKInfo.userAgentHeaderField: SDKInfo.userAgent
     ]
     request.httpMethod = "PUT"
     return request

@@ -1,4 +1,5 @@
 import AVFoundation
+import BunnyStreamAPI
 import Foundation
 
 final class CMCDResourceLoader: NSObject {
@@ -68,6 +69,7 @@ private extension CMCDResourceLoader {
 
         // Copy original headers from AVPlayer's request
         loadingRequest.request.allHTTPHeaderFields?.forEach { urlRequest.setValue($1, forHTTPHeaderField: $0) }
+        urlRequest.setValue(SDKInfo.userAgent, forHTTPHeaderField: SDKInfo.userAgentHeaderField)
 
         // Byte-range request (AVPlayer uses these for segments)
         if let dataRequest = loadingRequest.dataRequest {

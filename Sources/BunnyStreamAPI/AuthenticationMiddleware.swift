@@ -36,6 +36,9 @@ struct AuthenticationMiddleware: ClientMiddleware {
     if let key = HTTPField.Name.accessKey {
       request.headerFields[key] = accessKey
     }
+    if let key = HTTPField.Name(SDKInfo.userAgentHeaderField) {
+      request.headerFields[key] = SDKInfo.userAgent
+    }
 
     return try await next(request, body, baseURL)
   }

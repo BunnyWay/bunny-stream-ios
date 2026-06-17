@@ -2466,9 +2466,9 @@ components:
       description: Schema for updating live stream details.
       additionalProperties: true
       properties:
-        name:
+        title:
           type: string
-          description: The updated name of the live stream.
+          description: The updated title of the live stream.
           nullable: true
   securitySchemes:
     AccessKey:
