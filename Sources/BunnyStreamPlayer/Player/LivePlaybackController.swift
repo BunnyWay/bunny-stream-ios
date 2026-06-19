@@ -28,6 +28,7 @@ final class LivePlaybackController: ObservableObject {
 
     private var stallObserver: NSObjectProtocol?
     private var failureObserver: NSObjectProtocol?
+    private var itemStatusObserver: NSKeyValueObservation?
     private var lifecycleObservers: [NSObjectProtocol] = []
 
     init(bunnyStreamAPI: BunnyStreamAPI, libraryId: Int, streamId: String) {
@@ -145,11 +146,11 @@ private extension LivePlaybackController {
     }
 
     func handlePlayable(url: URL, isVodRecording: Bool) {
-        // Don't restart if already playing the same URL.
-        // For CMCD-enabled live players, compare sourceURL (pre-rewrite) rather than the asset URL.
+        // Don't restart if already playing the same URL — unless the player item has failed.
         if case .playable(let existing) = state {
             let existingURL = existing.sourceURL ?? (existing.currentItem?.asset as? AVURLAsset)?.url
-            if existingURL == url { return }
+            let itemFailed = existing.currentItem?.status == .failed
+            if existingURL == url && !itemFailed { return }
         }
 
         if isVodRecording {
@@ -213,6 +214,11 @@ private extension LivePlaybackController {
                 self?.handlePlayerFailure()
             }
         }
+
+        itemStatusObserver = player.currentItem?.observe(\.status, options: [.new]) { [weak self] item, _ in
+            guard item.status == .failed else { return }
+            Task { @MainActor [weak self] in self?.handlePlayerFailure() }
+        }
     }
 
     func handlePlayerFailure() {
@@ -225,6 +231,7 @@ private extension LivePlaybackController {
         failureObserver.map(NotificationCenter.default.removeObserver)
         stallObserver = nil
         failureObserver = nil
+        itemStatusObserver = nil
     }
 }
 

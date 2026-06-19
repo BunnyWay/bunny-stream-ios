@@ -47,7 +47,7 @@ struct ContentView: View {
           }
           NavigationLink("Live Streams") {
             LiveStreamListView(
-              viewModel: .init(api: dependenciesManager.bunnyStreamAPI, libraryId: dependenciesManager.libraryId),
+              viewModel: .init(api: dependenciesManager.bunnyStreamAPI, libraryId: dependenciesManager.libraryId, accessKey: dependenciesManager.accessKey),
               dependenciesManager: dependenciesManager
             )
           }

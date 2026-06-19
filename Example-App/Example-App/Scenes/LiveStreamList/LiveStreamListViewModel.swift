@@ -1,4 +1,5 @@
 import BunnyStreamAPI
+import BunnyStreamUploader
 import Foundation
 
 @MainActor
@@ -12,18 +13,41 @@ class LiveStreamListViewModel: ObservableObject {
 
     private let api: BunnyStreamAPI
     let libraryId: Int
+    let accessKey: String
 
-    init(api: BunnyStreamAPI, libraryId: Int) {
+    init(api: BunnyStreamAPI, libraryId: Int, accessKey: String) {
         self.api = api
         self.libraryId = libraryId
+        self.accessKey = accessKey
     }
 
-    func create(name: String, scheduledStartTime: Date? = nil) async throws -> Components.Schemas.LiveStreamModel {
+    func create(
+        name: String,
+        scheduledStartTime: Date? = nil,
+        enableCountdown: Bool = false,
+        dvrEnabled: Bool = false,
+        dvrWindowSeconds: Int? = nil,
+        recordVod: Bool = false,
+        trailerVideoId: String? = nil
+    ) async throws -> Components.Schemas.LiveStreamModel {
         var model = Components.Schemas.CreateLiveStreamModel(title: name)
         if let date = scheduledStartTime {
             let formatter = ISO8601DateFormatter()
             formatter.formatOptions = [.withInternetDateTime, .withFractionalSeconds]
             model.scheduledStartTime = formatter.string(from: date)
+        }
+        if enableCountdown {
+            model.enableCountdown = true
+        }
+        if dvrEnabled {
+            model.dvrEnabled = true
+            model.dvrWindowSeconds = dvrWindowSeconds.map { Int32($0) }
+        }
+        if recordVod {
+            model.recordVod = true
+        }
+        if let id = trailerVideoId, !id.isEmpty {
+            model.preStreamTrailerVideoId = id
         }
         let output = try await api.client.liveStreamCreate(
             path: .init(libraryId: Int64(libraryId)),
@@ -47,6 +71,33 @@ class LiveStreamListViewModel: ObservableObject {
             throw CreateError.httpError(code)
         default:
             throw CreateError.invalidResponse
+        }
+    }
+
+    func createTrailerEntry(name: String) async throws -> (id: String, title: String) {
+        let output = try await api.client.createVideo(
+            path: .init(libraryId: Int64(libraryId)),
+            body: .json(.CreateVideoModel(.init(title: name)))
+        )
+        guard case .ok(let ok) = output,
+              case .json(let model) = ok.body,
+              let guid = model.guid else {
+            throw TrailerUploadError.createFailed
+        }
+        return (id: guid, title: name)
+    }
+
+    enum TrailerUploadError: LocalizedError {
+        case createFailed
+        var errorDescription: String? { "Failed to create video entry in library." }
+    }
+
+    func videosForTrailerPicker() async throws -> [(id: String, title: String)] {
+        let output = try await api.client.listVideos(path: .init(libraryId: Int64(libraryId)))
+        guard case .ok(let ok) = output, case .json(let list) = ok.body else { return [] }
+        return (list.items ?? []).compactMap { video in
+            guard let id = video.guid, !id.isEmpty else { return nil }
+            return (id: id, title: video.title ?? id)
         }
     }
 

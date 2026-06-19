@@ -2390,6 +2390,18 @@ components:
           type: string
           description: The URL of the thumbnail image to display when the stream is offline.
           nullable: true
+        primaryLive:
+          type: boolean
+          description: Determines if the primary ingest is live.
+          nullable: true
+        backupLive:
+          type: boolean
+          description: Determines if the backup ingest is live.
+          nullable: true
+        ingestRegion:
+          type: string
+          description: The primary ingest region of the live stream.
+          nullable: true
     LiveStreamStatus:
       type: integer
       description: 'The current status of the live stream: 1 = Created, 2 = Scheduled, 4 = Running, 5 = Ended, 6 = VodProcessing, 7 = Error.'
@@ -2460,6 +2472,29 @@ components:
         scheduledStartTime:
           type: string
           description: The scheduled start time in ISO 8601 format. When set, stream status becomes Scheduled (Upcoming).
+          nullable: true
+        dvrEnabled:
+          type: boolean
+          description: Enables DVR so viewers can rewind the live stream.
+          nullable: true
+        dvrWindowSeconds:
+          type: integer
+          description: DVR window size in seconds. Required when dvrEnabled is true. Maximum is 43200 (12 hours).
+          format: int32
+          maximum: 43200
+          minimum: 1
+          nullable: true
+        recordVod:
+          type: boolean
+          description: Create a VOD recording after the stream ends.
+          nullable: true
+        enableCountdown:
+          type: boolean
+          description: Show a countdown in the player before the stream starts (only applies when scheduledStartTime is set).
+          nullable: true
+        preStreamTrailerVideoId:
+          type: string
+          description: Video ID of the VOD to loop as a trailer before the live stream starts.
           nullable: true
     UpdateLiveStreamModel:
       type: object

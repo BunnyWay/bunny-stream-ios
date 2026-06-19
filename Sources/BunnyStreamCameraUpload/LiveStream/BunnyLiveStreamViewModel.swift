@@ -26,6 +26,10 @@ final class BunnyStreamCameraUploadViewModel: ObservableObject {
   @Published var rtmpStream: RTMPStream
   @Published var currentPosition: AVCaptureDevice.Position = .back
   @Published var elapsedTime: String?
+  @Published var primaryLive: Bool? = nil
+  @Published var backupLive: Bool? = nil
+
+  private var ingestStatusTask: Task<Void, Never>?
 
   init(streamConfig: StreamConfig, videoCreator: VideoCreator? = nil) {
     self.streamConfig = streamConfig
@@ -79,6 +83,7 @@ extension BunnyStreamCameraUploadViewModel {
     setIsIdleTimerDisabled(false)
     state = .notStreaming
     stopStreamingTimer()
+    stopIngestStatusPolling()
     rtmpConnection.removeEventListener(.rtmpStatus, selector: #selector(rtmpStatusHandler), observer: self)
     rtmpConnection.removeEventListener(.ioError, selector: #selector(rtmpErrorHandler), observer: self)
     Task {
@@ -206,9 +211,11 @@ private extension BunnyStreamCameraUploadViewModel {
       state = .liveStreaming
       updateElapsedTime()
       rtmpStream.publish(streamConfig.streamKey)
+      startIngestStatusPolling()
     case RTMPConnection.Code.connectFailed.rawValue, RTMPConnection.Code.connectClosed.rawValue:
       guard retryCount <= maxRetryCount else {
         stopStreamingTimer()
+        stopIngestStatusPolling()
         state = .notStreaming
         snackbarMessage = Lingua.LiveStream.streamFailedMessage
         return
@@ -264,6 +271,39 @@ private extension BunnyStreamCameraUploadViewModel {
       countdownTimerPublisher = nil
       
       startPublish()
+    }
+  }
+}
+
+// MARK: - Ingest status polling
+
+private extension BunnyStreamCameraUploadViewModel {
+  func startIngestStatusPolling() {
+    guard let streamId = streamConfig.streamId, !streamConfig.accessKey.isEmpty else { return }
+    ingestStatusTask?.cancel()
+    ingestStatusTask = Task { [weak self] in
+      while !Task.isCancelled {
+        await self?.fetchIngestStatus(streamId: streamId)
+        try? await Task.sleep(nanoseconds: 5_000_000_000)
+      }
+    }
+  }
+
+  func stopIngestStatusPolling() {
+    ingestStatusTask?.cancel()
+    ingestStatusTask = nil
+    primaryLive = nil
+    backupLive = nil
+  }
+
+  func fetchIngestStatus(streamId: String) async {
+    let api = BunnyStreamAPI(accessKey: streamConfig.accessKey)
+    guard case .ok(let ok) = try? await api.client.liveStreamGet(
+      path: .init(libraryId: Int64(streamConfig.libraryId), streamId: streamId)
+    ), case .json(let model) = ok.body else { return }
+    await MainActor.run { [weak self] in
+      self?.primaryLive = model.primaryLive
+      self?.backupLive = model.backupLive
     }
   }
 }

@@ -29,6 +29,7 @@ final class CMCDSession {
               let range = item.loadedTimeRanges.last?.timeRangeValue else { return 0 }
         let currentTime = player.currentTime().seconds
         let bufferEnd = (range.start + range.duration).seconds
+        guard currentTime.isFinite, bufferEnd.isFinite else { return 0 }
         return Int(max(0, bufferEnd - currentTime) * 1000)
     }
 

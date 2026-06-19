@@ -71,8 +71,10 @@ private extension CMCDResourceLoader {
         loadingRequest.request.allHTTPHeaderFields?.forEach { urlRequest.setValue($1, forHTTPHeaderField: $0) }
         urlRequest.setValue(SDKInfo.userAgent, forHTTPHeaderField: SDKInfo.userAgentHeaderField)
 
-        // Byte-range request (AVPlayer uses these for segments)
-        if let dataRequest = loadingRequest.dataRequest {
+        // Only send a Range header for genuine partial requests (offset > 0).
+        // Avoid "bytes=0-" for full-segment fetches — live CMAF segments are atomic
+        // chunks that should be fetched in one request without a Range header.
+        if let dataRequest = loadingRequest.dataRequest, dataRequest.requestedOffset > 0 {
             let start = dataRequest.requestedOffset
             if dataRequest.requestsAllDataToEndOfResource {
                 urlRequest.setValue("bytes=\(start)-", forHTTPHeaderField: "Range")
@@ -106,15 +108,7 @@ private extension CMCDResourceLoader {
                 return
             }
 
-            // Fill content information (AVPlayer preflight)
-            if let contentInfo = loadingRequest.contentInformationRequest {
-                contentInfo.contentLength = httpResponse.value(forHTTPHeaderField: "Content-Length")
-                    .flatMap { Int64($0) } ?? Int64(data.count)
-                contentInfo.isByteRangeAccessSupported = true
-                contentInfo.contentType = Self.contentType(from: httpResponse, url: realURL)
-            }
-
-            // Rewrite M3U8 manifest URLs so AVPlayer routes future requests through us
+            // Rewrite M3U8 manifest URLs before filling content info so contentLength is accurate
             let isManifest = realURL.pathExtension.lowercased() == "m3u8"
                 || (httpResponse.mimeType ?? "").contains("mpegurl")
             let responseData: Data
@@ -124,6 +118,14 @@ private extension CMCDResourceLoader {
                 responseData = data
                 // First non-manifest response marks end of startup
                 self.session.markStartupComplete()
+            }
+
+            // Fill content information using the (potentially rewritten) responseData size
+            if let contentInfo = loadingRequest.contentInformationRequest {
+                contentInfo.contentLength = Int64(responseData.count)
+                // Live CMAF segments are atomic chunks — no byte-range sub-requests needed.
+                contentInfo.isByteRangeAccessSupported = false
+                contentInfo.contentType = Self.contentType(from: httpResponse, url: realURL)
             }
 
             loadingRequest.dataRequest?.respond(with: responseData)

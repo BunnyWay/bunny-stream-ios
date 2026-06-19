@@ -37,6 +37,7 @@ let package = Package(
         ),
       ],
       path: "Sources/BunnyStreamAPI",
+      exclude: ["GeneratedSources"],
       plugins: [
         .plugin(name: "OpenAPIGenerator", package: "swift-openapi-generator"),
       ]

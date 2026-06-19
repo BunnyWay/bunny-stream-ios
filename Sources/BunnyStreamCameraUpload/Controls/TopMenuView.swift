@@ -10,15 +10,23 @@ struct TopMenuView: View {
       RoundedRectangle(cornerRadius: 20)
         .fill(Color.black.opacity(0.4))
       
-      VStack {
+      VStack(spacing: 4) {
         LiveIndicatorView(streamState: viewModel.state)
           .frame(maxHeight: 30)
-        
+
         if let elapsedTime = viewModel.elapsedTime {
           Text(elapsedTime)
             .font(.caption)
             .fontWeight(.bold)
             .foregroundColor(.white)
+        }
+
+        if viewModel.state == .liveStreaming,
+           viewModel.primaryLive != nil || viewModel.backupLive != nil {
+          IngestBadgesView(
+            primaryLive: viewModel.primaryLive,
+            backupLive: viewModel.backupLive
+          )
         }
       }
       

@@ -4,8 +4,9 @@ extension MediaPlayer {
   static func makeLive(url: URL, seekableWindowSeconds: Double, contentId: String) -> MediaPlayer {
     let streamType: CMCDSession.StreamType = seekableWindowSeconds > 0 ? .event : .live
     let player = MediaPlayer(liveURL: url, contentId: contentId, streamType: streamType)
-    player.automaticallyWaitsToMinimizeStalling = false
     player.kind = seekableWindowSeconds > 0 ? .event : .live
+    // Reset playbackInterval now that kind is set so duration returns .infinity for .live
+    player.playbackInterval = (0, player.duration)
     return player
   }
 

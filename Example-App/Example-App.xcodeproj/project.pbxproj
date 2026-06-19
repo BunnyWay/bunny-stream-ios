@@ -11,6 +11,7 @@
 		6A86ED722FBA727B00A713E8 /* LiveStreamDemoView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6A86ED702FBA727B00A713E8 /* LiveStreamDemoView.swift */; };
 		CC000005CC000005CC000005 /* LiveStreamListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = CC000002CC000002CC000002 /* LiveStreamListView.swift */; };
 		DD000002DD000002DD000002 /* CreateLiveStreamView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD000001DD000001DD000001 /* CreateLiveStreamView.swift */; };
+		EE000001EE000001EE000001 /* TrailerPickerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = EE000002EE000002EE000002 /* TrailerPickerView.swift */; };
 		CC000006CC000006CC000006 /* LiveStreamListViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = CC000003CC000003CC000003 /* LiveStreamListViewModel.swift */; };
 		CC000007CC000007CC000007 /* LiveStreamRowView.swift in Sources */ = {isa = PBXBuildFile; fileRef = CC000004CC000004CC000004 /* LiveStreamRowView.swift */; };
 		770375792AD832B40034C47F /* VideoPicker.swift in Sources */ = {isa = PBXBuildFile; fileRef = 770375782AD832B40034C47F /* VideoPicker.swift */; };
@@ -54,6 +55,7 @@
 		6A86ED702FBA727B00A713E8 /* LiveStreamDemoView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LiveStreamDemoView.swift; sourceTree = "<group>"; };
 		CC000002CC000002CC000002 /* LiveStreamListView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LiveStreamListView.swift; sourceTree = "<group>"; };
 		DD000001DD000001DD000001 /* CreateLiveStreamView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CreateLiveStreamView.swift; sourceTree = "<group>"; };
+		EE000002EE000002EE000002 /* TrailerPickerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TrailerPickerView.swift; sourceTree = "<group>"; };
 		CC000003CC000003CC000003 /* LiveStreamListViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LiveStreamListViewModel.swift; sourceTree = "<group>"; };
 		CC000004CC000004CC000004 /* LiveStreamRowView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LiveStreamRowView.swift; sourceTree = "<group>"; };
 		770375782AD832B40034C47F /* VideoPicker.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VideoPicker.swift; sourceTree = "<group>"; };
@@ -121,6 +123,7 @@
 				CC000003CC000003CC000003 /* LiveStreamListViewModel.swift */,
 				CC000004CC000004CC000004 /* LiveStreamRowView.swift */,
 				DD000001DD000001DD000001 /* CreateLiveStreamView.swift */,
+				EE000002EE000002EE000002 /* TrailerPickerView.swift */,
 			);
 			path = LiveStreamList;
 			sourceTree = "<group>";
@@ -448,6 +451,7 @@
 				CC000006CC000006CC000006 /* LiveStreamListViewModel.swift in Sources */,
 				CC000007CC000007CC000007 /* LiveStreamRowView.swift in Sources */,
 				DD000002DD000002DD000002 /* CreateLiveStreamView.swift in Sources */,
+				EE000001EE000001EE000001 /* TrailerPickerView.swift in Sources */,
 				77116BDB2AFEBFA8000BB64C /* DefaultTextField.swift in Sources */,
 				7789CFAA2AD6C8B600CC8BCE /* UploadStatusIndicator.swift in Sources */,
 				65FC6F442D9D64AE00D29974 /* PublicVideoDemoView.swift in Sources */,

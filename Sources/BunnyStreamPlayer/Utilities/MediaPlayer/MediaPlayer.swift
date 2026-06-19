@@ -35,7 +35,7 @@ extension MediaPlayerDelegate {
 }
 
 class MediaPlayer: AVPlayer {
-  private(set) lazy var playbackInterval: (startAt: Double, endAt: Double) = (0, duration)
+  var playbackInterval: (startAt: Double, endAt: Double) = (0, 0)
   
   /// A Boolean value that determines whether the media player should loop playback when it reaches the end of the media.
   ///
