@@ -1316,11 +1316,7 @@ paths:
           description: The unique identifier of the live stream to delete.
       responses:
         '200':
-          description: The live stream was successfully deleted.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/StatusModel'
+          description: The live stream was successfully deleted. The response body is empty.
         '401':
           description: The request authorization failed.
         '404':
@@ -2316,6 +2312,26 @@ components:
           type: string
           description: The URL of the provider's website.
           nullable: true
+    IngestEndpointConfig:
+      type: object
+      description: RTMP ingest endpoint URLs for a live stream. Combine the URL with the stream key to build the full publishing target.
+      additionalProperties: true
+      properties:
+        primaryIngestUrl:
+          type: string
+          description: The primary RTMP ingest URL of the live stream. Combine with the stream key to create the full publishing URL.
+          nullable: true
+        backupIngestUrl:
+          type: string
+          description: The backup RTMP ingest URL of the live stream. Combine with the stream key to create the full publishing URL.
+          nullable: true
+    IngestEndpoints:
+      type: object
+      description: The ingest endpoints available for publishing to a live stream.
+      additionalProperties: true
+      properties:
+        rtmp:
+          $ref: '#/components/schemas/IngestEndpointConfig'
     LiveStreamModel:
       type: object
       description: Represents a live stream and its metadata including name, stream key, RTMP URL, playback URL, and current status.
@@ -2341,13 +2357,13 @@ components:
           type: string
           description: The title of the live stream.
           nullable: true
+        description:
+          type: string
+          description: The description of the live stream.
+          nullable: true
         streamKey:
           type: string
           description: The stream key used for RTMP publishing.
-          nullable: true
-        rtmpUrl:
-          type: string
-          description: The RTMP URL to which the encoder should publish.
           nullable: true
         playbackUrl:
           type: string
@@ -2357,10 +2373,8 @@ components:
           type: string
           description: The HLS playback URL for the live stream (primary field returned by the API).
           nullable: true
-        ingestEndpoint:
-          type: string
-          description: The primary RTMP ingest endpoint URL.
-          nullable: true
+        ingestEndpoints:
+          $ref: '#/components/schemas/IngestEndpoints'
         status:
           description: The current status of the live stream.
           oneOf:
@@ -2469,6 +2483,10 @@ components:
           type: string
           description: The title of the new live stream.
           minLength: 1
+        description:
+          type: string
+          description: An optional description of the live stream.
+          nullable: true
         scheduledStartTime:
           type: string
           description: The scheduled start time in ISO 8601 format. When set, stream status becomes Scheduled (Upcoming).
@@ -2496,6 +2514,10 @@ components:
           type: string
           description: Video ID of the VOD to loop as a trailer before the live stream starts.
           nullable: true
+        thumbnailUrl:
+          type: string
+          description: URL of a thumbnail image to display when the stream is offline.
+          nullable: true
     UpdateLiveStreamModel:
       type: object
       description: Schema for updating live stream details.
@@ -2504,6 +2526,14 @@ components:
         title:
           type: string
           description: The updated title of the live stream.
+          nullable: true
+        description:
+          type: string
+          description: The updated description of the live stream.
+          nullable: true
+        thumbnailUrl:
+          type: string
+          description: URL of a thumbnail image to display when the stream is offline.
           nullable: true
   securitySchemes:
     AccessKey:

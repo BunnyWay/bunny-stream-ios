@@ -1,4 +1,5 @@
 import BunnyStreamAPI
+import BunnyStreamPlayer
 import BunnyStreamUploader
 import Foundation
 
@@ -10,8 +11,10 @@ class LiveStreamListViewModel: ObservableObject {
 
     @Published var streams: [Components.Schemas.LiveStreamModel] = []
     @Published var loadingState: LoadingState = .loading
+    @Published var actionError: String?
 
     private let api: BunnyStreamAPI
+    private let configLoader = VideoPlayerConfigLoader()
     let libraryId: Int
     let accessKey: String
 
@@ -21,16 +24,33 @@ class LiveStreamListViewModel: ObservableObject {
         self.accessKey = accessKey
     }
 
+    /// Resolves the thumbnail URL for a library video (trailer preview, live stream row, etc.).
+    func videoThumbnailURL(videoId: String) async -> URL? {
+        guard let urlString = try? await configLoader.loadVideoThumbnail(
+            libraryId: libraryId,
+            videoId: videoId
+        ) else { return nil }
+        return URL(string: urlString)
+    }
+
     func create(
         name: String,
+        description: String? = nil,
         scheduledStartTime: Date? = nil,
         enableCountdown: Bool = false,
         dvrEnabled: Bool = false,
         dvrWindowSeconds: Int? = nil,
         recordVod: Bool = false,
-        trailerVideoId: String? = nil
+        trailerVideoId: String? = nil,
+        thumbnailUrl: String? = nil
     ) async throws -> Components.Schemas.LiveStreamModel {
         var model = Components.Schemas.CreateLiveStreamModel(title: name)
+        if let description, !description.isEmpty {
+            model.description = description
+        }
+        if let thumbnailUrl, !thumbnailUrl.isEmpty {
+            model.thumbnailUrl = thumbnailUrl
+        }
         if let date = scheduledStartTime {
             let formatter = ISO8601DateFormatter()
             formatter.formatOptions = [.withInternetDateTime, .withFractionalSeconds]
@@ -111,6 +131,34 @@ class LiveStreamListViewModel: ObservableObject {
             case .httpError(let code): return "HTTP \(code) — live stream creation failed."
             case .rawError(let body):  return body
             }
+        }
+    }
+
+    func delete(stream: Components.Schemas.LiveStreamModel) async {
+        guard let guid = stream.guid, !guid.isEmpty else { return }
+        // Optimistically remove from the list, restore on failure.
+        let previous = streams
+        streams.removeAll { $0.guid == guid }
+        do {
+            let output = try await api.client.liveStreamDelete(
+                path: .init(libraryId: Int64(libraryId), streamId: guid)
+            )
+            switch output {
+            case .ok:
+                break
+            case .notFound:
+                // Already gone — keep it removed.
+                break
+            case .unauthorized:
+                streams = previous
+                actionError = "Unauthorized — check your Access Key."
+            default:
+                streams = previous
+                actionError = "Couldn't delete the live stream."
+            }
+        } catch {
+            streams = previous
+            actionError = error.localizedDescription
         }
     }
 

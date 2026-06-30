@@ -39,6 +39,36 @@ struct CMCDHeaderBuilder {
         return parts.joined(separator: ",")
     }
 
+    /// Builds the single combined CMCD value used in query mode: all keys merged into one
+    /// comma-separated, alphabetically-sorted list (per CTA-5004), before percent-encoding.
+    static func queryValue(for session: CMCDSession, objectType: CMCDObjectType) -> String {
+        var pairs: [String] = []
+        pairs.append("bl=\(session.bufferLengthMs)")
+        if session.isBufferStarved { pairs.append("bs") }
+        pairs.append("cid=\"\(session.contentId)\"")
+        pairs.append("ot=\(objectType.rawValue)")
+        pairs.append("sf=h")
+        pairs.append("sid=\"\(session.sessionId)\"")
+        pairs.append("st=\(session.streamType.rawValue)")
+        if session.isStartup { pairs.append("su") }
+        pairs.append("v=2")
+        // Keys are appended in alphabetical order: bl, bs, cid, ot, sf, sid, st, su, v.
+        return pairs.joined(separator: ",")
+    }
+
+    /// Appends a percent-encoded `CMCD` query parameter to a URL, preserving any existing query.
+    static func appendingCMCDQuery(to url: URL, value: String) -> URL {
+        guard var components = URLComponents(url: url, resolvingAgainstBaseURL: false) else { return url }
+        let encoded = value.addingPercentEncoding(withAllowedCharacters: .alphanumerics) ?? value
+        let cmcdParam = "CMCD=\(encoded)"
+        if let existing = components.percentEncodedQuery, !existing.isEmpty {
+            components.percentEncodedQuery = existing + "&" + cmcdParam
+        } else {
+            components.percentEncodedQuery = cmcdParam
+        }
+        return components.url ?? url
+    }
+
     static func objectType(for url: URL) -> CMCDObjectType {
         let ext = url.pathExtension.lowercased()
         switch ext {

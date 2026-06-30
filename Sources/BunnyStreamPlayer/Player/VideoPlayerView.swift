@@ -4,8 +4,10 @@ import AVKit
 struct VideoPlayerView: View {
   @Environment(\.videoPlayerTheme) var theme: VideoPlayerTheme
   @Environment(\.videoPlayerConfig) var videoPlayerConfig: VideoPlayerConfig
+  @Environment(\.playerWatermark) var watermark: PlayerWatermark?
   @ObservedObject var controlsViewModel: VideoPlayerControlsViewModel
   @ObservedObject var viewModel: VideoPlayerViewModel
+  @StateObject private var pipManager = PictureInPictureManager()
   private var adComponent: MediaPlayerAdComponent
   private let video: Video
   
@@ -21,7 +23,7 @@ struct VideoPlayerView: View {
   
   var body: some View {
     VStack {
-      AVPlayerViewControllerRepresentable(player: controlsViewModel.player) { controller in
+      AVPlayerViewControllerRepresentable(player: controlsViewModel.player, pipManager: pipManager) { controller in
         guard videoPlayerConfig.hasAds else { return }
         adComponent.setupAdsInController(controller)
       }
@@ -36,12 +38,17 @@ struct VideoPlayerView: View {
                            font: theme.font.size(theme.caption.fontSize))
                 .padding(.bottom, viewModel.isVisible ? 50 : 0)
             }
-            VideoPlayerControls(viewModel: controlsViewModel)
+            VideoPlayerControls(viewModel: controlsViewModel, pipManager: pipManager)
               .opacity(viewModel.isVisible ? 1 : 0)
               .background(Color.black.opacity(viewModel.isVisible ? 0.3 : 0.001))
               .environment(\.videoPlayerTheme, theme)
               .environment(\.videoPlayerConfig, videoPlayerConfig)
           }
+        }
+      }
+      .overlay {
+        if let watermark, !controlsViewModel.isAdPlaying {
+          WatermarkOverlayView(watermark: watermark)
         }
       }
       .onTapGesture {

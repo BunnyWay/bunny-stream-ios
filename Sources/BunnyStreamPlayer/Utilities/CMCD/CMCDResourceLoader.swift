@@ -65,7 +65,18 @@ extension CMCDResourceLoader: AVAssetResourceLoaderDelegate {
 
 private extension CMCDResourceLoader {
     func startLoad(_ loadingRequest: AVAssetResourceLoadingRequest, realURL: URL) {
-        var urlRequest = URLRequest(url: realURL)
+        let mode = CMCDConfiguration.transmissionMode
+        let objectType = CMCDHeaderBuilder.objectType(for: realURL)
+
+        // In query mode, CMCD travels as a percent-encoded `CMCD` query parameter on the URL.
+        let requestURL = mode.sendsQuery
+            ? CMCDHeaderBuilder.appendingCMCDQuery(
+                to: realURL,
+                value: CMCDHeaderBuilder.queryValue(for: session, objectType: objectType)
+              )
+            : realURL
+
+        var urlRequest = URLRequest(url: requestURL)
 
         // Copy original headers from AVPlayer's request
         loadingRequest.request.allHTTPHeaderFields?.forEach { urlRequest.setValue($1, forHTTPHeaderField: $0) }
@@ -85,9 +96,10 @@ private extension CMCDResourceLoader {
         }
 
         // Add CMCD headers
-        let objectType = CMCDHeaderBuilder.objectType(for: realURL)
-        CMCDHeaderBuilder.headers(for: session, objectType: objectType).forEach {
-            urlRequest.setValue($1, forHTTPHeaderField: $0)
+        if mode.sendsHeaders {
+            CMCDHeaderBuilder.headers(for: session, objectType: objectType).forEach {
+                urlRequest.setValue($1, forHTTPHeaderField: $0)
+            }
         }
 
         let task = urlSession.dataTask(with: urlRequest) { [weak self] data, response, error in

@@ -13,6 +13,8 @@ struct LiveStreamListView: View {
     }
 
     @State private var broadcasterStream: BroadcastSelection?
+    @State private var ingestDetailsStream: BroadcastSelection?
+    @State private var streamPendingDeletion: BroadcastSelection?
     @State private var isShowingCreate = false
 
     init(viewModel: LiveStreamListViewModel, dependenciesManager: DependenciesManager) {
@@ -62,10 +64,40 @@ struct LiveStreamListView: View {
                 libraryId: dependenciesManager.libraryId
             )
         }
+        .sheet(item: $ingestDetailsStream) { selection in
+            LiveStreamIngestDetailsView(stream: selection.stream)
+        }
+        .alert("Delete live stream?", isPresented: deleteAlertBinding, presenting: streamPendingDeletion) { selection in
+            Button("Delete", role: .destructive) {
+                Task { await viewModel.delete(stream: selection.stream) }
+            }
+            Button("Cancel", role: .cancel) {}
+        } message: { selection in
+            Text("\"\(selection.stream.title ?? selection.stream.name ?? "This stream")\" will be permanently deleted.")
+        }
+        .alert("Error", isPresented: actionErrorBinding, presenting: viewModel.actionError) { _ in
+            Button("OK", role: .cancel) {}
+        } message: { message in
+            Text(message)
+        }
     }
 }
 
 private extension LiveStreamListView {
+    var deleteAlertBinding: Binding<Bool> {
+        Binding(
+            get: { streamPendingDeletion != nil },
+            set: { if !$0 { streamPendingDeletion = nil } }
+        )
+    }
+
+    var actionErrorBinding: Binding<Bool> {
+        Binding(
+            get: { viewModel.actionError != nil },
+            set: { if !$0 { viewModel.actionError = nil } }
+        )
+    }
+
     var listView: some View {
         Group {
             if viewModel.streams.isEmpty {
@@ -96,7 +128,9 @@ private extension LiveStreamListView {
                     .navigationBarTitleDisplayMode(.inline)
                     .ignoresSafeArea()
                 } label: {
-                    LiveStreamRowView(stream: stream)
+                    LiveStreamRowView(stream: stream) { videoId in
+                        await viewModel.videoThumbnailURL(videoId: videoId)
+                    }
                 }
                 .swipeActions(edge: .trailing, allowsFullSwipe: false) {
                     if canBroadcast(stream) {
@@ -107,6 +141,19 @@ private extension LiveStreamListView {
                             Label("Go Live", systemImage: "dot.radiowaves.left.and.right")
                         }
                         .tint(.red)
+                    }
+                    Button {
+                        guard let guid = stream.guid else { return }
+                        ingestDetailsStream = BroadcastSelection(id: guid, stream: stream)
+                    } label: {
+                        Label("RTMP", systemImage: "info.circle")
+                    }
+                    .tint(.indigo)
+                    Button(role: .destructive) {
+                        guard let guid = stream.guid else { return }
+                        streamPendingDeletion = BroadcastSelection(id: guid, stream: stream)
+                    } label: {
+                        Label("Delete", systemImage: "trash")
                     }
                 }
             }

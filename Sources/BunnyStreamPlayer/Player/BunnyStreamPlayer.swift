@@ -34,6 +34,8 @@ public struct BunnyStreamPlayer: View {
   @State var videoConfig = VideoPlayerConfig()
   /// The set of custom player icons.
   internal var playerIcons: PlayerIcons?
+  /// An optional client-side watermark rendered on top of the video.
+  internal var watermark: PlayerWatermark?
 
   /// The different states of video loading.
   enum VideoLoadingState {
@@ -60,6 +62,7 @@ public struct BunnyStreamPlayer: View {
   ///   - token: The embed view token. Required when token authentication is enabled for the video library.
   ///   - expires: The expiration timestamp for the embed view token.
   ///   - playerIcons: Optional custom icons for the video player.
+  ///   - watermark: Optional client-side watermark rendered on top of the video.
   ///
   /// ### Usage Example:
   /// ```swift
@@ -80,13 +83,15 @@ public struct BunnyStreamPlayer: View {
     libraryId: Int,
     token: String? = nil,
     expires: Int64? = nil,
-    playerIcons: PlayerIcons? = nil
+    playerIcons: PlayerIcons? = nil,
+    watermark: PlayerWatermark? = nil
   ) {
     self.accessKey = accessKey
     self.videoId = videoId
     self.libraryId = libraryId
     self.token = token
     self.expires = expires
+    self.watermark = watermark
     if let accessKey {
       self.heatmapLoader = HeatmapLoader(bunnyStreamAPI: .init(accessKey: accessKey))
     }
@@ -108,6 +113,7 @@ public struct BunnyStreamPlayer: View {
         BunnyStreamPlayerContainerView(player: mediaPlayer, video: video, heatmap: heatmap)
           .environment(\.videoPlayerTheme, theme)
           .environment(\.videoPlayerConfig, videoConfig)
+          .environment(\.playerWatermark, watermark)
           .onAppear {
             setupAudioSession()
             mediaPlayer.play()

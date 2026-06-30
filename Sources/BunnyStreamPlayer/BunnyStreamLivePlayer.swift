@@ -18,11 +18,18 @@ public struct BunnyStreamLivePlayer: View {
     private let accessKey: String
     private let libraryId: Int
     private let streamId: String
+    private let watermark: PlayerWatermark?
 
-    public init(accessKey: String, libraryId: Int, streamId: String) {
+    /// - Parameters:
+    ///   - accessKey: The access key for authentication.
+    ///   - libraryId: The ID of the video library.
+    ///   - streamId: The GUID of the live stream.
+    ///   - watermark: Optional client-side watermark rendered on top of the live video.
+    public init(accessKey: String, libraryId: Int, streamId: String, watermark: PlayerWatermark? = nil) {
         self.accessKey = accessKey
         self.libraryId = libraryId
         self.streamId = streamId
+        self.watermark = watermark
         self._controller = StateObject(wrappedValue: LivePlaybackController(
             bunnyStreamAPI: BunnyStreamAPI(accessKey: accessKey),
             libraryId: libraryId,
@@ -86,6 +93,7 @@ private extension BunnyStreamLivePlayer {
             playlistUrl: nil
         )
         return BunnyStreamPlayerContainerView(player: player, video: video, heatmap: Heatmap(data: [:]))
+            .environment(\.playerWatermark, watermark)
     }
 
     func countdownView(until date: Date, thumbnailUrl: URL?) -> some View {

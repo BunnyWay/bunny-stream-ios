@@ -4,17 +4,20 @@ import SwiftUI
 
 struct AVPlayerViewControllerRepresentable: UIViewControllerRepresentable {
   var player: AVPlayer
+  var pipManager: PictureInPictureManager?
   var setupAds: ((ViewController) -> Void)?
-  
+
   func makeUIViewController(context: Context) -> PlayerViewController {
     let controller = PlayerViewController(playerLayer: .init(player: player))
     controller.view.backgroundColor = .black
     context.coordinator.avPlayerViewController = controller
+    pipManager?.setup(with: controller.playerLayer)
     return controller
   }
-  
+
   func updateUIViewController(_ viewController: PlayerViewController, context: Context) {
     viewController.playerLayer.player = player
+    pipManager?.setup(with: viewController.playerLayer)
     setupAds?(viewController)
   }
   
@@ -59,8 +62,9 @@ import SwiftUI
 
 struct AVPlayerViewControllerRepresentable: NSViewRepresentable {
   var player: AVPlayer
+  var pipManager: PictureInPictureManager?
   var setupAds: ((ViewController) -> Void)?
-  
+
   func makeNSView(context: Context) -> AVPlayerView {
     let playerView = AVPlayerView()
     playerView.player = player

@@ -4,6 +4,10 @@ import SwiftUI
 
 struct LiveStreamRowView: View {
     let stream: Components.Schemas.LiveStreamModel
+    /// Optional fallback resolver used when the stream has no `thumbnailUrl`.
+    var resolveThumbnail: ((String) async -> URL?)? = nil
+
+    @State private var resolvedThumbnail: URL?
 
     var body: some View {
         HStack(spacing: 12) {
@@ -24,7 +28,7 @@ struct LiveStreamRowView: View {
 private extension LiveStreamRowView {
     var thumbnailView: some View {
         Group {
-            if let urlString = stream.thumbnailUrl, let url = URL(string: urlString) {
+            if let url = effectiveThumbnailURL {
                 AsyncImage(url: url) { phase in
                     switch phase {
                     case .success(let image):
@@ -39,6 +43,23 @@ private extension LiveStreamRowView {
         }
         .frame(width: 80, height: 45)
         .clipShape(RoundedRectangle(cornerRadius: 6))
+        .task { await loadThumbnailIfNeeded() }
+    }
+
+    var effectiveThumbnailURL: URL? {
+        if let urlString = stream.thumbnailUrl, let url = URL(string: urlString) {
+            return url
+        }
+        return resolvedThumbnail
+    }
+
+    func loadThumbnailIfNeeded() async {
+        guard stream.thumbnailUrl == nil || stream.thumbnailUrl?.isEmpty == true,
+              resolvedThumbnail == nil,
+              let resolveThumbnail,
+              let guid = stream.guid, !guid.isEmpty
+        else { return }
+        resolvedThumbnail = await resolveThumbnail(guid)
     }
 
     var placeholderThumbnail: some View {

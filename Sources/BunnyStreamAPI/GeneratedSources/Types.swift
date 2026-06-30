@@ -714,14 +714,8 @@ extension APIProtocol {
     ///
     /// - Remark: HTTP `DELETE /library/{libraryId}/live/{streamId}`.
     /// - Remark: Generated from `#/paths//library/{libraryId}/live/{streamId}/delete(LiveStream_Delete)`.
-    public func liveStreamDelete(
-        path: Operations.LiveStreamDelete.Input.Path,
-        headers: Operations.LiveStreamDelete.Input.Headers = .init()
-    ) async throws -> Operations.LiveStreamDelete.Output {
-        try await liveStreamDelete(Operations.LiveStreamDelete.Input(
-            path: path,
-            headers: headers
-        ))
+    public func liveStreamDelete(path: Operations.LiveStreamDelete.Input.Path) async throws -> Operations.LiveStreamDelete.Output {
+        try await liveStreamDelete(Operations.LiveStreamDelete.Input(path: path))
     }
     /// Start Live Stream
     ///
@@ -4191,6 +4185,109 @@ public enum Components {
                 try encoder.encodeAdditionalProperties(additionalProperties)
             }
         }
+        /// RTMP ingest endpoint URLs for a live stream. Combine the URL with the stream key to build the full publishing target.
+        ///
+        /// - Remark: Generated from `#/components/schemas/IngestEndpointConfig`.
+        public struct IngestEndpointConfig: Codable, Hashable, Sendable {
+            /// The primary RTMP ingest URL of the live stream. Combine with the stream key to create the full publishing URL.
+            ///
+            /// - Remark: Generated from `#/components/schemas/IngestEndpointConfig/primaryIngestUrl`.
+            public var primaryIngestUrl: Swift.String?
+            /// The backup RTMP ingest URL of the live stream. Combine with the stream key to create the full publishing URL.
+            ///
+            /// - Remark: Generated from `#/components/schemas/IngestEndpointConfig/backupIngestUrl`.
+            public var backupIngestUrl: Swift.String?
+            /// A container of undocumented properties.
+            public var additionalProperties: OpenAPIRuntime.OpenAPIObjectContainer
+            /// Creates a new `IngestEndpointConfig`.
+            ///
+            /// - Parameters:
+            ///   - primaryIngestUrl: The primary RTMP ingest URL of the live stream. Combine with the stream key to create the full publishing URL.
+            ///   - backupIngestUrl: The backup RTMP ingest URL of the live stream. Combine with the stream key to create the full publishing URL.
+            ///   - additionalProperties: A container of undocumented properties.
+            public init(
+                primaryIngestUrl: Swift.String? = nil,
+                backupIngestUrl: Swift.String? = nil,
+                additionalProperties: OpenAPIRuntime.OpenAPIObjectContainer = .init()
+            ) {
+                self.primaryIngestUrl = primaryIngestUrl
+                self.backupIngestUrl = backupIngestUrl
+                self.additionalProperties = additionalProperties
+            }
+            public enum CodingKeys: String, CodingKey {
+                case primaryIngestUrl
+                case backupIngestUrl
+            }
+            public init(from decoder: any Decoder) throws {
+                let container = try decoder.container(keyedBy: CodingKeys.self)
+                self.primaryIngestUrl = try container.decodeIfPresent(
+                    Swift.String.self,
+                    forKey: .primaryIngestUrl
+                )
+                self.backupIngestUrl = try container.decodeIfPresent(
+                    Swift.String.self,
+                    forKey: .backupIngestUrl
+                )
+                additionalProperties = try decoder.decodeAdditionalProperties(knownKeys: [
+                    "primaryIngestUrl",
+                    "backupIngestUrl"
+                ])
+            }
+            public func encode(to encoder: any Encoder) throws {
+                var container = encoder.container(keyedBy: CodingKeys.self)
+                try container.encodeIfPresent(
+                    self.primaryIngestUrl,
+                    forKey: .primaryIngestUrl
+                )
+                try container.encodeIfPresent(
+                    self.backupIngestUrl,
+                    forKey: .backupIngestUrl
+                )
+                try encoder.encodeAdditionalProperties(additionalProperties)
+            }
+        }
+        /// The ingest endpoints available for publishing to a live stream.
+        ///
+        /// - Remark: Generated from `#/components/schemas/IngestEndpoints`.
+        public struct IngestEndpoints: Codable, Hashable, Sendable {
+            /// - Remark: Generated from `#/components/schemas/IngestEndpoints/rtmp`.
+            public var rtmp: Components.Schemas.IngestEndpointConfig?
+            /// A container of undocumented properties.
+            public var additionalProperties: OpenAPIRuntime.OpenAPIObjectContainer
+            /// Creates a new `IngestEndpoints`.
+            ///
+            /// - Parameters:
+            ///   - rtmp:
+            ///   - additionalProperties: A container of undocumented properties.
+            public init(
+                rtmp: Components.Schemas.IngestEndpointConfig? = nil,
+                additionalProperties: OpenAPIRuntime.OpenAPIObjectContainer = .init()
+            ) {
+                self.rtmp = rtmp
+                self.additionalProperties = additionalProperties
+            }
+            public enum CodingKeys: String, CodingKey {
+                case rtmp
+            }
+            public init(from decoder: any Decoder) throws {
+                let container = try decoder.container(keyedBy: CodingKeys.self)
+                self.rtmp = try container.decodeIfPresent(
+                    Components.Schemas.IngestEndpointConfig.self,
+                    forKey: .rtmp
+                )
+                additionalProperties = try decoder.decodeAdditionalProperties(knownKeys: [
+                    "rtmp"
+                ])
+            }
+            public func encode(to encoder: any Encoder) throws {
+                var container = encoder.container(keyedBy: CodingKeys.self)
+                try container.encodeIfPresent(
+                    self.rtmp,
+                    forKey: .rtmp
+                )
+                try encoder.encodeAdditionalProperties(additionalProperties)
+            }
+        }
         /// Represents a live stream and its metadata including name, stream key, RTMP URL, playback URL, and current status.
         ///
         /// - Remark: Generated from `#/components/schemas/LiveStreamModel`.
@@ -4215,14 +4312,14 @@ public enum Components {
             ///
             /// - Remark: Generated from `#/components/schemas/LiveStreamModel/title`.
             public var title: Swift.String?
+            /// The description of the live stream.
+            ///
+            /// - Remark: Generated from `#/components/schemas/LiveStreamModel/description`.
+            public var description: Swift.String?
             /// The stream key used for RTMP publishing.
             ///
             /// - Remark: Generated from `#/components/schemas/LiveStreamModel/streamKey`.
             public var streamKey: Swift.String?
-            /// The RTMP URL to which the encoder should publish.
-            ///
-            /// - Remark: Generated from `#/components/schemas/LiveStreamModel/rtmpUrl`.
-            public var rtmpUrl: Swift.String?
             /// The HLS playback URL for the live stream.
             ///
             /// - Remark: Generated from `#/components/schemas/LiveStreamModel/playbackUrl`.
@@ -4231,10 +4328,8 @@ public enum Components {
             ///
             /// - Remark: Generated from `#/components/schemas/LiveStreamModel/playbackUrlHls`.
             public var playbackUrlHls: Swift.String?
-            /// The primary RTMP ingest endpoint URL.
-            ///
-            /// - Remark: Generated from `#/components/schemas/LiveStreamModel/ingestEndpoint`.
-            public var ingestEndpoint: Swift.String?
+            /// - Remark: Generated from `#/components/schemas/LiveStreamModel/ingestEndpoints`.
+            public var ingestEndpoints: Components.Schemas.IngestEndpoints?
             /// The current status of the live stream.
             ///
             /// - Remark: Generated from `#/components/schemas/LiveStreamModel/status`.
@@ -4316,11 +4411,11 @@ public enum Components {
             ///   - videoLibraryId: The ID of the video library that contains the live stream.
             ///   - name: The name of the live stream.
             ///   - title: The title of the live stream.
+            ///   - description: The description of the live stream.
             ///   - streamKey: The stream key used for RTMP publishing.
-            ///   - rtmpUrl: The RTMP URL to which the encoder should publish.
             ///   - playbackUrl: The HLS playback URL for the live stream.
             ///   - playbackUrlHls: The HLS playback URL for the live stream (primary field returned by the API).
-            ///   - ingestEndpoint: The primary RTMP ingest endpoint URL.
+            ///   - ingestEndpoints:
             ///   - status: The current status of the live stream.
             ///   - hasArchive: Indicates if the live stream is being archived for later playback.
             ///   - recordVod: Indicates whether a VOD recording will be available after the stream ends.
@@ -4339,11 +4434,11 @@ public enum Components {
                 videoLibraryId: Swift.Int64? = nil,
                 name: Swift.String? = nil,
                 title: Swift.String? = nil,
+                description: Swift.String? = nil,
                 streamKey: Swift.String? = nil,
-                rtmpUrl: Swift.String? = nil,
                 playbackUrl: Swift.String? = nil,
                 playbackUrlHls: Swift.String? = nil,
-                ingestEndpoint: Swift.String? = nil,
+                ingestEndpoints: Components.Schemas.IngestEndpoints? = nil,
                 status: Components.Schemas.LiveStreamModel.StatusPayload? = nil,
                 hasArchive: Swift.Bool? = nil,
                 recordVod: Swift.Bool? = nil,
@@ -4362,11 +4457,11 @@ public enum Components {
                 self.videoLibraryId = videoLibraryId
                 self.name = name
                 self.title = title
+                self.description = description
                 self.streamKey = streamKey
-                self.rtmpUrl = rtmpUrl
                 self.playbackUrl = playbackUrl
                 self.playbackUrlHls = playbackUrlHls
-                self.ingestEndpoint = ingestEndpoint
+                self.ingestEndpoints = ingestEndpoints
                 self.status = status
                 self.hasArchive = hasArchive
                 self.recordVod = recordVod
@@ -4386,11 +4481,11 @@ public enum Components {
                 case videoLibraryId
                 case name
                 case title
+                case description
                 case streamKey
-                case rtmpUrl
                 case playbackUrl
                 case playbackUrlHls
-                case ingestEndpoint
+                case ingestEndpoints
                 case status
                 case hasArchive
                 case recordVod
@@ -4425,13 +4520,13 @@ public enum Components {
                     Swift.String.self,
                     forKey: .title
                 )
+                self.description = try container.decodeIfPresent(
+                    Swift.String.self,
+                    forKey: .description
+                )
                 self.streamKey = try container.decodeIfPresent(
                     Swift.String.self,
                     forKey: .streamKey
-                )
-                self.rtmpUrl = try container.decodeIfPresent(
-                    Swift.String.self,
-                    forKey: .rtmpUrl
                 )
                 self.playbackUrl = try container.decodeIfPresent(
                     Swift.String.self,
@@ -4441,9 +4536,9 @@ public enum Components {
                     Swift.String.self,
                     forKey: .playbackUrlHls
                 )
-                self.ingestEndpoint = try container.decodeIfPresent(
-                    Swift.String.self,
-                    forKey: .ingestEndpoint
+                self.ingestEndpoints = try container.decodeIfPresent(
+                    Components.Schemas.IngestEndpoints.self,
+                    forKey: .ingestEndpoints
                 )
                 self.status = try container.decodeIfPresent(
                     Components.Schemas.LiveStreamModel.StatusPayload.self,
@@ -4495,11 +4590,11 @@ public enum Components {
                     "videoLibraryId",
                     "name",
                     "title",
+                    "description",
                     "streamKey",
-                    "rtmpUrl",
                     "playbackUrl",
                     "playbackUrlHls",
-                    "ingestEndpoint",
+                    "ingestEndpoints",
                     "status",
                     "hasArchive",
                     "recordVod",
@@ -4536,12 +4631,12 @@ public enum Components {
                     forKey: .title
                 )
                 try container.encodeIfPresent(
-                    self.streamKey,
-                    forKey: .streamKey
+                    self.description,
+                    forKey: .description
                 )
                 try container.encodeIfPresent(
-                    self.rtmpUrl,
-                    forKey: .rtmpUrl
+                    self.streamKey,
+                    forKey: .streamKey
                 )
                 try container.encodeIfPresent(
                     self.playbackUrl,
@@ -4552,8 +4647,8 @@ public enum Components {
                     forKey: .playbackUrlHls
                 )
                 try container.encodeIfPresent(
-                    self.ingestEndpoint,
-                    forKey: .ingestEndpoint
+                    self.ingestEndpoints,
+                    forKey: .ingestEndpoints
                 )
                 try container.encodeIfPresent(
                     self.status,
@@ -4794,6 +4889,10 @@ public enum Components {
             ///
             /// - Remark: Generated from `#/components/schemas/CreateLiveStreamModel/title`.
             public var title: Swift.String
+            /// An optional description of the live stream.
+            ///
+            /// - Remark: Generated from `#/components/schemas/CreateLiveStreamModel/description`.
+            public var description: Swift.String?
             /// The scheduled start time in ISO 8601 format. When set, stream status becomes Scheduled (Upcoming).
             ///
             /// - Remark: Generated from `#/components/schemas/CreateLiveStreamModel/scheduledStartTime`.
@@ -4818,52 +4917,68 @@ public enum Components {
             ///
             /// - Remark: Generated from `#/components/schemas/CreateLiveStreamModel/preStreamTrailerVideoId`.
             public var preStreamTrailerVideoId: Swift.String?
+            /// URL of a thumbnail image to display when the stream is offline.
+            ///
+            /// - Remark: Generated from `#/components/schemas/CreateLiveStreamModel/thumbnailUrl`.
+            public var thumbnailUrl: Swift.String?
             /// A container of undocumented properties.
             public var additionalProperties: OpenAPIRuntime.OpenAPIObjectContainer
             /// Creates a new `CreateLiveStreamModel`.
             ///
             /// - Parameters:
             ///   - title: The title of the new live stream.
+            ///   - description: An optional description of the live stream.
             ///   - scheduledStartTime: The scheduled start time in ISO 8601 format. When set, stream status becomes Scheduled (Upcoming).
             ///   - dvrEnabled: Enables DVR so viewers can rewind the live stream.
             ///   - dvrWindowSeconds: DVR window size in seconds. Required when dvrEnabled is true. Maximum is 43200 (12 hours).
             ///   - recordVod: Create a VOD recording after the stream ends.
             ///   - enableCountdown: Show a countdown in the player before the stream starts (only applies when scheduledStartTime is set).
             ///   - preStreamTrailerVideoId: Video ID of the VOD to loop as a trailer before the live stream starts.
+            ///   - thumbnailUrl: URL of a thumbnail image to display when the stream is offline.
             ///   - additionalProperties: A container of undocumented properties.
             public init(
                 title: Swift.String,
+                description: Swift.String? = nil,
                 scheduledStartTime: Swift.String? = nil,
                 dvrEnabled: Swift.Bool? = nil,
                 dvrWindowSeconds: Swift.Int32? = nil,
                 recordVod: Swift.Bool? = nil,
                 enableCountdown: Swift.Bool? = nil,
                 preStreamTrailerVideoId: Swift.String? = nil,
+                thumbnailUrl: Swift.String? = nil,
                 additionalProperties: OpenAPIRuntime.OpenAPIObjectContainer = .init()
             ) {
                 self.title = title
+                self.description = description
                 self.scheduledStartTime = scheduledStartTime
                 self.dvrEnabled = dvrEnabled
                 self.dvrWindowSeconds = dvrWindowSeconds
                 self.recordVod = recordVod
                 self.enableCountdown = enableCountdown
                 self.preStreamTrailerVideoId = preStreamTrailerVideoId
+                self.thumbnailUrl = thumbnailUrl
                 self.additionalProperties = additionalProperties
             }
             public enum CodingKeys: String, CodingKey {
                 case title
+                case description
                 case scheduledStartTime
                 case dvrEnabled
                 case dvrWindowSeconds
                 case recordVod
                 case enableCountdown
                 case preStreamTrailerVideoId
+                case thumbnailUrl
             }
             public init(from decoder: any Decoder) throws {
                 let container = try decoder.container(keyedBy: CodingKeys.self)
                 self.title = try container.decode(
                     Swift.String.self,
                     forKey: .title
+                )
+                self.description = try container.decodeIfPresent(
+                    Swift.String.self,
+                    forKey: .description
                 )
                 self.scheduledStartTime = try container.decodeIfPresent(
                     Swift.String.self,
@@ -4889,14 +5004,20 @@ public enum Components {
                     Swift.String.self,
                     forKey: .preStreamTrailerVideoId
                 )
+                self.thumbnailUrl = try container.decodeIfPresent(
+                    Swift.String.self,
+                    forKey: .thumbnailUrl
+                )
                 additionalProperties = try decoder.decodeAdditionalProperties(knownKeys: [
                     "title",
+                    "description",
                     "scheduledStartTime",
                     "dvrEnabled",
                     "dvrWindowSeconds",
                     "recordVod",
                     "enableCountdown",
-                    "preStreamTrailerVideoId"
+                    "preStreamTrailerVideoId",
+                    "thumbnailUrl"
                 ])
             }
             public func encode(to encoder: any Encoder) throws {
@@ -4904,6 +5025,10 @@ public enum Components {
                 try container.encode(
                     self.title,
                     forKey: .title
+                )
+                try container.encodeIfPresent(
+                    self.description,
+                    forKey: .description
                 )
                 try container.encodeIfPresent(
                     self.scheduledStartTime,
@@ -4929,6 +5054,10 @@ public enum Components {
                     self.preStreamTrailerVideoId,
                     forKey: .preStreamTrailerVideoId
                 )
+                try container.encodeIfPresent(
+                    self.thumbnailUrl,
+                    forKey: .thumbnailUrl
+                )
                 try encoder.encodeAdditionalProperties(additionalProperties)
             }
         }
@@ -4940,22 +5069,38 @@ public enum Components {
             ///
             /// - Remark: Generated from `#/components/schemas/UpdateLiveStreamModel/title`.
             public var title: Swift.String?
+            /// The updated description of the live stream.
+            ///
+            /// - Remark: Generated from `#/components/schemas/UpdateLiveStreamModel/description`.
+            public var description: Swift.String?
+            /// URL of a thumbnail image to display when the stream is offline.
+            ///
+            /// - Remark: Generated from `#/components/schemas/UpdateLiveStreamModel/thumbnailUrl`.
+            public var thumbnailUrl: Swift.String?
             /// A container of undocumented properties.
             public var additionalProperties: OpenAPIRuntime.OpenAPIObjectContainer
             /// Creates a new `UpdateLiveStreamModel`.
             ///
             /// - Parameters:
             ///   - title: The updated title of the live stream.
+            ///   - description: The updated description of the live stream.
+            ///   - thumbnailUrl: URL of a thumbnail image to display when the stream is offline.
             ///   - additionalProperties: A container of undocumented properties.
             public init(
                 title: Swift.String? = nil,
+                description: Swift.String? = nil,
+                thumbnailUrl: Swift.String? = nil,
                 additionalProperties: OpenAPIRuntime.OpenAPIObjectContainer = .init()
             ) {
                 self.title = title
+                self.description = description
+                self.thumbnailUrl = thumbnailUrl
                 self.additionalProperties = additionalProperties
             }
             public enum CodingKeys: String, CodingKey {
                 case title
+                case description
+                case thumbnailUrl
             }
             public init(from decoder: any Decoder) throws {
                 let container = try decoder.container(keyedBy: CodingKeys.self)
@@ -4963,8 +5108,18 @@ public enum Components {
                     Swift.String.self,
                     forKey: .title
                 )
+                self.description = try container.decodeIfPresent(
+                    Swift.String.self,
+                    forKey: .description
+                )
+                self.thumbnailUrl = try container.decodeIfPresent(
+                    Swift.String.self,
+                    forKey: .thumbnailUrl
+                )
                 additionalProperties = try decoder.decodeAdditionalProperties(knownKeys: [
-                    "title"
+                    "title",
+                    "description",
+                    "thumbnailUrl"
                 ])
             }
             public func encode(to encoder: any Encoder) throws {
@@ -4972,6 +5127,14 @@ public enum Components {
                 try container.encodeIfPresent(
                     self.title,
                     forKey: .title
+                )
+                try container.encodeIfPresent(
+                    self.description,
+                    forKey: .description
+                )
+                try container.encodeIfPresent(
+                    self.thumbnailUrl,
+                    forKey: .thumbnailUrl
                 )
                 try encoder.encodeAdditionalProperties(additionalProperties)
             }
@@ -12621,66 +12784,33 @@ public enum Operations {
                 }
             }
             public var path: Operations.LiveStreamDelete.Input.Path
-            /// - Remark: Generated from `#/paths/library/{libraryId}/live/{streamId}/DELETE/header`.
-            public struct Headers: Sendable, Hashable {
-                public var accept: [OpenAPIRuntime.AcceptHeaderContentType<Operations.LiveStreamDelete.AcceptableContentType>]
-                /// Creates a new `Headers`.
-                ///
-                /// - Parameters:
-                ///   - accept:
-                public init(accept: [OpenAPIRuntime.AcceptHeaderContentType<Operations.LiveStreamDelete.AcceptableContentType>] = .defaultValues()) {
-                    self.accept = accept
-                }
-            }
-            public var headers: Operations.LiveStreamDelete.Input.Headers
             /// Creates a new `Input`.
             ///
             /// - Parameters:
             ///   - path:
-            ///   - headers:
-            public init(
-                path: Operations.LiveStreamDelete.Input.Path,
-                headers: Operations.LiveStreamDelete.Input.Headers = .init()
-            ) {
+            public init(path: Operations.LiveStreamDelete.Input.Path) {
                 self.path = path
-                self.headers = headers
             }
         }
         @frozen public enum Output: Sendable, Hashable {
             public struct Ok: Sendable, Hashable {
-                /// - Remark: Generated from `#/paths/library/{libraryId}/live/{streamId}/DELETE/responses/200/content`.
-                @frozen public enum Body: Sendable, Hashable {
-                    /// - Remark: Generated from `#/paths/library/{libraryId}/live/{streamId}/DELETE/responses/200/content/application\/json`.
-                    case json(Components.Schemas.StatusModel)
-                    /// The associated value of the enum case if `self` is `.json`.
-                    ///
-                    /// - Throws: An error if `self` is not `.json`.
-                    /// - SeeAlso: `.json`.
-                    public var json: Components.Schemas.StatusModel {
-                        get throws {
-                            switch self {
-                            case let .json(body):
-                                return body
-                            }
-                        }
-                    }
-                }
-                /// Received HTTP response body
-                public var body: Operations.LiveStreamDelete.Output.Ok.Body
                 /// Creates a new `Ok`.
-                ///
-                /// - Parameters:
-                ///   - body: Received HTTP response body
-                public init(body: Operations.LiveStreamDelete.Output.Ok.Body) {
-                    self.body = body
-                }
+                public init() {}
             }
-            /// The live stream was successfully deleted.
+            /// The live stream was successfully deleted. The response body is empty.
             ///
             /// - Remark: Generated from `#/paths//library/{libraryId}/live/{streamId}/delete(LiveStream_Delete)/responses/200`.
             ///
             /// HTTP response code: `200 ok`.
             case ok(Operations.LiveStreamDelete.Output.Ok)
+            /// The live stream was successfully deleted. The response body is empty.
+            ///
+            /// - Remark: Generated from `#/paths//library/{libraryId}/live/{streamId}/delete(LiveStream_Delete)/responses/200`.
+            ///
+            /// HTTP response code: `200 ok`.
+            public static var ok: Self {
+                .ok(.init())
+            }
             /// The associated value of the enum case if `self` is `.ok`.
             ///
             /// - Throws: An error if `self` is not `.ok`.
@@ -12807,31 +12937,6 @@ public enum Operations {
             ///
             /// A response with a code that is not documented in the OpenAPI document.
             case undocumented(statusCode: Swift.Int, OpenAPIRuntime.UndocumentedPayload)
-        }
-        @frozen public enum AcceptableContentType: AcceptableProtocol {
-            case json
-            case other(Swift.String)
-            public init?(rawValue: Swift.String) {
-                switch rawValue.lowercased() {
-                case "application/json":
-                    self = .json
-                default:
-                    self = .other(rawValue)
-                }
-            }
-            public var rawValue: Swift.String {
-                switch self {
-                case let .other(string):
-                    return string
-                case .json:
-                    return "application/json"
-                }
-            }
-            public static var allCases: [Self] {
-                [
-                    .json
-                ]
-            }
         }
     }
     /// Start Live Stream

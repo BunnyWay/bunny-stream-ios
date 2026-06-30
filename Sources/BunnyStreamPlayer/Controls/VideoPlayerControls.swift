@@ -6,10 +6,12 @@ struct VideoPlayerControls: View {
   @Environment(\.videoPlayerTheme) var theme: VideoPlayerTheme
   @Environment(\.videoPlayerConfig) var videoPlayerConfig: VideoPlayerConfig
   @ObservedObject private var viewModel: VideoPlayerControlsViewModel
+  @ObservedObject private var pipManager: PictureInPictureManager
   @State private var airPlayView = AirPlayView()
-  
-  init(viewModel: VideoPlayerControlsViewModel) {
+
+  init(viewModel: VideoPlayerControlsViewModel, pipManager: PictureInPictureManager) {
     self.viewModel = viewModel
+    self.pipManager = pipManager
   }
   
   var body: some View {
@@ -127,6 +129,9 @@ extension VideoPlayerControls {
 
         optionsButton()
           .shouldAddView(controlsToCheck: .settings, in: videoPlayerConfig.controls)
+        pipButton()
+          .shouldAddView(pipManager.isSupported)
+          .shouldAddView(controlsToCheck: .pip, in: videoPlayerConfig.controls)
         airplayButton()
           .shouldAddView(controlsToCheck: .airplay, in: videoPlayerConfig.controls)
         volumeButton()
@@ -145,6 +150,15 @@ extension VideoPlayerControls {
     }
   }
   
+  func pipButton() -> some View {
+    Button(action: pipManager.toggle) {
+      (pipManager.isActive ? theme.images.pictureInPictureActive : theme.images.pictureInPicture)
+        .aspectRatio(contentMode: .fit)
+        .frame(width: 30, height: 30)
+        .foregroundColor(.white)
+    }
+  }
+
   func volumeButton() -> some View {
     Button(action: viewModel.toggleMute) {
       (viewModel.isMuted ? theme.images.volumeOff : theme.images.volumeOn)

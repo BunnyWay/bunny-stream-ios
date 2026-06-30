@@ -7,6 +7,7 @@ struct TrailerPickerView: View {
     @Environment(\.dismiss) private var dismiss
 
     @State private var videos: [(id: String, title: String)] = []
+    @State private var thumbnails: [String: URL] = [:]
     @State private var isLoading = true
     @State private var errorMessage: String?
     @State private var search = ""
@@ -88,13 +89,16 @@ struct TrailerPickerView: View {
                         selectedId = video.id
                         dismiss()
                     } label: {
-                        HStack {
+                        HStack(spacing: 12) {
+                            thumbnailView(for: video.id)
                             VStack(alignment: .leading, spacing: 2) {
                                 Text(video.title)
                                     .foregroundStyle(.primary)
                                 Text(video.id)
                                     .font(.caption)
                                     .foregroundStyle(.secondary)
+                                    .lineLimit(1)
+                                    .truncationMode(.middle)
                             }
                             Spacer()
                             if video.id == selectedId {
@@ -103,11 +107,48 @@ struct TrailerPickerView: View {
                             }
                         }
                     }
+                    .task { await loadThumbnail(for: video.id) }
                 }
             }
         }
         .searchable(text: $search, prompt: "Search videos")
         .refreshable { await load() }
+    }
+
+    @ViewBuilder
+    private func thumbnailView(for id: String) -> some View {
+        Group {
+            if let url = thumbnails[id] {
+                AsyncImage(url: url) { phase in
+                    switch phase {
+                    case .success(let image):
+                        image.resizable().aspectRatio(contentMode: .fill)
+                    default:
+                        placeholderThumbnail
+                    }
+                }
+            } else {
+                placeholderThumbnail
+            }
+        }
+        .frame(width: 64, height: 36)
+        .clipShape(RoundedRectangle(cornerRadius: 4))
+    }
+
+    private var placeholderThumbnail: some View {
+        ZStack {
+            Color.secondary.opacity(0.15)
+            Image(systemName: "film")
+                .font(.caption)
+                .foregroundStyle(.secondary)
+        }
+    }
+
+    private func loadThumbnail(for id: String) async {
+        guard thumbnails[id] == nil else { return }
+        if let url = await viewModel.videoThumbnailURL(videoId: id) {
+            thumbnails[id] = url
+        }
     }
 
     private func load() async {

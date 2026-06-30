@@ -80,10 +80,9 @@ public struct BunnyStreamCameraUploadView: View {
   }
 
   /// Initializes the broadcaster directly from a live stream model returned by the Bunny API.
-  /// Uses the `rtmpUrl` and `streamKey` from the model — no video creation step needed.
+  /// Uses the primary RTMP ingest endpoint and `streamKey` from the model — no video creation step needed.
   public init(liveStream: Components.Schemas.LiveStreamModel, accessKey: String, libraryId: Int) {
-    let rtmpUrl = liveStream.ingestEndpoint
-      ?? liveStream.rtmpUrl
+    let rtmpUrl = liveStream.ingestEndpoints?.rtmp?.primaryIngestUrl
       ?? BunnyStreamCameraUploadView.bunnyFallbackRtmpUrl
     let streamId = BunnyStreamCameraUploadView.extractStreamId(from: liveStream)
     let config = StreamConfig(
@@ -101,7 +100,7 @@ public struct BunnyStreamCameraUploadView: View {
     return model.guid
   }
 
-  /// Bunny global RTMP ingest URL — used when the stream model doesn't include ingestEndpoint.
+  /// Bunny global RTMP ingest URL — used when the stream model doesn't include an ingest endpoint.
   static let bunnyFallbackRtmpUrl = "rtmp://global.rtmp.mediadelivery.net/live"
 
   /// The body of the view that handles different states:
