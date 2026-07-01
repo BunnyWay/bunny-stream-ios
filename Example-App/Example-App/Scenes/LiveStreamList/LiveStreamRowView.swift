@@ -4,7 +4,8 @@ import SwiftUI
 
 struct LiveStreamRowView: View {
     let stream: Components.Schemas.LiveStreamModel
-    /// Optional fallback resolver used when the stream has no `thumbnailUrl`.
+    /// Optional fallback resolver that maps a library video id to its thumbnail URL.
+    /// Used to preview the pre-stream trailer when the stream has no `thumbnailUrl`.
     var resolveThumbnail: ((String) async -> URL?)? = nil
 
     @State private var resolvedThumbnail: URL?
@@ -54,12 +55,15 @@ private extension LiveStreamRowView {
     }
 
     func loadThumbnailIfNeeded() async {
+        // The live stream's own `thumbnailUrl` isn't returned by the API here, so fall back to
+        // the pre-stream trailer video's thumbnail. (The live stream GUID is not a video id, so
+        // it can't be resolved via the video thumbnail endpoint.)
         guard stream.thumbnailUrl == nil || stream.thumbnailUrl?.isEmpty == true,
               resolvedThumbnail == nil,
               let resolveThumbnail,
-              let guid = stream.guid, !guid.isEmpty
+              let trailerId = stream.preStreamTrailerVideoId, !trailerId.isEmpty
         else { return }
-        resolvedThumbnail = await resolveThumbnail(guid)
+        resolvedThumbnail = await resolveThumbnail(trailerId)
     }
 
     var placeholderThumbnail: some View {

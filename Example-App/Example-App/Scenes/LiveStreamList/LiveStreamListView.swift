@@ -45,7 +45,11 @@ struct LiveStreamListView: View {
             }
         }
         .navigationTitle("Live Streams")
-        .task { await viewModel.load() }
+        .onAppear {
+            // Reload on every appearance (incl. returning from the player) so statuses refresh.
+            // Silent refresh when data already exists to avoid the full-screen spinner flash.
+            Task { await viewModel.load(showLoadingState: viewModel.streams.isEmpty) }
+        }
         .toolbar {
             ToolbarItem(placement: .navigationBarTrailing) {
                 Button { isShowingCreate = true } label: {
@@ -130,7 +134,7 @@ private extension LiveStreamListView {
                         libraryId: dependenciesManager.libraryId,
                         streamId: stream.guid ?? ""
                     )
-                    .navigationTitle(stream.title ?? stream.name ?? "Live Stream")
+                    .navigationTitle("")
                     .navigationBarTitleDisplayMode(.inline)
                     .ignoresSafeArea()
                 } label: {
@@ -171,7 +175,7 @@ private extension LiveStreamListView {
                 }
             }
         }
-        .refreshable { await viewModel.load() }
+        .refreshable { await viewModel.load(showLoadingState: false) }
     }
 
     func canBroadcast(_ stream: Components.Schemas.LiveStreamModel) -> Bool {

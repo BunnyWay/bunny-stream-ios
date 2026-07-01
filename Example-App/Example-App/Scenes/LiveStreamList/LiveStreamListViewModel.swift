@@ -208,12 +208,18 @@ class LiveStreamListViewModel: ObservableObject {
         }
     }
 
-    func load() async {
+    /// - Parameter showLoadingState: when false, keeps the current list on screen instead of
+    ///   swapping to the full-screen spinner. Used for pull-to-refresh and silent re-loads —
+    ///   flipping to `.loading` tears the List out of the hierarchy and cancels the in-flight
+    ///   refresh request.
+    func load(showLoadingState: Bool = true) async {
         guard libraryId != 0 else {
             loadingState = .failed("Library ID not configured. Set it in BunnyStream Configuration.")
             return
         }
-        loadingState = .loading
+        if showLoadingState {
+            loadingState = .loading
+        }
         do {
             let output = try await api.client.liveStreamList(
                 path: .init(libraryId: Int64(libraryId))
