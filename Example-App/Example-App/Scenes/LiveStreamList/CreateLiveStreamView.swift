@@ -24,6 +24,7 @@ struct CreateLiveStreamView: View {
     @State private var trailerEnabled = false
     @State private var trailerVideoId = ""
     @State private var isPickingTrailer = false
+    @State private var rtmpOutputs: [RTMPOutputEntry] = []
     @State private var thumbnailEnabled = false
     @State private var thumbnailUrl = ""
     @State private var thumbnailImageData: Data?
@@ -69,6 +70,15 @@ struct CreateLiveStreamView: View {
         if let trailerId = stream.preStreamTrailerVideoId, !trailerId.isEmpty {
             _trailerEnabled = State(initialValue: true)
             _trailerVideoId = State(initialValue: trailerId)
+        }
+        if let outputs = stream.rtmpOutputs {
+            let entries = outputs.compactMap { output -> RTMPOutputEntry? in
+                let url = output.endpoint ?? ""
+                let key = output.streamKey ?? ""
+                guard !url.isEmpty || !key.isEmpty else { return nil }
+                return RTMPOutputEntry(url: url, key: key)
+            }
+            _rtmpOutputs = State(initialValue: entries)
         }
     }
 
@@ -237,6 +247,35 @@ struct CreateLiveStreamView: View {
                     }
                 }
 
+                Section {
+                    ForEach($rtmpOutputs) { $output in
+                        VStack(alignment: .leading, spacing: 6) {
+                            TextField("Stream URL (rtmp://…)", text: $output.url)
+                                .textContentType(.URL)
+                                .autocorrectionDisabled()
+                                .textInputAutocapitalization(.never)
+                                .keyboardType(.URL)
+                            TextField("Stream Key", text: $output.key)
+                                .autocorrectionDisabled()
+                                .textInputAutocapitalization(.never)
+                                .font(.system(.body, design: .monospaced))
+                        }
+                        .padding(.vertical, 2)
+                    }
+                    .onDelete { rtmpOutputs.remove(atOffsets: $0) }
+                    if rtmpOutputs.count < 4 {
+                        Button {
+                            rtmpOutputs.append(RTMPOutputEntry())
+                        } label: {
+                            Label("Add RTMP output", systemImage: "plus.circle")
+                        }
+                    }
+                } header: {
+                    Text("RTMP outputs")
+                } footer: {
+                    Text("Forward this live stream to up to 4 external RTMP destinations (YouTube, Twitch, etc.). Swipe a row to remove it.\n\n⚠️ RTMP output writes aren't enabled on the Bunny API yet (preview) — saving with outputs set currently returns a server error (HTTP 500). Reading already-configured outputs works.")
+                }
+
                 if let errorMessage {
                     Section {
                         Label(errorMessage, systemImage: "exclamationmark.triangle")
@@ -346,11 +385,22 @@ struct CreateLiveStreamView: View {
         return existingThumbnailURL
     }
 
+    /// Maps the RTMP output rows to API models, dropping rows where both fields are empty.
+    private func mappedRtmpOutputs() -> [Components.Schemas.RtmpOutput] {
+        rtmpOutputs.compactMap { entry in
+            let url = entry.url.trimmingCharacters(in: .whitespaces)
+            let key = entry.key.trimmingCharacters(in: .whitespaces)
+            guard !url.isEmpty || !key.isEmpty else { return nil }
+            return Components.Schemas.RtmpOutput(endpoint: url, streamKey: key)
+        }
+    }
+
     private func save() async {
         isCreating = true
         errorMessage = nil
         let trimmedName = name.trimmingCharacters(in: .whitespaces)
         let trimmedDescription = streamDescription.trimmingCharacters(in: .whitespacesAndNewlines)
+        let outputs = mappedRtmpOutputs()
         do {
             let streamId: String
             if let editingStream {
@@ -364,7 +414,8 @@ struct CreateLiveStreamView: View {
                     dvrWindowSeconds: dvrEnabled ? dvrWindowSeconds : nil,
                     recordVod: recordVod,
                     trailerVideoId: trailerEnabled ? trailerVideoId : nil,
-                    isPublic: isPublic
+                    isPublic: isPublic,
+                    rtmpOutputs: outputs
                 )
                 streamId = editingStream.guid ?? ""
             } else {
@@ -376,7 +427,8 @@ struct CreateLiveStreamView: View {
                     dvrEnabled: dvrEnabled,
                     dvrWindowSeconds: dvrEnabled ? dvrWindowSeconds : nil,
                     recordVod: recordVod,
-                    trailerVideoId: trailerEnabled ? trailerVideoId : nil
+                    trailerVideoId: trailerEnabled ? trailerVideoId : nil,
+                    rtmpOutputs: outputs
                 )
                 streamId = created.guid ?? ""
             }
@@ -388,7 +440,13 @@ struct CreateLiveStreamView: View {
             await onCreated()
             dismiss()
         } catch {
-            errorMessage = error.localizedDescription
+            if !outputs.isEmpty {
+                // Sending rtmpOutputs currently fails server-side (HTTP 500) — the write path is a
+                // Bunny preview feature that isn't enabled yet. The request body itself is spec-valid.
+                errorMessage = "Couldn't save. RTMP output writes aren't enabled on the Bunny API yet — remove the outputs and try again.\n(\(error.localizedDescription))"
+            } else {
+                errorMessage = error.localizedDescription
+            }
             isCreating = false
         }
     }
@@ -412,4 +470,11 @@ struct CreateLiveStreamView: View {
             viewModel.actionError = "Stream saved, but the thumbnail couldn't be updated: \(error.localizedDescription)"
         }
     }
+}
+
+/// A single editable RTMP output row (Stream URL + Stream Key).
+private struct RTMPOutputEntry: Identifiable {
+    let id = UUID()
+    var url: String = ""
+    var key: String = ""
 }

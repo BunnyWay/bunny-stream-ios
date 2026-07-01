@@ -4519,6 +4519,10 @@ public enum Components {
             ///
             /// - Remark: Generated from `#/components/schemas/LiveStreamModel/ingestRegion`.
             public var ingestRegion: Swift.String?
+            /// The RTMP outputs the incoming stream is forwarded to (up to 4).
+            ///
+            /// - Remark: Generated from `#/components/schemas/LiveStreamModel/rtmpOutputs`.
+            public var rtmpOutputs: [Components.Schemas.RtmpOutput]?
             /// A container of undocumented properties.
             public var additionalProperties: OpenAPIRuntime.OpenAPIObjectContainer
             /// Creates a new `LiveStreamModel`.
@@ -4551,6 +4555,7 @@ public enum Components {
             ///   - primaryLive: Determines if the primary ingest is live.
             ///   - backupLive: Determines if the backup ingest is live.
             ///   - ingestRegion: The primary ingest region of the live stream.
+            ///   - rtmpOutputs: The RTMP outputs the incoming stream is forwarded to (up to 4).
             ///   - additionalProperties: A container of undocumented properties.
             public init(
                 id: Swift.String? = nil,
@@ -4580,6 +4585,7 @@ public enum Components {
                 primaryLive: Swift.Bool? = nil,
                 backupLive: Swift.Bool? = nil,
                 ingestRegion: Swift.String? = nil,
+                rtmpOutputs: [Components.Schemas.RtmpOutput]? = nil,
                 additionalProperties: OpenAPIRuntime.OpenAPIObjectContainer = .init()
             ) {
                 self.id = id
@@ -4609,6 +4615,7 @@ public enum Components {
                 self.primaryLive = primaryLive
                 self.backupLive = backupLive
                 self.ingestRegion = ingestRegion
+                self.rtmpOutputs = rtmpOutputs
                 self.additionalProperties = additionalProperties
             }
             public enum CodingKeys: String, CodingKey {
@@ -4639,6 +4646,7 @@ public enum Components {
                 case primaryLive
                 case backupLive
                 case ingestRegion
+                case rtmpOutputs
             }
             public init(from decoder: any Decoder) throws {
                 let container = try decoder.container(keyedBy: CodingKeys.self)
@@ -4750,6 +4758,10 @@ public enum Components {
                     Swift.String.self,
                     forKey: .ingestRegion
                 )
+                self.rtmpOutputs = try container.decodeIfPresent(
+                    [Components.Schemas.RtmpOutput].self,
+                    forKey: .rtmpOutputs
+                )
                 additionalProperties = try decoder.decodeAdditionalProperties(knownKeys: [
                     "id",
                     "guid",
@@ -4777,7 +4789,8 @@ public enum Components {
                     "thumbnailFileName",
                     "primaryLive",
                     "backupLive",
-                    "ingestRegion"
+                    "ingestRegion",
+                    "rtmpOutputs"
                 ])
             }
             public func encode(to encoder: any Encoder) throws {
@@ -4889,6 +4902,10 @@ public enum Components {
                 try container.encodeIfPresent(
                     self.ingestRegion,
                     forKey: .ingestRegion
+                )
+                try container.encodeIfPresent(
+                    self.rtmpOutputs,
+                    forKey: .rtmpOutputs
                 )
                 try encoder.encodeAdditionalProperties(additionalProperties)
             }
@@ -5420,6 +5437,10 @@ public enum Components {
             ///
             /// - Remark: Generated from `#/components/schemas/CreateLiveStreamModel/preStreamTrailerVideoId`.
             public var preStreamTrailerVideoId: Swift.String?
+            /// A list of up to 4 RTMP outputs that the incoming stream should be forwarded to.
+            ///
+            /// - Remark: Generated from `#/components/schemas/CreateLiveStreamModel/rtmpOutputs`.
+            public var rtmpOutputs: [Components.Schemas.RtmpOutput]?
             /// A container of undocumented properties.
             public var additionalProperties: OpenAPIRuntime.OpenAPIObjectContainer
             /// Creates a new `CreateLiveStreamModel`.
@@ -5433,6 +5454,7 @@ public enum Components {
             ///   - recordVod: Create a VOD recording after the stream ends.
             ///   - enableCountdown: Show a countdown in the player before the stream starts (only applies when scheduledStartTime is set).
             ///   - preStreamTrailerVideoId: Video ID of the VOD to loop as a trailer before the live stream starts.
+            ///   - rtmpOutputs: A list of up to 4 RTMP outputs that the incoming stream should be forwarded to.
             ///   - additionalProperties: A container of undocumented properties.
             public init(
                 title: Swift.String,
@@ -5443,6 +5465,7 @@ public enum Components {
                 recordVod: Swift.Bool? = nil,
                 enableCountdown: Swift.Bool? = nil,
                 preStreamTrailerVideoId: Swift.String? = nil,
+                rtmpOutputs: [Components.Schemas.RtmpOutput]? = nil,
                 additionalProperties: OpenAPIRuntime.OpenAPIObjectContainer = .init()
             ) {
                 self.title = title
@@ -5453,6 +5476,7 @@ public enum Components {
                 self.recordVod = recordVod
                 self.enableCountdown = enableCountdown
                 self.preStreamTrailerVideoId = preStreamTrailerVideoId
+                self.rtmpOutputs = rtmpOutputs
                 self.additionalProperties = additionalProperties
             }
             public enum CodingKeys: String, CodingKey {
@@ -5464,6 +5488,7 @@ public enum Components {
                 case recordVod
                 case enableCountdown
                 case preStreamTrailerVideoId
+                case rtmpOutputs
             }
             public init(from decoder: any Decoder) throws {
                 let container = try decoder.container(keyedBy: CodingKeys.self)
@@ -5499,6 +5524,10 @@ public enum Components {
                     Swift.String.self,
                     forKey: .preStreamTrailerVideoId
                 )
+                self.rtmpOutputs = try container.decodeIfPresent(
+                    [Components.Schemas.RtmpOutput].self,
+                    forKey: .rtmpOutputs
+                )
                 additionalProperties = try decoder.decodeAdditionalProperties(knownKeys: [
                     "title",
                     "description",
@@ -5507,7 +5536,8 @@ public enum Components {
                     "dvrWindowSeconds",
                     "recordVod",
                     "enableCountdown",
-                    "preStreamTrailerVideoId"
+                    "preStreamTrailerVideoId",
+                    "rtmpOutputs"
                 ])
             }
             public func encode(to encoder: any Encoder) throws {
@@ -5543,6 +5573,10 @@ public enum Components {
                 try container.encodeIfPresent(
                     self.preStreamTrailerVideoId,
                     forKey: .preStreamTrailerVideoId
+                )
+                try container.encodeIfPresent(
+                    self.rtmpOutputs,
+                    forKey: .rtmpOutputs
                 )
                 try encoder.encodeAdditionalProperties(additionalProperties)
             }

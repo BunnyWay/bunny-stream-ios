@@ -42,11 +42,15 @@ class LiveStreamListViewModel: ObservableObject {
         dvrEnabled: Bool = false,
         dvrWindowSeconds: Int? = nil,
         recordVod: Bool = false,
-        trailerVideoId: String? = nil
+        trailerVideoId: String? = nil,
+        rtmpOutputs: [Components.Schemas.RtmpOutput] = []
     ) async throws -> Components.Schemas.LiveStreamModel {
         var model = Components.Schemas.CreateLiveStreamModel(title: name)
         if let description, !description.isEmpty {
             model.description = description
+        }
+        if !rtmpOutputs.isEmpty {
+            model.rtmpOutputs = rtmpOutputs
         }
         if let date = scheduledStartTime {
             let formatter = ISO8601DateFormatter()
@@ -101,7 +105,8 @@ class LiveStreamListViewModel: ObservableObject {
         dvrWindowSeconds: Int? = nil,
         recordVod: Bool = false,
         trailerVideoId: String? = nil,
-        isPublic: Bool? = nil
+        isPublic: Bool? = nil,
+        rtmpOutputs: [Components.Schemas.RtmpOutput] = []
     ) async throws -> Components.Schemas.LiveStreamModel {
         guard let guid = stream.guid, !guid.isEmpty else { throw CreateError.invalidRequest }
         var model = Components.Schemas.UpdateLiveStreamModel()
@@ -115,6 +120,12 @@ class LiveStreamListViewModel: ObservableObject {
         model.recordVod = recordVod
         model.preStreamTrailerVideoId = (trailerVideoId?.isEmpty == false) ? trailerVideoId : nil
         if let isPublic { model._public = isPublic }
+        // Only send rtmpOutputs when set — the API rejects an empty array (400). A populated array
+        // matches the documented schema but currently returns 500 (Bunny preview feature not yet
+        // enabled server-side), so the create/edit UI surfaces that as a clear error.
+        if !rtmpOutputs.isEmpty {
+            model.rtmpOutputs = rtmpOutputs
+        }
 
         let output = try await api.client.liveStreamUpdate(
             path: .init(libraryId: Int64(libraryId), streamId: guid),

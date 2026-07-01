@@ -2647,6 +2647,12 @@ components:
           type: string
           description: The primary ingest region of the live stream.
           nullable: true
+        rtmpOutputs:
+          type: array
+          description: The RTMP outputs the incoming stream is forwarded to (up to 4).
+          nullable: true
+          items:
+            $ref: '#/components/schemas/RtmpOutput'
     LiveStreamStatus:
       type: integer
       description: 'The current status of the live stream: 1 = Created, 2 = Scheduled, 4 = Running, 5 = Ended, 6 = VodProcessing, 7 = Error.'
@@ -2812,6 +2818,12 @@ components:
           type: string
           description: Video ID of the VOD to loop as a trailer before the live stream starts.
           nullable: true
+        rtmpOutputs:
+          type: array
+          description: A list of up to 4 RTMP outputs that the incoming stream should be forwarded to.
+          nullable: true
+          items:
+            $ref: '#/components/schemas/RtmpOutput'
     RtmpOutput:
       type: object
       description: An RTMP output endpoint that the incoming live stream is forwarded to.
