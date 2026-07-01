@@ -1,4 +1,5 @@
 import SwiftUI
+import Kingfisher
 
 /// A logo/watermark overlaid on top of the video while it plays.
 ///
@@ -75,17 +76,14 @@ struct WatermarkOverlayView: View {
 
   var body: some View {
     GeometryReader { geometry in
-      AsyncImage(url: watermark.imageURL) { phase in
-        if case .success(let image) = phase {
-          image
-            .resizable()
-            .aspectRatio(contentMode: .fit)
-            .frame(width: max(1, geometry.size.width * watermark.relativeWidth))
-            .opacity(watermark.opacity)
-            .padding(watermark.margin)
-            .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: watermark.position.alignment)
-        }
-      }
+      KFImage.url(watermark.imageURL)
+        .requestModifier(BunnyCDN.refererModifier)
+        .resizable()
+        .aspectRatio(contentMode: .fit)
+        .frame(width: max(1, geometry.size.width * watermark.relativeWidth))
+        .opacity(watermark.opacity)
+        .padding(watermark.margin)
+        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: watermark.position.alignment)
     }
     .allowsHitTesting(false)
   }

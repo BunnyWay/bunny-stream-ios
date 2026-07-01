@@ -30,6 +30,7 @@ private extension ThumbnailAsyncImageView {
       let column = positionWithinImage % video.seekThumbnail.maxColumns
       
       KFImage.url(url)
+        .requestModifier(BunnyCDN.refererModifier)
         .placeholder {
           ProgressView()
         }

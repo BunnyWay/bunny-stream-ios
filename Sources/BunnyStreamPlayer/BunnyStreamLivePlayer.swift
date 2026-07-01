@@ -1,6 +1,7 @@
 import AVFoundation
 import AVKit
 import SwiftUI
+import Kingfisher
 import BunnyStreamAPI
 
 /// A SwiftUI view that provides a live stream playback experience using BunnyStream.
@@ -99,22 +100,27 @@ private extension BunnyStreamLivePlayer {
 
     func countdownView(until date: Date, thumbnailUrl: URL?, title: String?) -> some View {
         ZStack {
-            if let thumbnailUrl {
-                AsyncImage(url: thumbnailUrl) { phase in
-                    if case .success(let image) = phase {
-                        image
-                            .resizable()
-                            .aspectRatio(contentMode: .fill)
-                    } else {
-                        Color.black
-                    }
-                }
-            } else {
-                Color.black
-            }
+            Color.black
+            posterImage(thumbnailUrl)
             countdownOverlay(until: date, title: title)
         }
         .ignoresSafeArea()
+    }
+
+    /// Poster image shown behind live-state overlays (countdown / offline / error).
+    ///
+    /// Uses Kingfisher with the Bunny CDN Referer so the image still loads when the library
+    /// has "Block direct URL file access" enabled (a plain `AsyncImage` cannot send the header
+    /// and would be rejected with HTTP 403, leaving a black poster).
+    @ViewBuilder
+    func posterImage(_ url: URL?, dim: Double = 0) -> some View {
+        if let url {
+            KFImage.url(url)
+                .requestModifier(BunnyCDN.refererModifier)
+                .resizable()
+                .aspectRatio(contentMode: .fill)
+                .overlay(dim > 0 ? Color.black.opacity(dim) : Color.clear)
+        }
     }
 
     func trailerWithOverlay(vodId: String, scheduledStart: Date?, statusMessage: String?, title: String?) -> some View {
@@ -204,20 +210,8 @@ private extension BunnyStreamLivePlayer {
 
     func offlineView(message: String, thumbnailUrl: URL?) -> some View {
         ZStack {
-            if let thumbnailUrl {
-                AsyncImage(url: thumbnailUrl) { phase in
-                    if case .success(let image) = phase {
-                        image
-                            .resizable()
-                            .aspectRatio(contentMode: .fill)
-                            .overlay(Color.black.opacity(0.55))
-                    } else {
-                        Color.black
-                    }
-                }
-            } else {
-                Color.black
-            }
+            Color.black
+            posterImage(thumbnailUrl, dim: 0.55)
 
             VStack(spacing: 12) {
                 Image(systemName: "antenna.radiowaves.left.and.right.slash")
@@ -234,20 +228,8 @@ private extension BunnyStreamLivePlayer {
 
     func errorView(message: String, thumbnailUrl: URL?) -> some View {
         ZStack {
-            if let thumbnailUrl {
-                AsyncImage(url: thumbnailUrl) { phase in
-                    if case .success(let image) = phase {
-                        image
-                            .resizable()
-                            .aspectRatio(contentMode: .fill)
-                            .overlay(Color.black.opacity(0.65))
-                    } else {
-                        Color.black
-                    }
-                }
-            } else {
-                Color.black
-            }
+            Color.black
+            posterImage(thumbnailUrl, dim: 0.65)
 
             VStack(spacing: 12) {
                 Image(systemName: "exclamationmark.triangle.fill")

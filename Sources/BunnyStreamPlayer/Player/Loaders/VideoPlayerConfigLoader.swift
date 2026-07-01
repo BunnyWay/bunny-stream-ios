@@ -28,7 +28,7 @@ public struct VideoPlayerConfigLoader {
     var request = URLRequest(url: url)
     request.httpMethod = "GET"
     request.addValue("application/json", forHTTPHeaderField: "Accept")
-    request.addValue("https://iframe.mediadelivery.net/", forHTTPHeaderField: "Referer")
+    request.addValue(BunnyCDN.referer, forHTTPHeaderField: "Referer")
     request.addValue(SDKInfo.userAgent, forHTTPHeaderField: SDKInfo.userAgentHeaderField)
     
     do {
