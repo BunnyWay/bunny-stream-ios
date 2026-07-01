@@ -154,11 +154,7 @@ private extension LivePlaybackController {
         }
 
         if isVodRecording {
-            teardownCurrentPlayer()
-            let player = MediaPlayer(url: url)
-            observeItem(player)
-            if userWantsPlay { player.play() }
-            state = .playable(player)
+            loadRecordingPlayer(fallbackURL: url)
         } else {
             // Fetch /play for HLS URL + DVR seekable window.
             // Don't change state yet — current state (trailer/countdown) stays visible until player is ready.
@@ -178,6 +174,36 @@ private extension LivePlaybackController {
                     self.teardownCurrentPlayer()
                     self.state = .playable(player)
                 }
+            }
+        }
+    }
+
+    /// Builds a VOD player for an ended live stream's recording.
+    ///
+    /// The recording is a regular VOD once the stream ends, so it plays through the same path as
+    /// any other VOD — `/videos/{guid}/play` → `Video` → `MediaPlayer.make` — which sets up
+    /// FairPlay, CMCD (`.vod`) and finite/scrubbable playback. The live `playbackUrlHls` points at
+    /// the (now-dead) live edge, so it's used only as a fallback while the recording config isn't
+    /// available yet. Once the recording player is up, polling stops — the ended state is terminal.
+    func loadRecordingPlayer(fallbackURL: URL) {
+        Task { [weak self] in
+            guard let self else { return }
+            let player: MediaPlayer
+            do {
+                let config = try await VideoPlayerConfigLoader().load(libraryId: libraryId, videoId: streamId)
+                player = MediaPlayer.make(video: Video(response: config))
+            } catch {
+                player = MediaPlayer(url: fallbackURL)
+            }
+            observeItem(player)
+            if userWantsPlay { player.play() }
+            await MainActor.run { [weak self] in
+                guard let self, !self.isStopped else { return }
+                self.teardownCurrentPlayer()
+                self.state = .playable(player)
+                // The recording is static — stop the 5s poll. Player-failure recovery still re-polls.
+                self.pollTask?.cancel()
+                self.pollTask = nil
             }
         }
     }
