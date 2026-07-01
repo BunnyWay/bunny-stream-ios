@@ -2,6 +2,7 @@ import BunnyStreamAPI
 import BunnyStreamPlayer
 import BunnyStreamUploader
 import Foundation
+import OpenAPIRuntime
 
 @MainActor
 class LiveStreamListViewModel: ObservableObject {
@@ -41,15 +42,11 @@ class LiveStreamListViewModel: ObservableObject {
         dvrEnabled: Bool = false,
         dvrWindowSeconds: Int? = nil,
         recordVod: Bool = false,
-        trailerVideoId: String? = nil,
-        thumbnailUrl: String? = nil
+        trailerVideoId: String? = nil
     ) async throws -> Components.Schemas.LiveStreamModel {
         var model = Components.Schemas.CreateLiveStreamModel(title: name)
         if let description, !description.isEmpty {
             model.description = description
-        }
-        if let thumbnailUrl, !thumbnailUrl.isEmpty {
-            model.thumbnailUrl = thumbnailUrl
         }
         if let date = scheduledStartTime {
             let formatter = ISO8601DateFormatter()
@@ -138,6 +135,99 @@ class LiveStreamListViewModel: ObservableObject {
         case .undocumented(statusCode: let code, _):
             throw CreateError.httpError(code)
         }
+    }
+
+    // MARK: - Thumbnails
+
+    enum ThumbnailError: LocalizedError {
+        case unauthorized, notFound, invalidImage, tooLarge, failed(Int?)
+        var errorDescription: String? {
+            switch self {
+            case .unauthorized:     return "Unauthorized — check your Access Key."
+            case .notFound:         return "Live stream not found."
+            case .invalidImage:     return "Couldn't read the selected image."
+            case .tooLarge:         return "The image is too large. Please pick a smaller one."
+            case .failed(let code): return code.map { "Failed to set thumbnail (HTTP \($0))." } ?? "Failed to set thumbnail."
+            }
+        }
+    }
+
+    /// Sets the offline thumbnail from a remote URL — Bunny fetches the image.
+    func setThumbnail(streamId: String, url: String) async throws {
+        let output = try await api.client.liveStreamSetThumbnail(
+            path: .init(libraryId: Int64(libraryId), streamId: streamId),
+            query: .init(thumbnailUrl: url)
+        )
+        try handleSetThumbnail(output)
+    }
+
+    /// Uploads JPEG image bytes (e.g. a photo picked on the device) as the offline thumbnail.
+    /// The bytes must be JPEG — Bunny requires an image Content-Type and rejects HEIC/octet-stream.
+    func setThumbnail(streamId: String, jpegData: Data) async throws {
+        let output = try await api.client.liveStreamSetThumbnail(
+            path: .init(libraryId: Int64(libraryId), streamId: streamId),
+            body: .jpeg(HTTPBody([UInt8](jpegData)))
+        )
+        try handleSetThumbnail(output)
+    }
+
+    private func handleSetThumbnail(_ output: Operations.LiveStreamSetThumbnail.Output) throws {
+        switch output {
+        case .ok:
+            return
+        case .unauthorized:
+            throw ThumbnailError.unauthorized
+        case .notFound:
+            throw ThumbnailError.notFound
+        case .badRequest:
+            // Bunny returns 400 for oversized images ("Invalid thumbnail file size").
+            throw ThumbnailError.tooLarge
+        case .unprocessableContent:
+            throw ThumbnailError.failed(422)
+        case .internalServerError:
+            throw ThumbnailError.failed(500)
+        case .undocumented(statusCode: let code, _):
+            throw ThumbnailError.failed(code)
+        }
+    }
+
+    /// Removes the offline thumbnail from the live stream.
+    func deleteThumbnail(streamId: String) async throws {
+        let output = try await api.client.liveStreamDeleteThumbnail(
+            path: .init(libraryId: Int64(libraryId), streamId: streamId)
+        )
+        switch output {
+        case .noContent:
+            return
+        case .unauthorized:
+            throw ThumbnailError.unauthorized
+        case .notFound:
+            throw ThumbnailError.notFound
+        case .undocumented(statusCode: let code, _):
+            throw ThumbnailError.failed(code)
+        default:
+            throw ThumbnailError.failed(nil)
+        }
+    }
+
+    /// Builds the full offline-thumbnail URL from the stream's `thumbnailFileName` and playback
+    /// host: `https://{host}/{guid}/{thumbnailFileName}`. Returns nil when no thumbnail is set.
+    func offlineThumbnailURL(for stream: Components.Schemas.LiveStreamModel) -> URL? {
+        guard let fileName = stream.thumbnailFileName, !fileName.isEmpty,
+              let guid = stream.guid, !guid.isEmpty,
+              let hls = stream.playbackUrlHls, let host = URL(string: hls)?.host
+        else { return nil }
+        return URL(string: "https://\(host)/\(guid)/\(fileName)")
+    }
+
+    /// Best thumbnail for a list row: the stream's own offline thumbnail, else the pre-stream
+    /// trailer's thumbnail as a fallback.
+    func liveThumbnailURL(for stream: Components.Schemas.LiveStreamModel) async -> URL? {
+        if let url = offlineThumbnailURL(for: stream) { return url }
+        if let trailerId = stream.preStreamTrailerVideoId, !trailerId.isEmpty {
+            return await videoThumbnailURL(videoId: trailerId)
+        }
+        return nil
     }
 
     func createTrailerEntry(name: String) async throws -> (id: String, title: String) {

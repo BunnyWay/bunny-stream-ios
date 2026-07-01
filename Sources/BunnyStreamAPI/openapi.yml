@@ -1471,6 +1471,174 @@ paths:
           description: Internal Server Error.
       security:
         - AccessKey: []
+  /library/{libraryId}/live/{streamId}/thumbnail:
+    post:
+      tags:
+        - Manage Live Streams
+      summary: Set Live Stream Thumbnail
+      description: >-
+        Sets the offline thumbnail for a live stream, shown in the player before the stream
+        starts or when it encounters issues. Provide either a `thumbnailUrl` query parameter
+        (Bunny fetches the image) or upload the raw image bytes as an octet-stream request body.
+      operationId: LiveStream_SetThumbnail
+      parameters:
+        - name: libraryId
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+          description: The ID of the video library.
+        - name: streamId
+          in: path
+          required: true
+          schema:
+            type: string
+          description: The unique identifier of the live stream.
+        - name: thumbnailUrl
+          in: query
+          required: false
+          schema:
+            type: string
+          description: URL of the image to set as the thumbnail. Omit when uploading raw bytes in the request body.
+      requestBody:
+        required: false
+        description: >-
+          Raw image bytes to upload as the thumbnail. Send with the matching image Content-Type
+          (JPEG, PNG, WebP, or GIF) — the API rejects application/octet-stream. Omit when setting
+          the thumbnail via the thumbnailUrl query parameter.
+        content:
+          image/jpeg:
+            schema:
+              type: string
+              format: binary
+          image/png:
+            schema:
+              type: string
+              format: binary
+          image/webp:
+            schema:
+              type: string
+              format: binary
+          image/gif:
+            schema:
+              type: string
+              format: binary
+      responses:
+        '200':
+          description: The thumbnail was successfully set.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/StatusModel'
+        '400':
+          description: The request or URL was invalid.
+        '401':
+          description: The request authorization failed.
+        '404':
+          description: The requested live stream was not found.
+        '422':
+          description: Unable to fetch the thumbnail from the origin.
+        '500':
+          description: Internal Server Error.
+      security:
+        - AccessKey: []
+    delete:
+      tags:
+        - Manage Live Streams
+      summary: Delete Live Stream Thumbnail
+      description: Removes the offline thumbnail for a live stream.
+      operationId: LiveStream_DeleteThumbnail
+      parameters:
+        - name: libraryId
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+          description: The ID of the video library.
+        - name: streamId
+          in: path
+          required: true
+          schema:
+            type: string
+          description: The unique identifier of the live stream.
+        - name: restoreLibraryDefault
+          in: query
+          required: false
+          schema:
+            type: boolean
+          description: When true and the library has a default live thumbnail, that default is restored.
+      responses:
+        '204':
+          description: The thumbnail was successfully deleted.
+        '401':
+          description: The request authorization failed.
+        '404':
+          description: The requested live stream was not found.
+        '500':
+          description: Internal Server Error.
+      security:
+        - AccessKey: []
+  /library/{libraryId}/live/{streamId}/thumbnails:
+    get:
+      tags:
+        - Manage Live Streams
+      summary: Get Live Stream Thumbnails
+      description: Returns the list of captured thumbnails (URL and timestamp) for a live stream.
+      operationId: LiveStream_GetThumbnails
+      parameters:
+        - name: libraryId
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+          description: The ID of the video library.
+        - name: streamId
+          in: path
+          required: true
+          schema:
+            type: string
+          description: The unique identifier of the live stream.
+        - name: limit
+          in: query
+          required: false
+          schema:
+            type: integer
+            format: int32
+          description: 'The maximum number of thumbnails to return. Default: 5.'
+        - name: from
+          in: query
+          required: false
+          schema:
+            type: string
+          description: Filter thumbnails created at or after this UTC timestamp.
+        - name: to
+          in: query
+          required: false
+          schema:
+            type: string
+          description: Filter thumbnails created at or before this UTC timestamp.
+      responses:
+        '200':
+          description: A list of thumbnail objects.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/ThumbnailListResponseModel'
+        '400':
+          description: The request was invalid.
+        '401':
+          description: The request authorization failed.
+        '404':
+          description: The requested live stream was not found.
+        '500':
+          description: Internal Server Error.
+      security:
+        - AccessKey: []
   /OEmbed:
     get:
       tags:
@@ -2460,6 +2628,13 @@ components:
           type: string
           description: The URL of the thumbnail image to display when the stream is offline.
           nullable: true
+        thumbnailFileName:
+          type: string
+          description: >-
+            The relative path of the offline thumbnail within the CDN zone. Combine with the
+            playback host and stream GUID to build the full URL:
+            https://{host}/{guid}/{thumbnailFileName}.
+          nullable: true
         primaryLive:
           type: boolean
           description: Determines if the primary ingest is live.
@@ -2516,6 +2691,19 @@ components:
         statusTimeUtc:
           type: string
           description: The UTC time when the status was read, in ISO 8601 format.
+          nullable: true
+    ThumbnailListResponseModel:
+      type: object
+      description: A captured live stream thumbnail — its CDN URL and the moment it was taken.
+      additionalProperties: true
+      properties:
+        url:
+          type: string
+          description: The URL of the thumbnail image.
+          nullable: true
+        timestamp:
+          type: string
+          description: The UTC time the thumbnail was captured, in ISO 8601 format.
           nullable: true
     LiveStreamPlayDataModel:
       type: object
@@ -2623,10 +2811,6 @@ components:
         preStreamTrailerVideoId:
           type: string
           description: Video ID of the VOD to loop as a trailer before the live stream starts.
-          nullable: true
-        thumbnailUrl:
-          type: string
-          description: URL of a thumbnail image to display when the stream is offline.
           nullable: true
     RtmpOutput:
       type: object

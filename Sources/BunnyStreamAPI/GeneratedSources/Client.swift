@@ -2708,6 +2708,265 @@ public struct Client: APIProtocol {
             }
         )
     }
+    /// Set Live Stream Thumbnail
+    ///
+    /// Sets the offline thumbnail for a live stream, shown in the player before the stream starts or when it encounters issues. Provide either a `thumbnailUrl` query parameter (Bunny fetches the image) or upload the raw image bytes as an octet-stream request body.
+    ///
+    /// - Remark: HTTP `POST /library/{libraryId}/live/{streamId}/thumbnail`.
+    /// - Remark: Generated from `#/paths//library/{libraryId}/live/{streamId}/thumbnail/post(LiveStream_SetThumbnail)`.
+    public func liveStreamSetThumbnail(_ input: Operations.LiveStreamSetThumbnail.Input) async throws -> Operations.LiveStreamSetThumbnail.Output {
+        try await client.send(
+            input: input,
+            forOperation: Operations.LiveStreamSetThumbnail.id,
+            serializer: { input in
+                let path = try converter.renderedPath(
+                    template: "/library/{}/live/{}/thumbnail",
+                    parameters: [
+                        input.path.libraryId,
+                        input.path.streamId
+                    ]
+                )
+                var request: HTTPTypes.HTTPRequest = .init(
+                    soar_path: path,
+                    method: .post
+                )
+                suppressMutabilityWarning(&request)
+                try converter.setQueryItemAsURI(
+                    in: &request,
+                    style: .form,
+                    explode: true,
+                    name: "thumbnailUrl",
+                    value: input.query.thumbnailUrl
+                )
+                converter.setAcceptHeader(
+                    in: &request.headerFields,
+                    contentTypes: input.headers.accept
+                )
+                let body: OpenAPIRuntime.HTTPBody?
+                switch input.body {
+                case .none:
+                    body = nil
+                case let .jpeg(value):
+                    body = try converter.setOptionalRequestBodyAsBinary(
+                        value,
+                        headerFields: &request.headerFields,
+                        contentType: "image/jpeg"
+                    )
+                case let .png(value):
+                    body = try converter.setOptionalRequestBodyAsBinary(
+                        value,
+                        headerFields: &request.headerFields,
+                        contentType: "image/png"
+                    )
+                case let .imageWebp(value):
+                    body = try converter.setOptionalRequestBodyAsBinary(
+                        value,
+                        headerFields: &request.headerFields,
+                        contentType: "image/webp"
+                    )
+                case let .imageGif(value):
+                    body = try converter.setOptionalRequestBodyAsBinary(
+                        value,
+                        headerFields: &request.headerFields,
+                        contentType: "image/gif"
+                    )
+                }
+                return (request, body)
+            },
+            deserializer: { response, responseBody in
+                switch response.status.code {
+                case 200:
+                    let contentType = converter.extractContentTypeIfPresent(in: response.headerFields)
+                    let body: Operations.LiveStreamSetThumbnail.Output.Ok.Body
+                    let chosenContentType = try converter.bestContentType(
+                        received: contentType,
+                        options: [
+                            "application/json"
+                        ]
+                    )
+                    switch chosenContentType {
+                    case "application/json":
+                        body = try await converter.getResponseBodyAsJSON(
+                            Components.Schemas.StatusModel.self,
+                            from: responseBody,
+                            transforming: { value in
+                                .json(value)
+                            }
+                        )
+                    default:
+                        preconditionFailure("bestContentType chose an invalid content type.")
+                    }
+                    return .ok(.init(body: body))
+                case 400:
+                    return .badRequest(.init())
+                case 401:
+                    return .unauthorized(.init())
+                case 404:
+                    return .notFound(.init())
+                case 422:
+                    return .unprocessableContent(.init())
+                case 500:
+                    return .internalServerError(.init())
+                default:
+                    return .undocumented(
+                        statusCode: response.status.code,
+                        .init(
+                            headerFields: response.headerFields,
+                            body: responseBody
+                        )
+                    )
+                }
+            }
+        )
+    }
+    /// Delete Live Stream Thumbnail
+    ///
+    /// Removes the offline thumbnail for a live stream.
+    ///
+    /// - Remark: HTTP `DELETE /library/{libraryId}/live/{streamId}/thumbnail`.
+    /// - Remark: Generated from `#/paths//library/{libraryId}/live/{streamId}/thumbnail/delete(LiveStream_DeleteThumbnail)`.
+    public func liveStreamDeleteThumbnail(_ input: Operations.LiveStreamDeleteThumbnail.Input) async throws -> Operations.LiveStreamDeleteThumbnail.Output {
+        try await client.send(
+            input: input,
+            forOperation: Operations.LiveStreamDeleteThumbnail.id,
+            serializer: { input in
+                let path = try converter.renderedPath(
+                    template: "/library/{}/live/{}/thumbnail",
+                    parameters: [
+                        input.path.libraryId,
+                        input.path.streamId
+                    ]
+                )
+                var request: HTTPTypes.HTTPRequest = .init(
+                    soar_path: path,
+                    method: .delete
+                )
+                suppressMutabilityWarning(&request)
+                try converter.setQueryItemAsURI(
+                    in: &request,
+                    style: .form,
+                    explode: true,
+                    name: "restoreLibraryDefault",
+                    value: input.query.restoreLibraryDefault
+                )
+                return (request, nil)
+            },
+            deserializer: { response, responseBody in
+                switch response.status.code {
+                case 204:
+                    return .noContent(.init())
+                case 401:
+                    return .unauthorized(.init())
+                case 404:
+                    return .notFound(.init())
+                case 500:
+                    return .internalServerError(.init())
+                default:
+                    return .undocumented(
+                        statusCode: response.status.code,
+                        .init(
+                            headerFields: response.headerFields,
+                            body: responseBody
+                        )
+                    )
+                }
+            }
+        )
+    }
+    /// Get Live Stream Thumbnails
+    ///
+    /// Returns the list of captured thumbnails (URL and timestamp) for a live stream.
+    ///
+    /// - Remark: HTTP `GET /library/{libraryId}/live/{streamId}/thumbnails`.
+    /// - Remark: Generated from `#/paths//library/{libraryId}/live/{streamId}/thumbnails/get(LiveStream_GetThumbnails)`.
+    public func liveStreamGetThumbnails(_ input: Operations.LiveStreamGetThumbnails.Input) async throws -> Operations.LiveStreamGetThumbnails.Output {
+        try await client.send(
+            input: input,
+            forOperation: Operations.LiveStreamGetThumbnails.id,
+            serializer: { input in
+                let path = try converter.renderedPath(
+                    template: "/library/{}/live/{}/thumbnails",
+                    parameters: [
+                        input.path.libraryId,
+                        input.path.streamId
+                    ]
+                )
+                var request: HTTPTypes.HTTPRequest = .init(
+                    soar_path: path,
+                    method: .get
+                )
+                suppressMutabilityWarning(&request)
+                try converter.setQueryItemAsURI(
+                    in: &request,
+                    style: .form,
+                    explode: true,
+                    name: "limit",
+                    value: input.query.limit
+                )
+                try converter.setQueryItemAsURI(
+                    in: &request,
+                    style: .form,
+                    explode: true,
+                    name: "from",
+                    value: input.query.from
+                )
+                try converter.setQueryItemAsURI(
+                    in: &request,
+                    style: .form,
+                    explode: true,
+                    name: "to",
+                    value: input.query.to
+                )
+                converter.setAcceptHeader(
+                    in: &request.headerFields,
+                    contentTypes: input.headers.accept
+                )
+                return (request, nil)
+            },
+            deserializer: { response, responseBody in
+                switch response.status.code {
+                case 200:
+                    let contentType = converter.extractContentTypeIfPresent(in: response.headerFields)
+                    let body: Operations.LiveStreamGetThumbnails.Output.Ok.Body
+                    let chosenContentType = try converter.bestContentType(
+                        received: contentType,
+                        options: [
+                            "application/json"
+                        ]
+                    )
+                    switch chosenContentType {
+                    case "application/json":
+                        body = try await converter.getResponseBodyAsJSON(
+                            [Components.Schemas.ThumbnailListResponseModel].self,
+                            from: responseBody,
+                            transforming: { value in
+                                .json(value)
+                            }
+                        )
+                    default:
+                        preconditionFailure("bestContentType chose an invalid content type.")
+                    }
+                    return .ok(.init(body: body))
+                case 400:
+                    return .badRequest(.init())
+                case 401:
+                    return .unauthorized(.init())
+                case 404:
+                    return .notFound(.init())
+                case 500:
+                    return .internalServerError(.init())
+                default:
+                    return .undocumented(
+                        statusCode: response.status.code,
+                        .init(
+                            headerFields: response.headerFields,
+                            body: responseBody
+                        )
+                    )
+                }
+            }
+        )
+    }
     /// Get OEmbed Data
     ///
     /// Retrieves OEmbed information for a given video URL. This includes embed HTML, thumbnail URL, and metadata such as title and provider details.

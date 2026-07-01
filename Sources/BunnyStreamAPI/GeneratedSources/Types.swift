@@ -242,6 +242,27 @@ public protocol APIProtocol: Sendable {
     /// - Remark: HTTP `GET /library/{libraryId}/live/{streamId}/status`.
     /// - Remark: Generated from `#/paths//library/{libraryId}/live/{streamId}/status/get(LiveStream_GetStreamStatus)`.
     func liveStreamGetStreamStatus(_ input: Operations.LiveStreamGetStreamStatus.Input) async throws -> Operations.LiveStreamGetStreamStatus.Output
+    /// Set Live Stream Thumbnail
+    ///
+    /// Sets the offline thumbnail for a live stream, shown in the player before the stream starts or when it encounters issues. Provide either a `thumbnailUrl` query parameter (Bunny fetches the image) or upload the raw image bytes as an octet-stream request body.
+    ///
+    /// - Remark: HTTP `POST /library/{libraryId}/live/{streamId}/thumbnail`.
+    /// - Remark: Generated from `#/paths//library/{libraryId}/live/{streamId}/thumbnail/post(LiveStream_SetThumbnail)`.
+    func liveStreamSetThumbnail(_ input: Operations.LiveStreamSetThumbnail.Input) async throws -> Operations.LiveStreamSetThumbnail.Output
+    /// Delete Live Stream Thumbnail
+    ///
+    /// Removes the offline thumbnail for a live stream.
+    ///
+    /// - Remark: HTTP `DELETE /library/{libraryId}/live/{streamId}/thumbnail`.
+    /// - Remark: Generated from `#/paths//library/{libraryId}/live/{streamId}/thumbnail/delete(LiveStream_DeleteThumbnail)`.
+    func liveStreamDeleteThumbnail(_ input: Operations.LiveStreamDeleteThumbnail.Input) async throws -> Operations.LiveStreamDeleteThumbnail.Output
+    /// Get Live Stream Thumbnails
+    ///
+    /// Returns the list of captured thumbnails (URL and timestamp) for a live stream.
+    ///
+    /// - Remark: HTTP `GET /library/{libraryId}/live/{streamId}/thumbnails`.
+    /// - Remark: Generated from `#/paths//library/{libraryId}/live/{streamId}/thumbnails/get(LiveStream_GetThumbnails)`.
+    func liveStreamGetThumbnails(_ input: Operations.LiveStreamGetThumbnails.Input) async throws -> Operations.LiveStreamGetThumbnails.Output
     /// Get OEmbed Data
     ///
     /// Retrieves OEmbed information for a given video URL. This includes embed HTML, thumbnail URL, and metadata such as title and provider details.
@@ -781,6 +802,57 @@ extension APIProtocol {
     ) async throws -> Operations.LiveStreamGetStreamStatus.Output {
         try await liveStreamGetStreamStatus(Operations.LiveStreamGetStreamStatus.Input(
             path: path,
+            headers: headers
+        ))
+    }
+    /// Set Live Stream Thumbnail
+    ///
+    /// Sets the offline thumbnail for a live stream, shown in the player before the stream starts or when it encounters issues. Provide either a `thumbnailUrl` query parameter (Bunny fetches the image) or upload the raw image bytes as an octet-stream request body.
+    ///
+    /// - Remark: HTTP `POST /library/{libraryId}/live/{streamId}/thumbnail`.
+    /// - Remark: Generated from `#/paths//library/{libraryId}/live/{streamId}/thumbnail/post(LiveStream_SetThumbnail)`.
+    public func liveStreamSetThumbnail(
+        path: Operations.LiveStreamSetThumbnail.Input.Path,
+        query: Operations.LiveStreamSetThumbnail.Input.Query = .init(),
+        headers: Operations.LiveStreamSetThumbnail.Input.Headers = .init(),
+        body: Operations.LiveStreamSetThumbnail.Input.Body? = nil
+    ) async throws -> Operations.LiveStreamSetThumbnail.Output {
+        try await liveStreamSetThumbnail(Operations.LiveStreamSetThumbnail.Input(
+            path: path,
+            query: query,
+            headers: headers,
+            body: body
+        ))
+    }
+    /// Delete Live Stream Thumbnail
+    ///
+    /// Removes the offline thumbnail for a live stream.
+    ///
+    /// - Remark: HTTP `DELETE /library/{libraryId}/live/{streamId}/thumbnail`.
+    /// - Remark: Generated from `#/paths//library/{libraryId}/live/{streamId}/thumbnail/delete(LiveStream_DeleteThumbnail)`.
+    public func liveStreamDeleteThumbnail(
+        path: Operations.LiveStreamDeleteThumbnail.Input.Path,
+        query: Operations.LiveStreamDeleteThumbnail.Input.Query = .init()
+    ) async throws -> Operations.LiveStreamDeleteThumbnail.Output {
+        try await liveStreamDeleteThumbnail(Operations.LiveStreamDeleteThumbnail.Input(
+            path: path,
+            query: query
+        ))
+    }
+    /// Get Live Stream Thumbnails
+    ///
+    /// Returns the list of captured thumbnails (URL and timestamp) for a live stream.
+    ///
+    /// - Remark: HTTP `GET /library/{libraryId}/live/{streamId}/thumbnails`.
+    /// - Remark: Generated from `#/paths//library/{libraryId}/live/{streamId}/thumbnails/get(LiveStream_GetThumbnails)`.
+    public func liveStreamGetThumbnails(
+        path: Operations.LiveStreamGetThumbnails.Input.Path,
+        query: Operations.LiveStreamGetThumbnails.Input.Query = .init(),
+        headers: Operations.LiveStreamGetThumbnails.Input.Headers = .init()
+    ) async throws -> Operations.LiveStreamGetThumbnails.Output {
+        try await liveStreamGetThumbnails(Operations.LiveStreamGetThumbnails.Input(
+            path: path,
+            query: query,
             headers: headers
         ))
     }
@@ -4431,6 +4503,10 @@ public enum Components {
             ///
             /// - Remark: Generated from `#/components/schemas/LiveStreamModel/thumbnailUrl`.
             public var thumbnailUrl: Swift.String?
+            /// The relative path of the offline thumbnail within the CDN zone. Combine with the playback host and stream GUID to build the full URL: https://{host}/{guid}/{thumbnailFileName}.
+            ///
+            /// - Remark: Generated from `#/components/schemas/LiveStreamModel/thumbnailFileName`.
+            public var thumbnailFileName: Swift.String?
             /// Determines if the primary ingest is live.
             ///
             /// - Remark: Generated from `#/components/schemas/LiveStreamModel/primaryLive`.
@@ -4471,6 +4547,7 @@ public enum Components {
             ///   - preStreamTrailerVideoId: The GUID of a VOD video to loop as a trailer before the stream starts.
             ///   - startedAt: The actual time the live stream started, in ISO 8601 format.
             ///   - thumbnailUrl: The URL of the thumbnail image to display when the stream is offline.
+            ///   - thumbnailFileName: The relative path of the offline thumbnail within the CDN zone. Combine with the playback host and stream GUID to build the full URL: https://{host}/{guid}/{thumbnailFileName}.
             ///   - primaryLive: Determines if the primary ingest is live.
             ///   - backupLive: Determines if the backup ingest is live.
             ///   - ingestRegion: The primary ingest region of the live stream.
@@ -4499,6 +4576,7 @@ public enum Components {
                 preStreamTrailerVideoId: Swift.String? = nil,
                 startedAt: Swift.String? = nil,
                 thumbnailUrl: Swift.String? = nil,
+                thumbnailFileName: Swift.String? = nil,
                 primaryLive: Swift.Bool? = nil,
                 backupLive: Swift.Bool? = nil,
                 ingestRegion: Swift.String? = nil,
@@ -4527,6 +4605,7 @@ public enum Components {
                 self.preStreamTrailerVideoId = preStreamTrailerVideoId
                 self.startedAt = startedAt
                 self.thumbnailUrl = thumbnailUrl
+                self.thumbnailFileName = thumbnailFileName
                 self.primaryLive = primaryLive
                 self.backupLive = backupLive
                 self.ingestRegion = ingestRegion
@@ -4556,6 +4635,7 @@ public enum Components {
                 case preStreamTrailerVideoId
                 case startedAt
                 case thumbnailUrl
+                case thumbnailFileName
                 case primaryLive
                 case backupLive
                 case ingestRegion
@@ -4654,6 +4734,10 @@ public enum Components {
                     Swift.String.self,
                     forKey: .thumbnailUrl
                 )
+                self.thumbnailFileName = try container.decodeIfPresent(
+                    Swift.String.self,
+                    forKey: .thumbnailFileName
+                )
                 self.primaryLive = try container.decodeIfPresent(
                     Swift.Bool.self,
                     forKey: .primaryLive
@@ -4690,6 +4774,7 @@ public enum Components {
                     "preStreamTrailerVideoId",
                     "startedAt",
                     "thumbnailUrl",
+                    "thumbnailFileName",
                     "primaryLive",
                     "backupLive",
                     "ingestRegion"
@@ -4788,6 +4873,10 @@ public enum Components {
                 try container.encodeIfPresent(
                     self.thumbnailUrl,
                     forKey: .thumbnailUrl
+                )
+                try container.encodeIfPresent(
+                    self.thumbnailFileName,
+                    forKey: .thumbnailFileName
                 )
                 try container.encodeIfPresent(
                     self.primaryLive,
@@ -4940,6 +5029,67 @@ public enum Components {
                 try container.encodeIfPresent(
                     self.statusTimeUtc,
                     forKey: .statusTimeUtc
+                )
+                try encoder.encodeAdditionalProperties(additionalProperties)
+            }
+        }
+        /// A captured live stream thumbnail — its CDN URL and the moment it was taken.
+        ///
+        /// - Remark: Generated from `#/components/schemas/ThumbnailListResponseModel`.
+        public struct ThumbnailListResponseModel: Codable, Hashable, Sendable {
+            /// The URL of the thumbnail image.
+            ///
+            /// - Remark: Generated from `#/components/schemas/ThumbnailListResponseModel/url`.
+            public var url: Swift.String?
+            /// The UTC time the thumbnail was captured, in ISO 8601 format.
+            ///
+            /// - Remark: Generated from `#/components/schemas/ThumbnailListResponseModel/timestamp`.
+            public var timestamp: Swift.String?
+            /// A container of undocumented properties.
+            public var additionalProperties: OpenAPIRuntime.OpenAPIObjectContainer
+            /// Creates a new `ThumbnailListResponseModel`.
+            ///
+            /// - Parameters:
+            ///   - url: The URL of the thumbnail image.
+            ///   - timestamp: The UTC time the thumbnail was captured, in ISO 8601 format.
+            ///   - additionalProperties: A container of undocumented properties.
+            public init(
+                url: Swift.String? = nil,
+                timestamp: Swift.String? = nil,
+                additionalProperties: OpenAPIRuntime.OpenAPIObjectContainer = .init()
+            ) {
+                self.url = url
+                self.timestamp = timestamp
+                self.additionalProperties = additionalProperties
+            }
+            public enum CodingKeys: String, CodingKey {
+                case url
+                case timestamp
+            }
+            public init(from decoder: any Decoder) throws {
+                let container = try decoder.container(keyedBy: CodingKeys.self)
+                self.url = try container.decodeIfPresent(
+                    Swift.String.self,
+                    forKey: .url
+                )
+                self.timestamp = try container.decodeIfPresent(
+                    Swift.String.self,
+                    forKey: .timestamp
+                )
+                additionalProperties = try decoder.decodeAdditionalProperties(knownKeys: [
+                    "url",
+                    "timestamp"
+                ])
+            }
+            public func encode(to encoder: any Encoder) throws {
+                var container = encoder.container(keyedBy: CodingKeys.self)
+                try container.encodeIfPresent(
+                    self.url,
+                    forKey: .url
+                )
+                try container.encodeIfPresent(
+                    self.timestamp,
+                    forKey: .timestamp
                 )
                 try encoder.encodeAdditionalProperties(additionalProperties)
             }
@@ -5270,10 +5420,6 @@ public enum Components {
             ///
             /// - Remark: Generated from `#/components/schemas/CreateLiveStreamModel/preStreamTrailerVideoId`.
             public var preStreamTrailerVideoId: Swift.String?
-            /// URL of a thumbnail image to display when the stream is offline.
-            ///
-            /// - Remark: Generated from `#/components/schemas/CreateLiveStreamModel/thumbnailUrl`.
-            public var thumbnailUrl: Swift.String?
             /// A container of undocumented properties.
             public var additionalProperties: OpenAPIRuntime.OpenAPIObjectContainer
             /// Creates a new `CreateLiveStreamModel`.
@@ -5287,7 +5433,6 @@ public enum Components {
             ///   - recordVod: Create a VOD recording after the stream ends.
             ///   - enableCountdown: Show a countdown in the player before the stream starts (only applies when scheduledStartTime is set).
             ///   - preStreamTrailerVideoId: Video ID of the VOD to loop as a trailer before the live stream starts.
-            ///   - thumbnailUrl: URL of a thumbnail image to display when the stream is offline.
             ///   - additionalProperties: A container of undocumented properties.
             public init(
                 title: Swift.String,
@@ -5298,7 +5443,6 @@ public enum Components {
                 recordVod: Swift.Bool? = nil,
                 enableCountdown: Swift.Bool? = nil,
                 preStreamTrailerVideoId: Swift.String? = nil,
-                thumbnailUrl: Swift.String? = nil,
                 additionalProperties: OpenAPIRuntime.OpenAPIObjectContainer = .init()
             ) {
                 self.title = title
@@ -5309,7 +5453,6 @@ public enum Components {
                 self.recordVod = recordVod
                 self.enableCountdown = enableCountdown
                 self.preStreamTrailerVideoId = preStreamTrailerVideoId
-                self.thumbnailUrl = thumbnailUrl
                 self.additionalProperties = additionalProperties
             }
             public enum CodingKeys: String, CodingKey {
@@ -5321,7 +5464,6 @@ public enum Components {
                 case recordVod
                 case enableCountdown
                 case preStreamTrailerVideoId
-                case thumbnailUrl
             }
             public init(from decoder: any Decoder) throws {
                 let container = try decoder.container(keyedBy: CodingKeys.self)
@@ -5357,10 +5499,6 @@ public enum Components {
                     Swift.String.self,
                     forKey: .preStreamTrailerVideoId
                 )
-                self.thumbnailUrl = try container.decodeIfPresent(
-                    Swift.String.self,
-                    forKey: .thumbnailUrl
-                )
                 additionalProperties = try decoder.decodeAdditionalProperties(knownKeys: [
                     "title",
                     "description",
@@ -5369,8 +5507,7 @@ public enum Components {
                     "dvrWindowSeconds",
                     "recordVod",
                     "enableCountdown",
-                    "preStreamTrailerVideoId",
-                    "thumbnailUrl"
+                    "preStreamTrailerVideoId"
                 ])
             }
             public func encode(to encoder: any Encoder) throws {
@@ -5406,10 +5543,6 @@ public enum Components {
                 try container.encodeIfPresent(
                     self.preStreamTrailerVideoId,
                     forKey: .preStreamTrailerVideoId
-                )
-                try container.encodeIfPresent(
-                    self.thumbnailUrl,
-                    forKey: .thumbnailUrl
                 )
                 try encoder.encodeAdditionalProperties(additionalProperties)
             }
@@ -14492,6 +14625,878 @@ public enum Operations {
             /// - Throws: An error if `self` is not `.internalServerError`.
             /// - SeeAlso: `.internalServerError`.
             public var internalServerError: Operations.LiveStreamGetStreamStatus.Output.InternalServerError {
+                get throws {
+                    switch self {
+                    case let .internalServerError(response):
+                        return response
+                    default:
+                        try throwUnexpectedResponseStatus(
+                            expectedStatus: "internalServerError",
+                            response: self
+                        )
+                    }
+                }
+            }
+            /// Undocumented response.
+            ///
+            /// A response with a code that is not documented in the OpenAPI document.
+            case undocumented(statusCode: Swift.Int, OpenAPIRuntime.UndocumentedPayload)
+        }
+        @frozen public enum AcceptableContentType: AcceptableProtocol {
+            case json
+            case other(Swift.String)
+            public init?(rawValue: Swift.String) {
+                switch rawValue.lowercased() {
+                case "application/json":
+                    self = .json
+                default:
+                    self = .other(rawValue)
+                }
+            }
+            public var rawValue: Swift.String {
+                switch self {
+                case let .other(string):
+                    return string
+                case .json:
+                    return "application/json"
+                }
+            }
+            public static var allCases: [Self] {
+                [
+                    .json
+                ]
+            }
+        }
+    }
+    /// Set Live Stream Thumbnail
+    ///
+    /// Sets the offline thumbnail for a live stream, shown in the player before the stream starts or when it encounters issues. Provide either a `thumbnailUrl` query parameter (Bunny fetches the image) or upload the raw image bytes as an octet-stream request body.
+    ///
+    /// - Remark: HTTP `POST /library/{libraryId}/live/{streamId}/thumbnail`.
+    /// - Remark: Generated from `#/paths//library/{libraryId}/live/{streamId}/thumbnail/post(LiveStream_SetThumbnail)`.
+    public enum LiveStreamSetThumbnail {
+        public static let id: Swift.String = "LiveStream_SetThumbnail"
+        public struct Input: Sendable, Hashable {
+            /// - Remark: Generated from `#/paths/library/{libraryId}/live/{streamId}/thumbnail/POST/path`.
+            public struct Path: Sendable, Hashable {
+                /// The ID of the video library.
+                ///
+                /// - Remark: Generated from `#/paths/library/{libraryId}/live/{streamId}/thumbnail/POST/path/libraryId`.
+                public var libraryId: Swift.Int64
+                /// The unique identifier of the live stream.
+                ///
+                /// - Remark: Generated from `#/paths/library/{libraryId}/live/{streamId}/thumbnail/POST/path/streamId`.
+                public var streamId: Swift.String
+                /// Creates a new `Path`.
+                ///
+                /// - Parameters:
+                ///   - libraryId: The ID of the video library.
+                ///   - streamId: The unique identifier of the live stream.
+                public init(
+                    libraryId: Swift.Int64,
+                    streamId: Swift.String
+                ) {
+                    self.libraryId = libraryId
+                    self.streamId = streamId
+                }
+            }
+            public var path: Operations.LiveStreamSetThumbnail.Input.Path
+            /// - Remark: Generated from `#/paths/library/{libraryId}/live/{streamId}/thumbnail/POST/query`.
+            public struct Query: Sendable, Hashable {
+                /// URL of the image to set as the thumbnail. Omit when uploading raw bytes in the request body.
+                ///
+                /// - Remark: Generated from `#/paths/library/{libraryId}/live/{streamId}/thumbnail/POST/query/thumbnailUrl`.
+                public var thumbnailUrl: Swift.String?
+                /// Creates a new `Query`.
+                ///
+                /// - Parameters:
+                ///   - thumbnailUrl: URL of the image to set as the thumbnail. Omit when uploading raw bytes in the request body.
+                public init(thumbnailUrl: Swift.String? = nil) {
+                    self.thumbnailUrl = thumbnailUrl
+                }
+            }
+            public var query: Operations.LiveStreamSetThumbnail.Input.Query
+            /// - Remark: Generated from `#/paths/library/{libraryId}/live/{streamId}/thumbnail/POST/header`.
+            public struct Headers: Sendable, Hashable {
+                public var accept: [OpenAPIRuntime.AcceptHeaderContentType<Operations.LiveStreamSetThumbnail.AcceptableContentType>]
+                /// Creates a new `Headers`.
+                ///
+                /// - Parameters:
+                ///   - accept:
+                public init(accept: [OpenAPIRuntime.AcceptHeaderContentType<Operations.LiveStreamSetThumbnail.AcceptableContentType>] = .defaultValues()) {
+                    self.accept = accept
+                }
+            }
+            public var headers: Operations.LiveStreamSetThumbnail.Input.Headers
+            /// - Remark: Generated from `#/paths/library/{libraryId}/live/{streamId}/thumbnail/POST/requestBody`.
+            @frozen public enum Body: Sendable, Hashable {
+                /// - Remark: Generated from `#/paths/library/{libraryId}/live/{streamId}/thumbnail/POST/requestBody/content/image\/jpeg`.
+                case jpeg(OpenAPIRuntime.HTTPBody)
+                /// - Remark: Generated from `#/paths/library/{libraryId}/live/{streamId}/thumbnail/POST/requestBody/content/image\/png`.
+                case png(OpenAPIRuntime.HTTPBody)
+                /// - Remark: Generated from `#/paths/library/{libraryId}/live/{streamId}/thumbnail/POST/requestBody/content/image\/webp`.
+                case imageWebp(OpenAPIRuntime.HTTPBody)
+                /// - Remark: Generated from `#/paths/library/{libraryId}/live/{streamId}/thumbnail/POST/requestBody/content/image\/gif`.
+                case imageGif(OpenAPIRuntime.HTTPBody)
+            }
+            public var body: Operations.LiveStreamSetThumbnail.Input.Body?
+            /// Creates a new `Input`.
+            ///
+            /// - Parameters:
+            ///   - path:
+            ///   - query:
+            ///   - headers:
+            ///   - body:
+            public init(
+                path: Operations.LiveStreamSetThumbnail.Input.Path,
+                query: Operations.LiveStreamSetThumbnail.Input.Query = .init(),
+                headers: Operations.LiveStreamSetThumbnail.Input.Headers = .init(),
+                body: Operations.LiveStreamSetThumbnail.Input.Body? = nil
+            ) {
+                self.path = path
+                self.query = query
+                self.headers = headers
+                self.body = body
+            }
+        }
+        @frozen public enum Output: Sendable, Hashable {
+            public struct Ok: Sendable, Hashable {
+                /// - Remark: Generated from `#/paths/library/{libraryId}/live/{streamId}/thumbnail/POST/responses/200/content`.
+                @frozen public enum Body: Sendable, Hashable {
+                    /// - Remark: Generated from `#/paths/library/{libraryId}/live/{streamId}/thumbnail/POST/responses/200/content/application\/json`.
+                    case json(Components.Schemas.StatusModel)
+                    /// The associated value of the enum case if `self` is `.json`.
+                    ///
+                    /// - Throws: An error if `self` is not `.json`.
+                    /// - SeeAlso: `.json`.
+                    public var json: Components.Schemas.StatusModel {
+                        get throws {
+                            switch self {
+                            case let .json(body):
+                                return body
+                            }
+                        }
+                    }
+                }
+                /// Received HTTP response body
+                public var body: Operations.LiveStreamSetThumbnail.Output.Ok.Body
+                /// Creates a new `Ok`.
+                ///
+                /// - Parameters:
+                ///   - body: Received HTTP response body
+                public init(body: Operations.LiveStreamSetThumbnail.Output.Ok.Body) {
+                    self.body = body
+                }
+            }
+            /// The thumbnail was successfully set.
+            ///
+            /// - Remark: Generated from `#/paths//library/{libraryId}/live/{streamId}/thumbnail/post(LiveStream_SetThumbnail)/responses/200`.
+            ///
+            /// HTTP response code: `200 ok`.
+            case ok(Operations.LiveStreamSetThumbnail.Output.Ok)
+            /// The associated value of the enum case if `self` is `.ok`.
+            ///
+            /// - Throws: An error if `self` is not `.ok`.
+            /// - SeeAlso: `.ok`.
+            public var ok: Operations.LiveStreamSetThumbnail.Output.Ok {
+                get throws {
+                    switch self {
+                    case let .ok(response):
+                        return response
+                    default:
+                        try throwUnexpectedResponseStatus(
+                            expectedStatus: "ok",
+                            response: self
+                        )
+                    }
+                }
+            }
+            public struct BadRequest: Sendable, Hashable {
+                /// Creates a new `BadRequest`.
+                public init() {}
+            }
+            /// The request or URL was invalid.
+            ///
+            /// - Remark: Generated from `#/paths//library/{libraryId}/live/{streamId}/thumbnail/post(LiveStream_SetThumbnail)/responses/400`.
+            ///
+            /// HTTP response code: `400 badRequest`.
+            case badRequest(Operations.LiveStreamSetThumbnail.Output.BadRequest)
+            /// The request or URL was invalid.
+            ///
+            /// - Remark: Generated from `#/paths//library/{libraryId}/live/{streamId}/thumbnail/post(LiveStream_SetThumbnail)/responses/400`.
+            ///
+            /// HTTP response code: `400 badRequest`.
+            public static var badRequest: Self {
+                .badRequest(.init())
+            }
+            /// The associated value of the enum case if `self` is `.badRequest`.
+            ///
+            /// - Throws: An error if `self` is not `.badRequest`.
+            /// - SeeAlso: `.badRequest`.
+            public var badRequest: Operations.LiveStreamSetThumbnail.Output.BadRequest {
+                get throws {
+                    switch self {
+                    case let .badRequest(response):
+                        return response
+                    default:
+                        try throwUnexpectedResponseStatus(
+                            expectedStatus: "badRequest",
+                            response: self
+                        )
+                    }
+                }
+            }
+            public struct Unauthorized: Sendable, Hashable {
+                /// Creates a new `Unauthorized`.
+                public init() {}
+            }
+            /// The request authorization failed.
+            ///
+            /// - Remark: Generated from `#/paths//library/{libraryId}/live/{streamId}/thumbnail/post(LiveStream_SetThumbnail)/responses/401`.
+            ///
+            /// HTTP response code: `401 unauthorized`.
+            case unauthorized(Operations.LiveStreamSetThumbnail.Output.Unauthorized)
+            /// The request authorization failed.
+            ///
+            /// - Remark: Generated from `#/paths//library/{libraryId}/live/{streamId}/thumbnail/post(LiveStream_SetThumbnail)/responses/401`.
+            ///
+            /// HTTP response code: `401 unauthorized`.
+            public static var unauthorized: Self {
+                .unauthorized(.init())
+            }
+            /// The associated value of the enum case if `self` is `.unauthorized`.
+            ///
+            /// - Throws: An error if `self` is not `.unauthorized`.
+            /// - SeeAlso: `.unauthorized`.
+            public var unauthorized: Operations.LiveStreamSetThumbnail.Output.Unauthorized {
+                get throws {
+                    switch self {
+                    case let .unauthorized(response):
+                        return response
+                    default:
+                        try throwUnexpectedResponseStatus(
+                            expectedStatus: "unauthorized",
+                            response: self
+                        )
+                    }
+                }
+            }
+            public struct NotFound: Sendable, Hashable {
+                /// Creates a new `NotFound`.
+                public init() {}
+            }
+            /// The requested live stream was not found.
+            ///
+            /// - Remark: Generated from `#/paths//library/{libraryId}/live/{streamId}/thumbnail/post(LiveStream_SetThumbnail)/responses/404`.
+            ///
+            /// HTTP response code: `404 notFound`.
+            case notFound(Operations.LiveStreamSetThumbnail.Output.NotFound)
+            /// The requested live stream was not found.
+            ///
+            /// - Remark: Generated from `#/paths//library/{libraryId}/live/{streamId}/thumbnail/post(LiveStream_SetThumbnail)/responses/404`.
+            ///
+            /// HTTP response code: `404 notFound`.
+            public static var notFound: Self {
+                .notFound(.init())
+            }
+            /// The associated value of the enum case if `self` is `.notFound`.
+            ///
+            /// - Throws: An error if `self` is not `.notFound`.
+            /// - SeeAlso: `.notFound`.
+            public var notFound: Operations.LiveStreamSetThumbnail.Output.NotFound {
+                get throws {
+                    switch self {
+                    case let .notFound(response):
+                        return response
+                    default:
+                        try throwUnexpectedResponseStatus(
+                            expectedStatus: "notFound",
+                            response: self
+                        )
+                    }
+                }
+            }
+            public struct UnprocessableContent: Sendable, Hashable {
+                /// Creates a new `UnprocessableContent`.
+                public init() {}
+            }
+            /// Unable to fetch the thumbnail from the origin.
+            ///
+            /// - Remark: Generated from `#/paths//library/{libraryId}/live/{streamId}/thumbnail/post(LiveStream_SetThumbnail)/responses/422`.
+            ///
+            /// HTTP response code: `422 unprocessableContent`.
+            case unprocessableContent(Operations.LiveStreamSetThumbnail.Output.UnprocessableContent)
+            /// Unable to fetch the thumbnail from the origin.
+            ///
+            /// - Remark: Generated from `#/paths//library/{libraryId}/live/{streamId}/thumbnail/post(LiveStream_SetThumbnail)/responses/422`.
+            ///
+            /// HTTP response code: `422 unprocessableContent`.
+            public static var unprocessableContent: Self {
+                .unprocessableContent(.init())
+            }
+            /// The associated value of the enum case if `self` is `.unprocessableContent`.
+            ///
+            /// - Throws: An error if `self` is not `.unprocessableContent`.
+            /// - SeeAlso: `.unprocessableContent`.
+            public var unprocessableContent: Operations.LiveStreamSetThumbnail.Output.UnprocessableContent {
+                get throws {
+                    switch self {
+                    case let .unprocessableContent(response):
+                        return response
+                    default:
+                        try throwUnexpectedResponseStatus(
+                            expectedStatus: "unprocessableContent",
+                            response: self
+                        )
+                    }
+                }
+            }
+            public struct InternalServerError: Sendable, Hashable {
+                /// Creates a new `InternalServerError`.
+                public init() {}
+            }
+            /// Internal Server Error.
+            ///
+            /// - Remark: Generated from `#/paths//library/{libraryId}/live/{streamId}/thumbnail/post(LiveStream_SetThumbnail)/responses/500`.
+            ///
+            /// HTTP response code: `500 internalServerError`.
+            case internalServerError(Operations.LiveStreamSetThumbnail.Output.InternalServerError)
+            /// Internal Server Error.
+            ///
+            /// - Remark: Generated from `#/paths//library/{libraryId}/live/{streamId}/thumbnail/post(LiveStream_SetThumbnail)/responses/500`.
+            ///
+            /// HTTP response code: `500 internalServerError`.
+            public static var internalServerError: Self {
+                .internalServerError(.init())
+            }
+            /// The associated value of the enum case if `self` is `.internalServerError`.
+            ///
+            /// - Throws: An error if `self` is not `.internalServerError`.
+            /// - SeeAlso: `.internalServerError`.
+            public var internalServerError: Operations.LiveStreamSetThumbnail.Output.InternalServerError {
+                get throws {
+                    switch self {
+                    case let .internalServerError(response):
+                        return response
+                    default:
+                        try throwUnexpectedResponseStatus(
+                            expectedStatus: "internalServerError",
+                            response: self
+                        )
+                    }
+                }
+            }
+            /// Undocumented response.
+            ///
+            /// A response with a code that is not documented in the OpenAPI document.
+            case undocumented(statusCode: Swift.Int, OpenAPIRuntime.UndocumentedPayload)
+        }
+        @frozen public enum AcceptableContentType: AcceptableProtocol {
+            case json
+            case other(Swift.String)
+            public init?(rawValue: Swift.String) {
+                switch rawValue.lowercased() {
+                case "application/json":
+                    self = .json
+                default:
+                    self = .other(rawValue)
+                }
+            }
+            public var rawValue: Swift.String {
+                switch self {
+                case let .other(string):
+                    return string
+                case .json:
+                    return "application/json"
+                }
+            }
+            public static var allCases: [Self] {
+                [
+                    .json
+                ]
+            }
+        }
+    }
+    /// Delete Live Stream Thumbnail
+    ///
+    /// Removes the offline thumbnail for a live stream.
+    ///
+    /// - Remark: HTTP `DELETE /library/{libraryId}/live/{streamId}/thumbnail`.
+    /// - Remark: Generated from `#/paths//library/{libraryId}/live/{streamId}/thumbnail/delete(LiveStream_DeleteThumbnail)`.
+    public enum LiveStreamDeleteThumbnail {
+        public static let id: Swift.String = "LiveStream_DeleteThumbnail"
+        public struct Input: Sendable, Hashable {
+            /// - Remark: Generated from `#/paths/library/{libraryId}/live/{streamId}/thumbnail/DELETE/path`.
+            public struct Path: Sendable, Hashable {
+                /// The ID of the video library.
+                ///
+                /// - Remark: Generated from `#/paths/library/{libraryId}/live/{streamId}/thumbnail/DELETE/path/libraryId`.
+                public var libraryId: Swift.Int64
+                /// The unique identifier of the live stream.
+                ///
+                /// - Remark: Generated from `#/paths/library/{libraryId}/live/{streamId}/thumbnail/DELETE/path/streamId`.
+                public var streamId: Swift.String
+                /// Creates a new `Path`.
+                ///
+                /// - Parameters:
+                ///   - libraryId: The ID of the video library.
+                ///   - streamId: The unique identifier of the live stream.
+                public init(
+                    libraryId: Swift.Int64,
+                    streamId: Swift.String
+                ) {
+                    self.libraryId = libraryId
+                    self.streamId = streamId
+                }
+            }
+            public var path: Operations.LiveStreamDeleteThumbnail.Input.Path
+            /// - Remark: Generated from `#/paths/library/{libraryId}/live/{streamId}/thumbnail/DELETE/query`.
+            public struct Query: Sendable, Hashable {
+                /// When true and the library has a default live thumbnail, that default is restored.
+                ///
+                /// - Remark: Generated from `#/paths/library/{libraryId}/live/{streamId}/thumbnail/DELETE/query/restoreLibraryDefault`.
+                public var restoreLibraryDefault: Swift.Bool?
+                /// Creates a new `Query`.
+                ///
+                /// - Parameters:
+                ///   - restoreLibraryDefault: When true and the library has a default live thumbnail, that default is restored.
+                public init(restoreLibraryDefault: Swift.Bool? = nil) {
+                    self.restoreLibraryDefault = restoreLibraryDefault
+                }
+            }
+            public var query: Operations.LiveStreamDeleteThumbnail.Input.Query
+            /// Creates a new `Input`.
+            ///
+            /// - Parameters:
+            ///   - path:
+            ///   - query:
+            public init(
+                path: Operations.LiveStreamDeleteThumbnail.Input.Path,
+                query: Operations.LiveStreamDeleteThumbnail.Input.Query = .init()
+            ) {
+                self.path = path
+                self.query = query
+            }
+        }
+        @frozen public enum Output: Sendable, Hashable {
+            public struct NoContent: Sendable, Hashable {
+                /// Creates a new `NoContent`.
+                public init() {}
+            }
+            /// The thumbnail was successfully deleted.
+            ///
+            /// - Remark: Generated from `#/paths//library/{libraryId}/live/{streamId}/thumbnail/delete(LiveStream_DeleteThumbnail)/responses/204`.
+            ///
+            /// HTTP response code: `204 noContent`.
+            case noContent(Operations.LiveStreamDeleteThumbnail.Output.NoContent)
+            /// The thumbnail was successfully deleted.
+            ///
+            /// - Remark: Generated from `#/paths//library/{libraryId}/live/{streamId}/thumbnail/delete(LiveStream_DeleteThumbnail)/responses/204`.
+            ///
+            /// HTTP response code: `204 noContent`.
+            public static var noContent: Self {
+                .noContent(.init())
+            }
+            /// The associated value of the enum case if `self` is `.noContent`.
+            ///
+            /// - Throws: An error if `self` is not `.noContent`.
+            /// - SeeAlso: `.noContent`.
+            public var noContent: Operations.LiveStreamDeleteThumbnail.Output.NoContent {
+                get throws {
+                    switch self {
+                    case let .noContent(response):
+                        return response
+                    default:
+                        try throwUnexpectedResponseStatus(
+                            expectedStatus: "noContent",
+                            response: self
+                        )
+                    }
+                }
+            }
+            public struct Unauthorized: Sendable, Hashable {
+                /// Creates a new `Unauthorized`.
+                public init() {}
+            }
+            /// The request authorization failed.
+            ///
+            /// - Remark: Generated from `#/paths//library/{libraryId}/live/{streamId}/thumbnail/delete(LiveStream_DeleteThumbnail)/responses/401`.
+            ///
+            /// HTTP response code: `401 unauthorized`.
+            case unauthorized(Operations.LiveStreamDeleteThumbnail.Output.Unauthorized)
+            /// The request authorization failed.
+            ///
+            /// - Remark: Generated from `#/paths//library/{libraryId}/live/{streamId}/thumbnail/delete(LiveStream_DeleteThumbnail)/responses/401`.
+            ///
+            /// HTTP response code: `401 unauthorized`.
+            public static var unauthorized: Self {
+                .unauthorized(.init())
+            }
+            /// The associated value of the enum case if `self` is `.unauthorized`.
+            ///
+            /// - Throws: An error if `self` is not `.unauthorized`.
+            /// - SeeAlso: `.unauthorized`.
+            public var unauthorized: Operations.LiveStreamDeleteThumbnail.Output.Unauthorized {
+                get throws {
+                    switch self {
+                    case let .unauthorized(response):
+                        return response
+                    default:
+                        try throwUnexpectedResponseStatus(
+                            expectedStatus: "unauthorized",
+                            response: self
+                        )
+                    }
+                }
+            }
+            public struct NotFound: Sendable, Hashable {
+                /// Creates a new `NotFound`.
+                public init() {}
+            }
+            /// The requested live stream was not found.
+            ///
+            /// - Remark: Generated from `#/paths//library/{libraryId}/live/{streamId}/thumbnail/delete(LiveStream_DeleteThumbnail)/responses/404`.
+            ///
+            /// HTTP response code: `404 notFound`.
+            case notFound(Operations.LiveStreamDeleteThumbnail.Output.NotFound)
+            /// The requested live stream was not found.
+            ///
+            /// - Remark: Generated from `#/paths//library/{libraryId}/live/{streamId}/thumbnail/delete(LiveStream_DeleteThumbnail)/responses/404`.
+            ///
+            /// HTTP response code: `404 notFound`.
+            public static var notFound: Self {
+                .notFound(.init())
+            }
+            /// The associated value of the enum case if `self` is `.notFound`.
+            ///
+            /// - Throws: An error if `self` is not `.notFound`.
+            /// - SeeAlso: `.notFound`.
+            public var notFound: Operations.LiveStreamDeleteThumbnail.Output.NotFound {
+                get throws {
+                    switch self {
+                    case let .notFound(response):
+                        return response
+                    default:
+                        try throwUnexpectedResponseStatus(
+                            expectedStatus: "notFound",
+                            response: self
+                        )
+                    }
+                }
+            }
+            public struct InternalServerError: Sendable, Hashable {
+                /// Creates a new `InternalServerError`.
+                public init() {}
+            }
+            /// Internal Server Error.
+            ///
+            /// - Remark: Generated from `#/paths//library/{libraryId}/live/{streamId}/thumbnail/delete(LiveStream_DeleteThumbnail)/responses/500`.
+            ///
+            /// HTTP response code: `500 internalServerError`.
+            case internalServerError(Operations.LiveStreamDeleteThumbnail.Output.InternalServerError)
+            /// Internal Server Error.
+            ///
+            /// - Remark: Generated from `#/paths//library/{libraryId}/live/{streamId}/thumbnail/delete(LiveStream_DeleteThumbnail)/responses/500`.
+            ///
+            /// HTTP response code: `500 internalServerError`.
+            public static var internalServerError: Self {
+                .internalServerError(.init())
+            }
+            /// The associated value of the enum case if `self` is `.internalServerError`.
+            ///
+            /// - Throws: An error if `self` is not `.internalServerError`.
+            /// - SeeAlso: `.internalServerError`.
+            public var internalServerError: Operations.LiveStreamDeleteThumbnail.Output.InternalServerError {
+                get throws {
+                    switch self {
+                    case let .internalServerError(response):
+                        return response
+                    default:
+                        try throwUnexpectedResponseStatus(
+                            expectedStatus: "internalServerError",
+                            response: self
+                        )
+                    }
+                }
+            }
+            /// Undocumented response.
+            ///
+            /// A response with a code that is not documented in the OpenAPI document.
+            case undocumented(statusCode: Swift.Int, OpenAPIRuntime.UndocumentedPayload)
+        }
+    }
+    /// Get Live Stream Thumbnails
+    ///
+    /// Returns the list of captured thumbnails (URL and timestamp) for a live stream.
+    ///
+    /// - Remark: HTTP `GET /library/{libraryId}/live/{streamId}/thumbnails`.
+    /// - Remark: Generated from `#/paths//library/{libraryId}/live/{streamId}/thumbnails/get(LiveStream_GetThumbnails)`.
+    public enum LiveStreamGetThumbnails {
+        public static let id: Swift.String = "LiveStream_GetThumbnails"
+        public struct Input: Sendable, Hashable {
+            /// - Remark: Generated from `#/paths/library/{libraryId}/live/{streamId}/thumbnails/GET/path`.
+            public struct Path: Sendable, Hashable {
+                /// The ID of the video library.
+                ///
+                /// - Remark: Generated from `#/paths/library/{libraryId}/live/{streamId}/thumbnails/GET/path/libraryId`.
+                public var libraryId: Swift.Int64
+                /// The unique identifier of the live stream.
+                ///
+                /// - Remark: Generated from `#/paths/library/{libraryId}/live/{streamId}/thumbnails/GET/path/streamId`.
+                public var streamId: Swift.String
+                /// Creates a new `Path`.
+                ///
+                /// - Parameters:
+                ///   - libraryId: The ID of the video library.
+                ///   - streamId: The unique identifier of the live stream.
+                public init(
+                    libraryId: Swift.Int64,
+                    streamId: Swift.String
+                ) {
+                    self.libraryId = libraryId
+                    self.streamId = streamId
+                }
+            }
+            public var path: Operations.LiveStreamGetThumbnails.Input.Path
+            /// - Remark: Generated from `#/paths/library/{libraryId}/live/{streamId}/thumbnails/GET/query`.
+            public struct Query: Sendable, Hashable {
+                /// The maximum number of thumbnails to return. Default: 5.
+                ///
+                /// - Remark: Generated from `#/paths/library/{libraryId}/live/{streamId}/thumbnails/GET/query/limit`.
+                public var limit: Swift.Int32?
+                /// Filter thumbnails created at or after this UTC timestamp.
+                ///
+                /// - Remark: Generated from `#/paths/library/{libraryId}/live/{streamId}/thumbnails/GET/query/from`.
+                public var from: Swift.String?
+                /// Filter thumbnails created at or before this UTC timestamp.
+                ///
+                /// - Remark: Generated from `#/paths/library/{libraryId}/live/{streamId}/thumbnails/GET/query/to`.
+                public var to: Swift.String?
+                /// Creates a new `Query`.
+                ///
+                /// - Parameters:
+                ///   - limit: The maximum number of thumbnails to return. Default: 5.
+                ///   - from: Filter thumbnails created at or after this UTC timestamp.
+                ///   - to: Filter thumbnails created at or before this UTC timestamp.
+                public init(
+                    limit: Swift.Int32? = nil,
+                    from: Swift.String? = nil,
+                    to: Swift.String? = nil
+                ) {
+                    self.limit = limit
+                    self.from = from
+                    self.to = to
+                }
+            }
+            public var query: Operations.LiveStreamGetThumbnails.Input.Query
+            /// - Remark: Generated from `#/paths/library/{libraryId}/live/{streamId}/thumbnails/GET/header`.
+            public struct Headers: Sendable, Hashable {
+                public var accept: [OpenAPIRuntime.AcceptHeaderContentType<Operations.LiveStreamGetThumbnails.AcceptableContentType>]
+                /// Creates a new `Headers`.
+                ///
+                /// - Parameters:
+                ///   - accept:
+                public init(accept: [OpenAPIRuntime.AcceptHeaderContentType<Operations.LiveStreamGetThumbnails.AcceptableContentType>] = .defaultValues()) {
+                    self.accept = accept
+                }
+            }
+            public var headers: Operations.LiveStreamGetThumbnails.Input.Headers
+            /// Creates a new `Input`.
+            ///
+            /// - Parameters:
+            ///   - path:
+            ///   - query:
+            ///   - headers:
+            public init(
+                path: Operations.LiveStreamGetThumbnails.Input.Path,
+                query: Operations.LiveStreamGetThumbnails.Input.Query = .init(),
+                headers: Operations.LiveStreamGetThumbnails.Input.Headers = .init()
+            ) {
+                self.path = path
+                self.query = query
+                self.headers = headers
+            }
+        }
+        @frozen public enum Output: Sendable, Hashable {
+            public struct Ok: Sendable, Hashable {
+                /// - Remark: Generated from `#/paths/library/{libraryId}/live/{streamId}/thumbnails/GET/responses/200/content`.
+                @frozen public enum Body: Sendable, Hashable {
+                    /// - Remark: Generated from `#/paths/library/{libraryId}/live/{streamId}/thumbnails/GET/responses/200/content/application\/json`.
+                    case json([Components.Schemas.ThumbnailListResponseModel])
+                    /// The associated value of the enum case if `self` is `.json`.
+                    ///
+                    /// - Throws: An error if `self` is not `.json`.
+                    /// - SeeAlso: `.json`.
+                    public var json: [Components.Schemas.ThumbnailListResponseModel] {
+                        get throws {
+                            switch self {
+                            case let .json(body):
+                                return body
+                            }
+                        }
+                    }
+                }
+                /// Received HTTP response body
+                public var body: Operations.LiveStreamGetThumbnails.Output.Ok.Body
+                /// Creates a new `Ok`.
+                ///
+                /// - Parameters:
+                ///   - body: Received HTTP response body
+                public init(body: Operations.LiveStreamGetThumbnails.Output.Ok.Body) {
+                    self.body = body
+                }
+            }
+            /// A list of thumbnail objects.
+            ///
+            /// - Remark: Generated from `#/paths//library/{libraryId}/live/{streamId}/thumbnails/get(LiveStream_GetThumbnails)/responses/200`.
+            ///
+            /// HTTP response code: `200 ok`.
+            case ok(Operations.LiveStreamGetThumbnails.Output.Ok)
+            /// The associated value of the enum case if `self` is `.ok`.
+            ///
+            /// - Throws: An error if `self` is not `.ok`.
+            /// - SeeAlso: `.ok`.
+            public var ok: Operations.LiveStreamGetThumbnails.Output.Ok {
+                get throws {
+                    switch self {
+                    case let .ok(response):
+                        return response
+                    default:
+                        try throwUnexpectedResponseStatus(
+                            expectedStatus: "ok",
+                            response: self
+                        )
+                    }
+                }
+            }
+            public struct BadRequest: Sendable, Hashable {
+                /// Creates a new `BadRequest`.
+                public init() {}
+            }
+            /// The request was invalid.
+            ///
+            /// - Remark: Generated from `#/paths//library/{libraryId}/live/{streamId}/thumbnails/get(LiveStream_GetThumbnails)/responses/400`.
+            ///
+            /// HTTP response code: `400 badRequest`.
+            case badRequest(Operations.LiveStreamGetThumbnails.Output.BadRequest)
+            /// The request was invalid.
+            ///
+            /// - Remark: Generated from `#/paths//library/{libraryId}/live/{streamId}/thumbnails/get(LiveStream_GetThumbnails)/responses/400`.
+            ///
+            /// HTTP response code: `400 badRequest`.
+            public static var badRequest: Self {
+                .badRequest(.init())
+            }
+            /// The associated value of the enum case if `self` is `.badRequest`.
+            ///
+            /// - Throws: An error if `self` is not `.badRequest`.
+            /// - SeeAlso: `.badRequest`.
+            public var badRequest: Operations.LiveStreamGetThumbnails.Output.BadRequest {
+                get throws {
+                    switch self {
+                    case let .badRequest(response):
+                        return response
+                    default:
+                        try throwUnexpectedResponseStatus(
+                            expectedStatus: "badRequest",
+                            response: self
+                        )
+                    }
+                }
+            }
+            public struct Unauthorized: Sendable, Hashable {
+                /// Creates a new `Unauthorized`.
+                public init() {}
+            }
+            /// The request authorization failed.
+            ///
+            /// - Remark: Generated from `#/paths//library/{libraryId}/live/{streamId}/thumbnails/get(LiveStream_GetThumbnails)/responses/401`.
+            ///
+            /// HTTP response code: `401 unauthorized`.
+            case unauthorized(Operations.LiveStreamGetThumbnails.Output.Unauthorized)
+            /// The request authorization failed.
+            ///
+            /// - Remark: Generated from `#/paths//library/{libraryId}/live/{streamId}/thumbnails/get(LiveStream_GetThumbnails)/responses/401`.
+            ///
+            /// HTTP response code: `401 unauthorized`.
+            public static var unauthorized: Self {
+                .unauthorized(.init())
+            }
+            /// The associated value of the enum case if `self` is `.unauthorized`.
+            ///
+            /// - Throws: An error if `self` is not `.unauthorized`.
+            /// - SeeAlso: `.unauthorized`.
+            public var unauthorized: Operations.LiveStreamGetThumbnails.Output.Unauthorized {
+                get throws {
+                    switch self {
+                    case let .unauthorized(response):
+                        return response
+                    default:
+                        try throwUnexpectedResponseStatus(
+                            expectedStatus: "unauthorized",
+                            response: self
+                        )
+                    }
+                }
+            }
+            public struct NotFound: Sendable, Hashable {
+                /// Creates a new `NotFound`.
+                public init() {}
+            }
+            /// The requested live stream was not found.
+            ///
+            /// - Remark: Generated from `#/paths//library/{libraryId}/live/{streamId}/thumbnails/get(LiveStream_GetThumbnails)/responses/404`.
+            ///
+            /// HTTP response code: `404 notFound`.
+            case notFound(Operations.LiveStreamGetThumbnails.Output.NotFound)
+            /// The requested live stream was not found.
+            ///
+            /// - Remark: Generated from `#/paths//library/{libraryId}/live/{streamId}/thumbnails/get(LiveStream_GetThumbnails)/responses/404`.
+            ///
+            /// HTTP response code: `404 notFound`.
+            public static var notFound: Self {
+                .notFound(.init())
+            }
+            /// The associated value of the enum case if `self` is `.notFound`.
+            ///
+            /// - Throws: An error if `self` is not `.notFound`.
+            /// - SeeAlso: `.notFound`.
+            public var notFound: Operations.LiveStreamGetThumbnails.Output.NotFound {
+                get throws {
+                    switch self {
+                    case let .notFound(response):
+                        return response
+                    default:
+                        try throwUnexpectedResponseStatus(
+                            expectedStatus: "notFound",
+                            response: self
+                        )
+                    }
+                }
+            }
+            public struct InternalServerError: Sendable, Hashable {
+                /// Creates a new `InternalServerError`.
+                public init() {}
+            }
+            /// Internal Server Error.
+            ///
+            /// - Remark: Generated from `#/paths//library/{libraryId}/live/{streamId}/thumbnails/get(LiveStream_GetThumbnails)/responses/500`.
+            ///
+            /// HTTP response code: `500 internalServerError`.
+            case internalServerError(Operations.LiveStreamGetThumbnails.Output.InternalServerError)
+            /// Internal Server Error.
+            ///
+            /// - Remark: Generated from `#/paths//library/{libraryId}/live/{streamId}/thumbnails/get(LiveStream_GetThumbnails)/responses/500`.
+            ///
+            /// HTTP response code: `500 internalServerError`.
+            public static var internalServerError: Self {
+                .internalServerError(.init())
+            }
+            /// The associated value of the enum case if `self` is `.internalServerError`.
+            ///
+            /// - Throws: An error if `self` is not `.internalServerError`.
+            /// - SeeAlso: `.internalServerError`.
+            public var internalServerError: Operations.LiveStreamGetThumbnails.Output.InternalServerError {
                 get throws {
                     switch self {
                     case let .internalServerError(response):

@@ -1,5 +1,7 @@
 import BunnyStreamAPI
+import PhotosUI
 import SwiftUI
+import UIKit
 
 struct CreateLiveStreamView: View {
     let viewModel: LiveStreamListViewModel
@@ -23,6 +25,9 @@ struct CreateLiveStreamView: View {
     @State private var isPickingTrailer = false
     @State private var thumbnailEnabled = false
     @State private var thumbnailUrl = ""
+    @State private var thumbnailImageData: Data?
+    @State private var thumbnailPickerItem: PhotosPickerItem?
+    @State private var existingThumbnailURL: URL?
     @State private var isCreating = false
     @State private var errorMessage: String?
     @Environment(\.dismiss) private var dismiss
@@ -57,6 +62,21 @@ struct CreateLiveStreamView: View {
             _trailerEnabled = State(initialValue: true)
             _trailerVideoId = State(initialValue: trailerId)
         }
+    }
+
+    /// Downscales an image to a reasonable thumbnail size and re-encodes it as JPEG so uploads
+    /// stay well under Bunny's ~5 MB thumbnail limit.
+    private static func downscaledJPEG(from data: Data, maxDimension: CGFloat = 1920, quality: CGFloat = 0.8) -> Data? {
+        guard let image = UIImage(data: data) else { return nil }
+        let longest = max(image.size.width, image.size.height)
+        let scale = longest > maxDimension ? maxDimension / longest : 1
+        let newSize = CGSize(width: image.size.width * scale, height: image.size.height * scale)
+        let format = UIGraphicsImageRendererFormat.default()
+        format.scale = 1
+        let resized = UIGraphicsImageRenderer(size: newSize, format: format).image { _ in
+            image.draw(in: CGRect(origin: .zero, size: newSize))
+        }
+        return resized.jpegData(compressionQuality: quality)
     }
 
     /// Parses Bunny's ISO 8601 timestamps (with or without fractional seconds).
@@ -150,44 +170,28 @@ struct CreateLiveStreamView: View {
                     }
                 }
 
-                if !isEditing {
-                  Section {
+                Section {
                     Toggle("Offline thumbnail", isOn: $thumbnailEnabled.animation())
                     if thumbnailEnabled {
-                        TextField("https://example.com/thumb.jpg", text: $thumbnailUrl)
+                        PhotosPicker(selection: $thumbnailPickerItem, matching: .images) {
+                            Label(
+                                thumbnailImageData == nil ? "Choose from Photos" : "Change photo",
+                                systemImage: "photo"
+                            )
+                        }
+                        TextField("…or paste an image URL", text: $thumbnailUrl)
                             .textContentType(.URL)
                             .autocorrectionDisabled()
                             .textInputAutocapitalization(.never)
                             .keyboardType(.URL)
-                        if let url = URL(string: thumbnailUrl.trimmingCharacters(in: .whitespaces)),
-                           !thumbnailUrl.trimmingCharacters(in: .whitespaces).isEmpty {
-                            AsyncImage(url: url) { phase in
-                                switch phase {
-                                case .success(let image):
-                                    image
-                                        .resizable()
-                                        .aspectRatio(16 / 9, contentMode: .fit)
-                                        .clipShape(RoundedRectangle(cornerRadius: 8))
-                                case .failure:
-                                    Label("Couldn't load image", systemImage: "photo")
-                                        .foregroundStyle(.secondary)
-                                        .font(.subheadline)
-                                case .empty:
-                                    ProgressView()
-                                        .frame(maxWidth: .infinity)
-                                @unknown default:
-                                    EmptyView()
-                                }
-                            }
-                        }
+                        thumbnailPreview
                     }
-                  } header: {
+                } header: {
                     Text("Thumbnail")
-                  } footer: {
+                } footer: {
                     if thumbnailEnabled {
-                        Text("Shown in the player while the stream is offline. Bunny's live API sets the thumbnail by URL.")
+                        Text("Shown in the player before the stream starts or if it encounters issues.")
                     }
-                  }
                 }
 
                 if isEditing {
@@ -226,6 +230,26 @@ struct CreateLiveStreamView: View {
             }
             .sheet(isPresented: $isPickingTimeZone) {
                 TimezonePickerView(selected: $scheduledTimeZone)
+            }
+            .onChange(of: thumbnailPickerItem) { item in
+                Task {
+                    guard let data = try? await item?.loadTransferable(type: Data.self) else { return }
+                    // Downscale + JPEG-encode: keeps the upload well under Bunny's ~5 MB thumbnail
+                    // limit (full-res iPhone photos exceed it) and normalizes HEIC to JPEG.
+                    if let jpeg = Self.downscaledJPEG(from: data) {
+                        thumbnailImageData = jpeg
+                        thumbnailEnabled = true
+                    } else {
+                        viewModel.actionError = "Couldn't read the selected image."
+                    }
+                }
+            }
+            .task {
+                guard isEditing, let stream = editingStream else { return }
+                if let url = viewModel.offlineThumbnailURL(for: stream) {
+                    existingThumbnailURL = url
+                    thumbnailEnabled = true
+                }
             }
             .navigationTitle(isEditing ? "Edit Live Stream" : "New Live Stream")
             .navigationBarTitleDisplayMode(.inline)
@@ -267,12 +291,49 @@ struct CreateLiveStreamView: View {
         return formatter.string(from: resolvedScheduledStartTime)
     }
 
+    @ViewBuilder
+    private var thumbnailPreview: some View {
+        if let data = thumbnailImageData, let uiImage = UIImage(data: data) {
+            Image(uiImage: uiImage)
+                .resizable()
+                .aspectRatio(16 / 9, contentMode: .fit)
+                .clipShape(RoundedRectangle(cornerRadius: 8))
+        } else if let url = previewURL {
+            AsyncImage(url: url) { phase in
+                switch phase {
+                case .success(let image):
+                    image
+                        .resizable()
+                        .aspectRatio(16 / 9, contentMode: .fit)
+                        .clipShape(RoundedRectangle(cornerRadius: 8))
+                case .failure:
+                    Label("Couldn't load image", systemImage: "photo")
+                        .foregroundStyle(.secondary)
+                        .font(.subheadline)
+                case .empty:
+                    ProgressView()
+                        .frame(maxWidth: .infinity)
+                @unknown default:
+                    EmptyView()
+                }
+            }
+        }
+    }
+
+    /// The image URL to preview: a typed URL takes precedence, otherwise the stream's current thumbnail.
+    private var previewURL: URL? {
+        let trimmed = thumbnailUrl.trimmingCharacters(in: .whitespaces)
+        if !trimmed.isEmpty { return URL(string: trimmed) }
+        return existingThumbnailURL
+    }
+
     private func save() async {
         isCreating = true
         errorMessage = nil
         let trimmedName = name.trimmingCharacters(in: .whitespaces)
         let trimmedDescription = streamDescription.trimmingCharacters(in: .whitespacesAndNewlines)
         do {
+            let streamId: String
             if let editingStream {
                 _ = try await viewModel.update(
                     stream: editingStream,
@@ -286,8 +347,9 @@ struct CreateLiveStreamView: View {
                     trailerVideoId: trailerEnabled ? trailerVideoId : nil,
                     isPublic: isPublic
                 )
+                streamId = editingStream.guid ?? ""
             } else {
-                _ = try await viewModel.create(
+                let created = try await viewModel.create(
                     name: trimmedName,
                     description: trimmedDescription,
                     scheduledStartTime: scheduleEnabled ? resolvedScheduledStartTime : nil,
@@ -295,15 +357,40 @@ struct CreateLiveStreamView: View {
                     dvrEnabled: dvrEnabled,
                     dvrWindowSeconds: dvrEnabled ? dvrWindowSeconds : nil,
                     recordVod: recordVod,
-                    trailerVideoId: trailerEnabled ? trailerVideoId : nil,
-                    thumbnailUrl: thumbnailEnabled ? thumbnailUrl.trimmingCharacters(in: .whitespaces) : nil
+                    trailerVideoId: trailerEnabled ? trailerVideoId : nil
                 )
+                streamId = created.guid ?? ""
+            }
+            // Thumbnail is set via a separate endpoint (needs the stream id) — best-effort so it
+            // doesn't block or duplicate the save if it fails.
+            if !streamId.isEmpty {
+                await applyThumbnail(streamId: streamId)
             }
             await onCreated()
             dismiss()
         } catch {
             errorMessage = error.localizedDescription
             isCreating = false
+        }
+    }
+
+    private func applyThumbnail(streamId: String) async {
+        do {
+            if thumbnailEnabled {
+                if let data = thumbnailImageData {
+                    try await viewModel.setThumbnail(streamId: streamId, jpegData: data)
+                } else {
+                    let trimmed = thumbnailUrl.trimmingCharacters(in: .whitespaces)
+                    if !trimmed.isEmpty {
+                        try await viewModel.setThumbnail(streamId: streamId, url: trimmed)
+                    }
+                }
+            } else if isEditing, existingThumbnailURL != nil {
+                // Thumbnail was turned off while editing — remove it.
+                try await viewModel.deleteThumbnail(streamId: streamId)
+            }
+        } catch {
+            viewModel.actionError = "Stream saved, but the thumbnail couldn't be updated: \(error.localizedDescription)"
         }
     }
 }

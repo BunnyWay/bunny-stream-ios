@@ -4,9 +4,8 @@ import SwiftUI
 
 struct LiveStreamRowView: View {
     let stream: Components.Schemas.LiveStreamModel
-    /// Optional fallback resolver that maps a library video id to its thumbnail URL.
-    /// Used to preview the pre-stream trailer when the stream has no `thumbnailUrl`.
-    var resolveThumbnail: ((String) async -> URL?)? = nil
+    /// Resolves the row's thumbnail URL for a stream (its offline thumbnail, else trailer preview).
+    var resolveThumbnail: ((Components.Schemas.LiveStreamModel) async -> URL?)? = nil
 
     @State private var resolvedThumbnail: URL?
 
@@ -29,7 +28,7 @@ struct LiveStreamRowView: View {
 private extension LiveStreamRowView {
     var thumbnailView: some View {
         Group {
-            if let url = effectiveThumbnailURL {
+            if let url = resolvedThumbnail {
                 AsyncImage(url: url) { phase in
                     switch phase {
                     case .success(let image):
@@ -44,26 +43,10 @@ private extension LiveStreamRowView {
         }
         .frame(width: 80, height: 45)
         .clipShape(RoundedRectangle(cornerRadius: 6))
-        .task { await loadThumbnailIfNeeded() }
-    }
-
-    var effectiveThumbnailURL: URL? {
-        if let urlString = stream.thumbnailUrl, let url = URL(string: urlString) {
-            return url
+        // Re-resolve when the stream's thumbnail changes (e.g. after it's set/updated).
+        .task(id: stream.thumbnailFileName) {
+            resolvedThumbnail = await resolveThumbnail?(stream)
         }
-        return resolvedThumbnail
-    }
-
-    func loadThumbnailIfNeeded() async {
-        // The live stream's own `thumbnailUrl` isn't returned by the API here, so fall back to
-        // the pre-stream trailer video's thumbnail. (The live stream GUID is not a video id, so
-        // it can't be resolved via the video thumbnail endpoint.)
-        guard stream.thumbnailUrl == nil || stream.thumbnailUrl?.isEmpty == true,
-              resolvedThumbnail == nil,
-              let resolveThumbnail,
-              let trailerId = stream.preStreamTrailerVideoId, !trailerId.isEmpty
-        else { return }
-        resolvedThumbnail = await resolveThumbnail(trailerId)
     }
 
     var placeholderThumbnail: some View {
