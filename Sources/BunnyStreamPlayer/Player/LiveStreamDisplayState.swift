@@ -3,8 +3,8 @@ import BunnyStreamAPI
 
 enum LiveStreamDisplayState {
     case playable(url: URL, isVodRecording: Bool)
-    case countdown(until: Date, thumbnailUrl: URL?)
-    case trailer(vodId: String, scheduledStart: Date?, statusMessage: String?)
+    case countdown(until: Date, thumbnailUrl: URL?, title: String?)
+    case trailer(vodId: String, scheduledStart: Date?, statusMessage: String?, title: String?)
     case offline(message: String, thumbnailUrl: URL?)
     case error(message: String, thumbnailUrl: URL?)
 }
@@ -53,7 +53,8 @@ func resolveDisplayState(
         return .trailer(
             vodId: vodId,
             scheduledStart: scheduledStart,
-            statusMessage: Lingua.LiveStream.streamNotActive
+            statusMessage: Lingua.LiveStream.streamNotActive,
+            title: model.title
         )
     }
 
@@ -63,7 +64,7 @@ func resolveDisplayState(
        let startString = model.scheduledStartTime,
        let start = Date(bunnyString: startString),
        start > now {
-        return .countdown(until: start, thumbnailUrl: model.thumbnailUrl.flatMap(URL.init(string:)))
+        return .countdown(until: start, thumbnailUrl: model.thumbnailUrl.flatMap(URL.init(string:)), title: model.title)
     }
 
     let thumbnailUrl = model.thumbnailUrl.flatMap(URL.init(string:))

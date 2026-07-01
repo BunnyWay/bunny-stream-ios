@@ -9,8 +9,8 @@ final class LivePlaybackController: ObservableObject {
     enum State {
         case loading
         case playable(MediaPlayer)
-        case countdown(until: Date, thumbnailUrl: URL?)
-        case trailer(vodId: String, scheduledStart: Date?, statusMessage: String?)
+        case countdown(until: Date, thumbnailUrl: URL?, title: String?)
+        case trailer(vodId: String, scheduledStart: Date?, statusMessage: String?, title: String?)
         case offline(message: String, thumbnailUrl: URL?)
         case error(message: String, thumbnailUrl: URL?)
     }
@@ -129,12 +129,12 @@ private extension LivePlaybackController {
         switch displayState {
         case .playable(let url, let isVodRecording):
             handlePlayable(url: url, isVodRecording: isVodRecording)
-        case .countdown(let date, let thumbnailUrl):
+        case .countdown(let date, let thumbnailUrl, let title):
             teardownCurrentPlayer()
-            state = .countdown(until: date, thumbnailUrl: thumbnailUrl)
-        case .trailer(let vodId, let scheduledStart, let statusMessage):
+            state = .countdown(until: date, thumbnailUrl: thumbnailUrl, title: title)
+        case .trailer(let vodId, let scheduledStart, let statusMessage, let title):
             teardownCurrentPlayer()
-            state = .trailer(vodId: vodId, scheduledStart: scheduledStart, statusMessage: statusMessage)
+            state = .trailer(vodId: vodId, scheduledStart: scheduledStart, statusMessage: statusMessage, title: title)
         case .offline(let message, let thumbnailUrl):
             teardownCurrentPlayer()
             state = .offline(message: message, thumbnailUrl: thumbnailUrl)

@@ -19,6 +19,7 @@ public struct BunnyStreamLivePlayer: View {
     private let libraryId: Int
     private let streamId: String
     private let watermark: PlayerWatermark?
+    @State private var isTrailerMuted = true
 
     /// - Parameters:
     ///   - accessKey: The access key for authentication.
@@ -44,10 +45,10 @@ public struct BunnyStreamLivePlayer: View {
                 loadingView
             case .playable(let player):
                 liveContainerView(player)
-            case .countdown(let date, let thumbnailUrl):
-                countdownView(until: date, thumbnailUrl: thumbnailUrl)
-            case .trailer(let vodId, let scheduledStart, let statusMessage):
-                trailerWithOverlay(vodId: vodId, scheduledStart: scheduledStart, statusMessage: statusMessage)
+            case .countdown(let date, let thumbnailUrl, let title):
+                countdownView(until: date, thumbnailUrl: thumbnailUrl, title: title)
+            case .trailer(let vodId, let scheduledStart, let statusMessage, let title):
+                trailerWithOverlay(vodId: vodId, scheduledStart: scheduledStart, statusMessage: statusMessage, title: title)
             case .offline(let message, let thumbnailUrl):
                 offlineView(message: message, thumbnailUrl: thumbnailUrl)
             case .error(let message, let thumbnailUrl):
@@ -96,7 +97,7 @@ private extension BunnyStreamLivePlayer {
             .environment(\.playerWatermark, watermark)
     }
 
-    func countdownView(until date: Date, thumbnailUrl: URL?) -> some View {
+    func countdownView(until date: Date, thumbnailUrl: URL?, title: String?) -> some View {
         ZStack {
             if let thumbnailUrl {
                 AsyncImage(url: thumbnailUrl) { phase in
@@ -104,7 +105,6 @@ private extension BunnyStreamLivePlayer {
                         image
                             .resizable()
                             .aspectRatio(contentMode: .fill)
-                            .overlay(Color.black.opacity(0.5))
                     } else {
                         Color.black
                     }
@@ -112,43 +112,82 @@ private extension BunnyStreamLivePlayer {
             } else {
                 Color.black
             }
-            VStack(spacing: 16) {
-                Image(systemName: "clock")
-                    .font(.system(size: 40))
-                    .foregroundStyle(theme.tintColor.opacity(0.8))
-                TimelineView(.periodic(from: .now, by: 1)) { _ in
-                    countdownLabel(until: date)
-                }
-            }
+            countdownOverlay(until: date, title: title)
         }
+        .ignoresSafeArea()
     }
 
-    func countdownLabel(until date: Date) -> some View {
-        let remaining = date.timeIntervalSinceNow
-        if remaining > 0 {
-            let h = Int(remaining) / 3600
-            let m = Int(remaining) / 60 % 60
-            let s = Int(remaining) % 60
-            return Text(String(format: "%02d:%02d:%02d", h, m, s))
-                .font(.system(size: 48, weight: .thin, design: .monospaced))
-                .foregroundStyle(.white)
-        } else {
-            return Text(Lingua.LiveStream.streamStartingSoon)
-                .font(theme.font.size(16))
-                .foregroundStyle(.white.opacity(0.8))
-        }
-    }
-
-    func trailerWithOverlay(vodId: String, scheduledStart: Date?, statusMessage: String?) -> some View {
-        ZStack(alignment: .bottom) {
-            LoopingTrailerView(libraryId: libraryId, vodId: vodId)
+    func trailerWithOverlay(vodId: String, scheduledStart: Date?, statusMessage: String?, title: String?) -> some View {
+        ZStack {
+            LoopingTrailerView(libraryId: libraryId, vodId: vodId, isMuted: $isTrailerMuted)
                 .ignoresSafeArea()
             if let scheduledStart {
-                trailerCountdownOverlay(until: scheduledStart)
+                countdownOverlay(until: scheduledStart, title: title)
             } else if let statusMessage {
                 trailerStatusOverlay(message: statusMessage)
             }
+            muteButton
+                .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .bottomTrailing)
+                .padding(20)
         }
+    }
+
+    /// Centered countdown overlay matching the Bunny web player:
+    /// "<title> will start in" on top, large bold H:MM:SS timer below.
+    func countdownOverlay(until date: Date, title: String?) -> some View {
+        TimelineView(.periodic(from: .now, by: 1)) { context in
+            let remaining = date.timeIntervalSince(context.date)
+            VStack(spacing: 8) {
+                if remaining > 0 {
+                    Text(countdownTitle(title))
+                        .font(theme.font.size(22))
+                        .foregroundStyle(.white)
+                        .shadow(color: .black.opacity(0.45), radius: 3, y: 1)
+                    Text(Self.countdownString(from: remaining))
+                        .font(theme.font.size(40))
+                        .fontWeight(.bold)
+                        .monospacedDigit()
+                        .foregroundStyle(.white)
+                        .shadow(color: .black.opacity(0.5), radius: 4, y: 2)
+                } else {
+                    Text(Lingua.LiveStream.streamStartingSoon)
+                        .font(theme.font.size(20))
+                        .fontWeight(.semibold)
+                        .foregroundStyle(.white)
+                        .shadow(color: .black.opacity(0.45), radius: 3, y: 1)
+                }
+            }
+            .multilineTextAlignment(.center)
+            .padding(.horizontal, 24)
+        }
+    }
+
+    var muteButton: some View {
+        Button {
+            isTrailerMuted.toggle()
+        } label: {
+            (isTrailerMuted ? theme.images.volumeOff : theme.images.volumeOn)
+                .font(.system(size: 15, weight: .semibold))
+                .foregroundStyle(.white)
+                .frame(width: 40, height: 40)
+                .background(.black.opacity(0.45), in: Circle())
+        }
+        .buttonStyle(.plain)
+    }
+
+    func countdownTitle(_ title: String?) -> String {
+        let name = (title?.isEmpty == false) ? title! : "Live stream"
+        return "\(name) will start in"
+    }
+
+    static func countdownString(from remaining: TimeInterval) -> String {
+        let total = max(0, Int(remaining))
+        let h = total / 3600
+        let m = total / 60 % 60
+        let s = total % 60
+        return h > 0
+            ? String(format: "%d:%02d:%02d", h, m, s)
+            : String(format: "%d:%02d", m, s)
     }
 
     func trailerStatusOverlay(message: String) -> some View {
@@ -159,34 +198,8 @@ private extension BunnyStreamLivePlayer {
             .padding(.vertical, 8)
             .background(.black.opacity(0.55))
             .clipShape(Capsule())
+            .frame(maxHeight: .infinity, alignment: .bottom)
             .padding(.bottom, 32)
-    }
-
-    func trailerCountdownOverlay(until date: Date) -> some View {
-        HStack(spacing: 8) {
-            Image(systemName: "clock")
-                .foregroundStyle(theme.tintColor)
-            TimelineView(.periodic(from: .now, by: 1)) { _ in
-                let remaining = date.timeIntervalSinceNow
-                if remaining > 0 {
-                    let h = Int(remaining) / 3600
-                    let m = Int(remaining) / 60 % 60
-                    let s = Int(remaining) % 60
-                    Text(String(format: "%02d:%02d:%02d", h, m, s))
-                        .font(.system(size: 16, weight: .semibold, design: .monospaced))
-                        .foregroundStyle(.white)
-                } else {
-                    Text(Lingua.LiveStream.streamStartingSoon)
-                        .font(theme.font.size(14))
-                        .foregroundStyle(.white)
-                }
-            }
-        }
-        .padding(.horizontal, 14)
-        .padding(.vertical, 8)
-        .background(.black.opacity(0.55))
-        .clipShape(Capsule())
-        .padding(.bottom, 32)
     }
 
     func offlineView(message: String, thumbnailUrl: URL?) -> some View {
@@ -255,6 +268,7 @@ private extension BunnyStreamLivePlayer {
 private struct LoopingTrailerView: View {
     let libraryId: Int
     let vodId: String
+    @Binding var isMuted: Bool
 
     @State private var player: AVQueuePlayer?
     @State private var looper: AVPlayerLooper?
@@ -270,6 +284,9 @@ private struct LoopingTrailerView: View {
         }
         .ignoresSafeArea()
         .task(id: vodId) { await loadAndPlay() }
+        .onChange(of: isMuted) { newValue in
+            player?.isMuted = newValue
+        }
         .onDisappear {
             looper?.disableLooping()
             player?.pause()
@@ -285,6 +302,7 @@ private struct LoopingTrailerView: View {
             let item = AVPlayerItem(url: url)
             let queuePlayer = AVQueuePlayer()
             let playerLooper = AVPlayerLooper(player: queuePlayer, templateItem: item)
+            queuePlayer.isMuted = isMuted
             queuePlayer.play()
             looper = playerLooper
             player = queuePlayer

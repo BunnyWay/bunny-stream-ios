@@ -86,10 +86,16 @@ extension BunnyStreamCameraUploadViewModel {
     stopIngestStatusPolling()
     rtmpConnection.removeEventListener(.rtmpStatus, selector: #selector(rtmpStatusHandler), observer: self)
     rtmpConnection.removeEventListener(.ioError, selector: #selector(rtmpErrorHandler), observer: self)
-    Task {
-      rtmpStream.close()
-      rtmpConnection.close()
-      await completeStream()
+    Task { [weak self] in
+      self?.rtmpStream.close()
+      self?.rtmpConnection.close()
+      do {
+        try await self?.completeStream()
+      } catch let error as LifecycleError {
+        await MainActor.run { self?.snackbarMessage = error.errorDescription }
+      } catch {
+        await MainActor.run { self?.snackbarMessage = "Failed to stop the live stream cleanly." }
+      }
     }
   }
 }
@@ -99,20 +105,27 @@ extension BunnyStreamCameraUploadViewModel {
   func startStreamingCountdown() {
     Task {
       do {
-        await activateStream()
+        // Activate first — if this fails the stream won't go live, so abort before publishing.
+        try await activateStream()
         if videoId == nil, let creator = videoCreator {
             await MainActor.run {
                 isCreatingVideo = true
             }
-            
+
           videoId = try await creator.createVideo()
-            
+
             await MainActor.run {
                 isCreatingVideo = false
             }
         }
         streamConfig.videoId = videoId
         await startTimer()
+      } catch let error as LifecycleError {
+        await MainActor.run {
+          isCreatingVideo = false
+          state = .notStreaming
+          snackbarMessage = error.errorDescription
+        }
       } catch let error as VideoCreator.VideoCreatorError {
         await MainActor.run {
           isCreatingVideo = false
@@ -298,7 +311,9 @@ private extension BunnyStreamCameraUploadViewModel {
 
   func fetchIngestStatus(streamId: String) async {
     let api = BunnyStreamAPI(accessKey: streamConfig.accessKey)
-    guard case .ok(let ok) = try? await api.client.liveStreamGet(
+    // Lightweight /status endpoint, suited for frequent polling. (The full live stream
+    // model doesn't expose primaryLive/backupLive — only /status does.)
+    guard case .ok(let ok) = try? await api.client.liveStreamGetStreamStatus(
       path: .init(libraryId: Int64(streamConfig.libraryId), streamId: streamId)
     ), case .json(let model) = ok.body else { return }
     await MainActor.run { [weak self] in
@@ -310,18 +325,69 @@ private extension BunnyStreamCameraUploadViewModel {
 
 // MARK: - Bunny Live Stream lifecycle (activate / complete)
 
+extension BunnyStreamCameraUploadViewModel {
+  /// Errors surfaced when starting/stopping a live stream on the Bunny backend.
+  enum LifecycleError: LocalizedError {
+    case missingConfiguration
+    case unauthorized
+    case notFound
+    case server
+    case http(Int)
+
+    var errorDescription: String? {
+      switch self {
+      case .missingConfiguration: return "Live stream is not configured correctly."
+      case .unauthorized:         return "Unauthorized — check your Access Key."
+      case .notFound:             return "Live stream not found."
+      case .server:               return "Server error. Please try again."
+      case .http(let code):       return "Request failed (HTTP \(code))."
+      }
+    }
+  }
+}
+
 private extension BunnyStreamCameraUploadViewModel {
-  func activateStream() async {
-    guard let streamId = streamConfig.streamId, !streamConfig.accessKey.isEmpty else { return }
-    _ = try? await BunnyStreamAPI(accessKey: streamConfig.accessKey).client.liveStreamActivate(
+  /// Activates the stream on the Bunny backend. Throws on failure so the caller can abort
+  /// before publishing — an unactivated stream won't go live even if RTMP publishing succeeds.
+  func activateStream() async throws {
+    guard let streamId = streamConfig.streamId, !streamConfig.accessKey.isEmpty else {
+      throw LifecycleError.missingConfiguration
+    }
+    let output = try await BunnyStreamAPI(accessKey: streamConfig.accessKey).client.liveStreamActivate(
       path: .init(libraryId: Int64(streamConfig.libraryId), streamId: streamId)
     )
+    switch output {
+    case .ok:
+      break
+    case .unauthorized:
+      throw LifecycleError.unauthorized
+    case .notFound:
+      throw LifecycleError.notFound
+    case .internalServerError:
+      throw LifecycleError.server
+    case .undocumented(statusCode: let code, _):
+      throw LifecycleError.http(code)
+    }
   }
 
-  func completeStream() async {
+  /// Completes the stream on the Bunny backend. Best-effort: the local broadcast is already
+  /// torn down before this is called, so failures are surfaced but don't block stopping.
+  func completeStream() async throws {
     guard let streamId = streamConfig.streamId, !streamConfig.accessKey.isEmpty else { return }
-    _ = try? await BunnyStreamAPI(accessKey: streamConfig.accessKey).client.liveStreamComplete(
+    let output = try await BunnyStreamAPI(accessKey: streamConfig.accessKey).client.liveStreamComplete(
       path: .init(libraryId: Int64(streamConfig.libraryId), streamId: streamId)
     )
+    switch output {
+    case .ok:
+      break
+    case .unauthorized:
+      throw LifecycleError.unauthorized
+    case .notFound:
+      throw LifecycleError.notFound
+    case .internalServerError:
+      throw LifecycleError.server
+    case .undocumented(statusCode: let code, _):
+      throw LifecycleError.http(code)
+    }
   }
 }

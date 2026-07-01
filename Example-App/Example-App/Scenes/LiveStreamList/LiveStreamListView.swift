@@ -15,6 +15,7 @@ struct LiveStreamListView: View {
     @State private var broadcasterStream: BroadcastSelection?
     @State private var ingestDetailsStream: BroadcastSelection?
     @State private var streamPendingDeletion: BroadcastSelection?
+    @State private var editingStream: BroadcastSelection?
     @State private var isShowingCreate = false
 
     init(viewModel: LiveStreamListViewModel, dependenciesManager: DependenciesManager) {
@@ -66,6 +67,11 @@ struct LiveStreamListView: View {
         }
         .sheet(item: $ingestDetailsStream) { selection in
             LiveStreamIngestDetailsView(stream: selection.stream)
+        }
+        .sheet(item: $editingStream) { selection in
+            CreateLiveStreamView(viewModel: viewModel, editingStream: selection.stream) {
+                await viewModel.load()
+            }
         }
         .alert("Delete live stream?", isPresented: deleteAlertBinding, presenting: streamPendingDeletion) { selection in
             Button("Delete", role: .destructive) {
@@ -149,6 +155,13 @@ private extension LiveStreamListView {
                         Label("RTMP", systemImage: "info.circle")
                     }
                     .tint(.indigo)
+                    Button {
+                        guard let guid = stream.guid else { return }
+                        editingStream = BroadcastSelection(id: guid, stream: stream)
+                    } label: {
+                        Label("Edit", systemImage: "pencil")
+                    }
+                    .tint(.orange)
                     Button(role: .destructive) {
                         guard let guid = stream.guid else { return }
                         streamPendingDeletion = BroadcastSelection(id: guid, stream: stream)

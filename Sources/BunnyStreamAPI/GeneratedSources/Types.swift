@@ -202,10 +202,10 @@ public protocol APIProtocol: Sendable {
     func liveStreamGet(_ input: Operations.LiveStreamGet.Input) async throws -> Operations.LiveStreamGet.Output
     /// Update Live Stream
     ///
-    /// Updates an existing live stream with the provided details.
+    /// Updates an existing live stream with the provided details. Only the fields present in the request body are updated.
     ///
-    /// - Remark: HTTP `POST /library/{libraryId}/live/{streamId}`.
-    /// - Remark: Generated from `#/paths//library/{libraryId}/live/{streamId}/post(LiveStream_Update)`.
+    /// - Remark: HTTP `PUT /library/{libraryId}/live/{streamId}`.
+    /// - Remark: Generated from `#/paths//library/{libraryId}/live/{streamId}/put(LiveStream_Update)`.
     func liveStreamUpdate(_ input: Operations.LiveStreamUpdate.Input) async throws -> Operations.LiveStreamUpdate.Output
     /// Delete Live Stream
     ///
@@ -235,6 +235,13 @@ public protocol APIProtocol: Sendable {
     /// - Remark: HTTP `GET /library/{libraryId}/live/{streamId}/play`.
     /// - Remark: Generated from `#/paths//library/{libraryId}/live/{streamId}/play/get(LiveStream_GetStreamPlayData)`.
     func liveStreamGetStreamPlayData(_ input: Operations.LiveStreamGetStreamPlayData.Input) async throws -> Operations.LiveStreamGetStreamPlayData.Output
+    /// Get Live Stream Status
+    ///
+    /// Retrieves the current ingest status of the specified live stream — a lightweight call suited for frequent polling.
+    ///
+    /// - Remark: HTTP `GET /library/{libraryId}/live/{streamId}/status`.
+    /// - Remark: Generated from `#/paths//library/{libraryId}/live/{streamId}/status/get(LiveStream_GetStreamStatus)`.
+    func liveStreamGetStreamStatus(_ input: Operations.LiveStreamGetStreamStatus.Input) async throws -> Operations.LiveStreamGetStreamStatus.Output
     /// Get OEmbed Data
     ///
     /// Retrieves OEmbed information for a given video URL. This includes embed HTML, thumbnail URL, and metadata such as title and provider details.
@@ -693,10 +700,10 @@ extension APIProtocol {
     }
     /// Update Live Stream
     ///
-    /// Updates an existing live stream with the provided details.
+    /// Updates an existing live stream with the provided details. Only the fields present in the request body are updated.
     ///
-    /// - Remark: HTTP `POST /library/{libraryId}/live/{streamId}`.
-    /// - Remark: Generated from `#/paths//library/{libraryId}/live/{streamId}/post(LiveStream_Update)`.
+    /// - Remark: HTTP `PUT /library/{libraryId}/live/{streamId}`.
+    /// - Remark: Generated from `#/paths//library/{libraryId}/live/{streamId}/put(LiveStream_Update)`.
     public func liveStreamUpdate(
         path: Operations.LiveStreamUpdate.Input.Path,
         headers: Operations.LiveStreamUpdate.Input.Headers = .init(),
@@ -758,6 +765,21 @@ extension APIProtocol {
         headers: Operations.LiveStreamGetStreamPlayData.Input.Headers = .init()
     ) async throws -> Operations.LiveStreamGetStreamPlayData.Output {
         try await liveStreamGetStreamPlayData(Operations.LiveStreamGetStreamPlayData.Input(
+            path: path,
+            headers: headers
+        ))
+    }
+    /// Get Live Stream Status
+    ///
+    /// Retrieves the current ingest status of the specified live stream — a lightweight call suited for frequent polling.
+    ///
+    /// - Remark: HTTP `GET /library/{libraryId}/live/{streamId}/status`.
+    /// - Remark: Generated from `#/paths//library/{libraryId}/live/{streamId}/status/get(LiveStream_GetStreamStatus)`.
+    public func liveStreamGetStreamStatus(
+        path: Operations.LiveStreamGetStreamStatus.Input.Path,
+        headers: Operations.LiveStreamGetStreamStatus.Input.Headers = .init()
+    ) async throws -> Operations.LiveStreamGetStreamStatus.Output {
+        try await liveStreamGetStreamStatus(Operations.LiveStreamGetStreamStatus.Input(
             path: path,
             headers: headers
         ))
@@ -4369,6 +4391,26 @@ public enum Components {
             ///
             /// - Remark: Generated from `#/components/schemas/LiveStreamModel/recordVod`.
             public var recordVod: Swift.Bool?
+            /// Indicates whether DVR is enabled, allowing viewers to rewind the live stream.
+            ///
+            /// - Remark: Generated from `#/components/schemas/LiveStreamModel/dvrEnabled`.
+            public var dvrEnabled: Swift.Bool?
+            /// The DVR window size in seconds (how far back viewers can rewind).
+            ///
+            /// - Remark: Generated from `#/components/schemas/LiveStreamModel/dvrWindowSeconds`.
+            public var dvrWindowSeconds: Swift.Int32?
+            /// Indicates whether the live stream is publicly accessible.
+            ///
+            /// - Remark: Generated from `#/components/schemas/LiveStreamModel/public`.
+            public var _public: Swift.Bool?
+            /// The ID of the collection the live stream belongs to.
+            ///
+            /// - Remark: Generated from `#/components/schemas/LiveStreamModel/collectionId`.
+            public var collectionId: Swift.String?
+            /// The scheduled end time of the live stream in ISO 8601 format.
+            ///
+            /// - Remark: Generated from `#/components/schemas/LiveStreamModel/scheduledEndTime`.
+            public var scheduledEndTime: Swift.String?
             /// Indicates whether a countdown timer should be displayed before the scheduled start.
             ///
             /// - Remark: Generated from `#/components/schemas/LiveStreamModel/enableCountdown`.
@@ -4419,6 +4461,11 @@ public enum Components {
             ///   - status: The current status of the live stream.
             ///   - hasArchive: Indicates if the live stream is being archived for later playback.
             ///   - recordVod: Indicates whether a VOD recording will be available after the stream ends.
+            ///   - dvrEnabled: Indicates whether DVR is enabled, allowing viewers to rewind the live stream.
+            ///   - dvrWindowSeconds: The DVR window size in seconds (how far back viewers can rewind).
+            ///   - _public: Indicates whether the live stream is publicly accessible.
+            ///   - collectionId: The ID of the collection the live stream belongs to.
+            ///   - scheduledEndTime: The scheduled end time of the live stream in ISO 8601 format.
             ///   - enableCountdown: Indicates whether a countdown timer should be displayed before the scheduled start.
             ///   - scheduledStartTime: The scheduled start time of the live stream in ISO 8601 format.
             ///   - preStreamTrailerVideoId: The GUID of a VOD video to loop as a trailer before the stream starts.
@@ -4442,6 +4489,11 @@ public enum Components {
                 status: Components.Schemas.LiveStreamModel.StatusPayload? = nil,
                 hasArchive: Swift.Bool? = nil,
                 recordVod: Swift.Bool? = nil,
+                dvrEnabled: Swift.Bool? = nil,
+                dvrWindowSeconds: Swift.Int32? = nil,
+                _public: Swift.Bool? = nil,
+                collectionId: Swift.String? = nil,
+                scheduledEndTime: Swift.String? = nil,
                 enableCountdown: Swift.Bool? = nil,
                 scheduledStartTime: Swift.String? = nil,
                 preStreamTrailerVideoId: Swift.String? = nil,
@@ -4465,6 +4517,11 @@ public enum Components {
                 self.status = status
                 self.hasArchive = hasArchive
                 self.recordVod = recordVod
+                self.dvrEnabled = dvrEnabled
+                self.dvrWindowSeconds = dvrWindowSeconds
+                self._public = _public
+                self.collectionId = collectionId
+                self.scheduledEndTime = scheduledEndTime
                 self.enableCountdown = enableCountdown
                 self.scheduledStartTime = scheduledStartTime
                 self.preStreamTrailerVideoId = preStreamTrailerVideoId
@@ -4489,6 +4546,11 @@ public enum Components {
                 case status
                 case hasArchive
                 case recordVod
+                case dvrEnabled
+                case dvrWindowSeconds
+                case _public = "public"
+                case collectionId
+                case scheduledEndTime
                 case enableCountdown
                 case scheduledStartTime
                 case preStreamTrailerVideoId
@@ -4552,6 +4614,26 @@ public enum Components {
                     Swift.Bool.self,
                     forKey: .recordVod
                 )
+                self.dvrEnabled = try container.decodeIfPresent(
+                    Swift.Bool.self,
+                    forKey: .dvrEnabled
+                )
+                self.dvrWindowSeconds = try container.decodeIfPresent(
+                    Swift.Int32.self,
+                    forKey: .dvrWindowSeconds
+                )
+                self._public = try container.decodeIfPresent(
+                    Swift.Bool.self,
+                    forKey: ._public
+                )
+                self.collectionId = try container.decodeIfPresent(
+                    Swift.String.self,
+                    forKey: .collectionId
+                )
+                self.scheduledEndTime = try container.decodeIfPresent(
+                    Swift.String.self,
+                    forKey: .scheduledEndTime
+                )
                 self.enableCountdown = try container.decodeIfPresent(
                     Swift.Bool.self,
                     forKey: .enableCountdown
@@ -4598,6 +4680,11 @@ public enum Components {
                     "status",
                     "hasArchive",
                     "recordVod",
+                    "dvrEnabled",
+                    "dvrWindowSeconds",
+                    "public",
+                    "collectionId",
+                    "scheduledEndTime",
                     "enableCountdown",
                     "scheduledStartTime",
                     "preStreamTrailerVideoId",
@@ -4663,6 +4750,26 @@ public enum Components {
                     forKey: .recordVod
                 )
                 try container.encodeIfPresent(
+                    self.dvrEnabled,
+                    forKey: .dvrEnabled
+                )
+                try container.encodeIfPresent(
+                    self.dvrWindowSeconds,
+                    forKey: .dvrWindowSeconds
+                )
+                try container.encodeIfPresent(
+                    self._public,
+                    forKey: ._public
+                )
+                try container.encodeIfPresent(
+                    self.collectionId,
+                    forKey: .collectionId
+                )
+                try container.encodeIfPresent(
+                    self.scheduledEndTime,
+                    forKey: .scheduledEndTime
+                )
+                try container.encodeIfPresent(
                     self.enableCountdown,
                     forKey: .enableCountdown
                 )
@@ -4708,80 +4815,326 @@ public enum Components {
             case _6 = 6
             case _7 = 7
         }
-        /// Contains playback information for a live stream, including the HLS URL, DVR window size, and live status.
+        /// The current ingest status of a live stream, returned by the /status endpoint. Lightweight and suited for frequent polling.
         ///
-        /// - Remark: Generated from `#/components/schemas/LiveStreamPlayDataModel`.
-        public struct LiveStreamPlayDataModel: Codable, Hashable, Sendable {
-            /// The HLS playback URL for the live stream.
+        /// - Remark: Generated from `#/components/schemas/LiveStreamStatusModel`.
+        public struct LiveStreamStatusModel: Codable, Hashable, Sendable {
+            /// Determines if the stream is ready to start based on live ingest status.
             ///
-            /// - Remark: Generated from `#/components/schemas/LiveStreamPlayDataModel/playbackUrl`.
-            public var playbackUrl: Swift.String?
-            /// The size of the DVR seekable window in seconds. A value of 0 indicates no DVR is available.
+            /// - Remark: Generated from `#/components/schemas/LiveStreamStatusModel/readyToStart`.
+            public var readyToStart: Swift.Bool?
+            /// Determines if the primary ingest is live.
             ///
-            /// - Remark: Generated from `#/components/schemas/LiveStreamPlayDataModel/seekableWindow`.
-            public var seekableWindow: Swift.Double?
-            /// Indicates whether the stream is currently live.
+            /// - Remark: Generated from `#/components/schemas/LiveStreamStatusModel/primaryLive`.
+            public var primaryLive: Swift.Bool?
+            /// Determines if the backup ingest is live.
             ///
-            /// - Remark: Generated from `#/components/schemas/LiveStreamPlayDataModel/isLive`.
-            public var isLive: Swift.Bool?
+            /// - Remark: Generated from `#/components/schemas/LiveStreamStatusModel/backupLive`.
+            public var backupLive: Swift.Bool?
+            /// The number of milliseconds since the last ingest ping, if available.
+            ///
+            /// - Remark: Generated from `#/components/schemas/LiveStreamStatusModel/lastPingAgo`.
+            public var lastPingAgo: Swift.Int64?
+            /// The stream duration in seconds.
+            ///
+            /// - Remark: Generated from `#/components/schemas/LiveStreamStatusModel/duration`.
+            public var duration: Swift.Int32?
+            /// The UTC time when the status was read, in ISO 8601 format.
+            ///
+            /// - Remark: Generated from `#/components/schemas/LiveStreamStatusModel/statusTimeUtc`.
+            public var statusTimeUtc: Swift.String?
             /// A container of undocumented properties.
             public var additionalProperties: OpenAPIRuntime.OpenAPIObjectContainer
-            /// Creates a new `LiveStreamPlayDataModel`.
+            /// Creates a new `LiveStreamStatusModel`.
             ///
             /// - Parameters:
-            ///   - playbackUrl: The HLS playback URL for the live stream.
-            ///   - seekableWindow: The size of the DVR seekable window in seconds. A value of 0 indicates no DVR is available.
-            ///   - isLive: Indicates whether the stream is currently live.
+            ///   - readyToStart: Determines if the stream is ready to start based on live ingest status.
+            ///   - primaryLive: Determines if the primary ingest is live.
+            ///   - backupLive: Determines if the backup ingest is live.
+            ///   - lastPingAgo: The number of milliseconds since the last ingest ping, if available.
+            ///   - duration: The stream duration in seconds.
+            ///   - statusTimeUtc: The UTC time when the status was read, in ISO 8601 format.
             ///   - additionalProperties: A container of undocumented properties.
             public init(
-                playbackUrl: Swift.String? = nil,
-                seekableWindow: Swift.Double? = nil,
-                isLive: Swift.Bool? = nil,
+                readyToStart: Swift.Bool? = nil,
+                primaryLive: Swift.Bool? = nil,
+                backupLive: Swift.Bool? = nil,
+                lastPingAgo: Swift.Int64? = nil,
+                duration: Swift.Int32? = nil,
+                statusTimeUtc: Swift.String? = nil,
                 additionalProperties: OpenAPIRuntime.OpenAPIObjectContainer = .init()
             ) {
-                self.playbackUrl = playbackUrl
-                self.seekableWindow = seekableWindow
-                self.isLive = isLive
+                self.readyToStart = readyToStart
+                self.primaryLive = primaryLive
+                self.backupLive = backupLive
+                self.lastPingAgo = lastPingAgo
+                self.duration = duration
+                self.statusTimeUtc = statusTimeUtc
                 self.additionalProperties = additionalProperties
             }
             public enum CodingKeys: String, CodingKey {
-                case playbackUrl
-                case seekableWindow
-                case isLive
+                case readyToStart
+                case primaryLive
+                case backupLive
+                case lastPingAgo
+                case duration
+                case statusTimeUtc
             }
             public init(from decoder: any Decoder) throws {
                 let container = try decoder.container(keyedBy: CodingKeys.self)
-                self.playbackUrl = try container.decodeIfPresent(
-                    Swift.String.self,
-                    forKey: .playbackUrl
-                )
-                self.seekableWindow = try container.decodeIfPresent(
-                    Swift.Double.self,
-                    forKey: .seekableWindow
-                )
-                self.isLive = try container.decodeIfPresent(
+                self.readyToStart = try container.decodeIfPresent(
                     Swift.Bool.self,
-                    forKey: .isLive
+                    forKey: .readyToStart
+                )
+                self.primaryLive = try container.decodeIfPresent(
+                    Swift.Bool.self,
+                    forKey: .primaryLive
+                )
+                self.backupLive = try container.decodeIfPresent(
+                    Swift.Bool.self,
+                    forKey: .backupLive
+                )
+                self.lastPingAgo = try container.decodeIfPresent(
+                    Swift.Int64.self,
+                    forKey: .lastPingAgo
+                )
+                self.duration = try container.decodeIfPresent(
+                    Swift.Int32.self,
+                    forKey: .duration
+                )
+                self.statusTimeUtc = try container.decodeIfPresent(
+                    Swift.String.self,
+                    forKey: .statusTimeUtc
                 )
                 additionalProperties = try decoder.decodeAdditionalProperties(knownKeys: [
-                    "playbackUrl",
-                    "seekableWindow",
-                    "isLive"
+                    "readyToStart",
+                    "primaryLive",
+                    "backupLive",
+                    "lastPingAgo",
+                    "duration",
+                    "statusTimeUtc"
                 ])
             }
             public func encode(to encoder: any Encoder) throws {
                 var container = encoder.container(keyedBy: CodingKeys.self)
                 try container.encodeIfPresent(
-                    self.playbackUrl,
-                    forKey: .playbackUrl
+                    self.readyToStart,
+                    forKey: .readyToStart
                 )
                 try container.encodeIfPresent(
-                    self.seekableWindow,
-                    forKey: .seekableWindow
+                    self.primaryLive,
+                    forKey: .primaryLive
                 )
                 try container.encodeIfPresent(
-                    self.isLive,
-                    forKey: .isLive
+                    self.backupLive,
+                    forKey: .backupLive
+                )
+                try container.encodeIfPresent(
+                    self.lastPingAgo,
+                    forKey: .lastPingAgo
+                )
+                try container.encodeIfPresent(
+                    self.duration,
+                    forKey: .duration
+                )
+                try container.encodeIfPresent(
+                    self.statusTimeUtc,
+                    forKey: .statusTimeUtc
+                )
+                try encoder.encodeAdditionalProperties(additionalProperties)
+            }
+        }
+        /// Contains playback information returned by the live stream /play endpoint, including the nested live stream model and playback URLs.
+        ///
+        /// - Remark: Generated from `#/components/schemas/LiveStreamPlayDataModel`.
+        public struct LiveStreamPlayDataModel: Codable, Hashable, Sendable {
+            /// - Remark: Generated from `#/components/schemas/LiveStreamPlayDataModel/liveStream`.
+            public var liveStream: Components.Schemas.LiveStreamModel?
+            /// The name of the video library that contains the live stream.
+            ///
+            /// - Remark: Generated from `#/components/schemas/LiveStreamPlayDataModel/libraryName`.
+            public var libraryName: Swift.String?
+            /// The HLS playlist (.m3u8) URL for the live stream.
+            ///
+            /// - Remark: Generated from `#/components/schemas/LiveStreamPlayDataModel/videoPlaylistUrl`.
+            public var videoPlaylistUrl: Swift.String?
+            /// The fallback playback URL prefix used when the primary playlist is unavailable.
+            ///
+            /// - Remark: Generated from `#/components/schemas/LiveStreamPlayDataModel/fallbackUrl`.
+            public var fallbackUrl: Swift.String?
+            /// The original source URL of the live stream, when available.
+            ///
+            /// - Remark: Generated from `#/components/schemas/LiveStreamPlayDataModel/originalUrl`.
+            public var originalUrl: Swift.String?
+            /// The URL of the thumbnail image to display when the stream is offline.
+            ///
+            /// - Remark: Generated from `#/components/schemas/LiveStreamPlayDataModel/thumbnailUrl`.
+            public var thumbnailUrl: Swift.String?
+            /// The URL of the animated preview (WebP) for the live stream.
+            ///
+            /// - Remark: Generated from `#/components/schemas/LiveStreamPlayDataModel/previewUrl`.
+            public var previewUrl: Swift.String?
+            /// The base path for DVR seek thumbnails.
+            ///
+            /// - Remark: Generated from `#/components/schemas/LiveStreamPlayDataModel/seekPath`.
+            public var seekPath: Swift.String?
+            /// The base path for caption files.
+            ///
+            /// - Remark: Generated from `#/components/schemas/LiveStreamPlayDataModel/captionsPath`.
+            public var captionsPath: Swift.String?
+            /// Indicates whether DRM is enabled for the live stream.
+            ///
+            /// - Remark: Generated from `#/components/schemas/LiveStreamPlayDataModel/enableDRM`.
+            public var enableDRM: Swift.Bool?
+            /// A container of undocumented properties.
+            public var additionalProperties: OpenAPIRuntime.OpenAPIObjectContainer
+            /// Creates a new `LiveStreamPlayDataModel`.
+            ///
+            /// - Parameters:
+            ///   - liveStream:
+            ///   - libraryName: The name of the video library that contains the live stream.
+            ///   - videoPlaylistUrl: The HLS playlist (.m3u8) URL for the live stream.
+            ///   - fallbackUrl: The fallback playback URL prefix used when the primary playlist is unavailable.
+            ///   - originalUrl: The original source URL of the live stream, when available.
+            ///   - thumbnailUrl: The URL of the thumbnail image to display when the stream is offline.
+            ///   - previewUrl: The URL of the animated preview (WebP) for the live stream.
+            ///   - seekPath: The base path for DVR seek thumbnails.
+            ///   - captionsPath: The base path for caption files.
+            ///   - enableDRM: Indicates whether DRM is enabled for the live stream.
+            ///   - additionalProperties: A container of undocumented properties.
+            public init(
+                liveStream: Components.Schemas.LiveStreamModel? = nil,
+                libraryName: Swift.String? = nil,
+                videoPlaylistUrl: Swift.String? = nil,
+                fallbackUrl: Swift.String? = nil,
+                originalUrl: Swift.String? = nil,
+                thumbnailUrl: Swift.String? = nil,
+                previewUrl: Swift.String? = nil,
+                seekPath: Swift.String? = nil,
+                captionsPath: Swift.String? = nil,
+                enableDRM: Swift.Bool? = nil,
+                additionalProperties: OpenAPIRuntime.OpenAPIObjectContainer = .init()
+            ) {
+                self.liveStream = liveStream
+                self.libraryName = libraryName
+                self.videoPlaylistUrl = videoPlaylistUrl
+                self.fallbackUrl = fallbackUrl
+                self.originalUrl = originalUrl
+                self.thumbnailUrl = thumbnailUrl
+                self.previewUrl = previewUrl
+                self.seekPath = seekPath
+                self.captionsPath = captionsPath
+                self.enableDRM = enableDRM
+                self.additionalProperties = additionalProperties
+            }
+            public enum CodingKeys: String, CodingKey {
+                case liveStream
+                case libraryName
+                case videoPlaylistUrl
+                case fallbackUrl
+                case originalUrl
+                case thumbnailUrl
+                case previewUrl
+                case seekPath
+                case captionsPath
+                case enableDRM
+            }
+            public init(from decoder: any Decoder) throws {
+                let container = try decoder.container(keyedBy: CodingKeys.self)
+                self.liveStream = try container.decodeIfPresent(
+                    Components.Schemas.LiveStreamModel.self,
+                    forKey: .liveStream
+                )
+                self.libraryName = try container.decodeIfPresent(
+                    Swift.String.self,
+                    forKey: .libraryName
+                )
+                self.videoPlaylistUrl = try container.decodeIfPresent(
+                    Swift.String.self,
+                    forKey: .videoPlaylistUrl
+                )
+                self.fallbackUrl = try container.decodeIfPresent(
+                    Swift.String.self,
+                    forKey: .fallbackUrl
+                )
+                self.originalUrl = try container.decodeIfPresent(
+                    Swift.String.self,
+                    forKey: .originalUrl
+                )
+                self.thumbnailUrl = try container.decodeIfPresent(
+                    Swift.String.self,
+                    forKey: .thumbnailUrl
+                )
+                self.previewUrl = try container.decodeIfPresent(
+                    Swift.String.self,
+                    forKey: .previewUrl
+                )
+                self.seekPath = try container.decodeIfPresent(
+                    Swift.String.self,
+                    forKey: .seekPath
+                )
+                self.captionsPath = try container.decodeIfPresent(
+                    Swift.String.self,
+                    forKey: .captionsPath
+                )
+                self.enableDRM = try container.decodeIfPresent(
+                    Swift.Bool.self,
+                    forKey: .enableDRM
+                )
+                additionalProperties = try decoder.decodeAdditionalProperties(knownKeys: [
+                    "liveStream",
+                    "libraryName",
+                    "videoPlaylistUrl",
+                    "fallbackUrl",
+                    "originalUrl",
+                    "thumbnailUrl",
+                    "previewUrl",
+                    "seekPath",
+                    "captionsPath",
+                    "enableDRM"
+                ])
+            }
+            public func encode(to encoder: any Encoder) throws {
+                var container = encoder.container(keyedBy: CodingKeys.self)
+                try container.encodeIfPresent(
+                    self.liveStream,
+                    forKey: .liveStream
+                )
+                try container.encodeIfPresent(
+                    self.libraryName,
+                    forKey: .libraryName
+                )
+                try container.encodeIfPresent(
+                    self.videoPlaylistUrl,
+                    forKey: .videoPlaylistUrl
+                )
+                try container.encodeIfPresent(
+                    self.fallbackUrl,
+                    forKey: .fallbackUrl
+                )
+                try container.encodeIfPresent(
+                    self.originalUrl,
+                    forKey: .originalUrl
+                )
+                try container.encodeIfPresent(
+                    self.thumbnailUrl,
+                    forKey: .thumbnailUrl
+                )
+                try container.encodeIfPresent(
+                    self.previewUrl,
+                    forKey: .previewUrl
+                )
+                try container.encodeIfPresent(
+                    self.seekPath,
+                    forKey: .seekPath
+                )
+                try container.encodeIfPresent(
+                    self.captionsPath,
+                    forKey: .captionsPath
+                )
+                try container.encodeIfPresent(
+                    self.enableDRM,
+                    forKey: .enableDRM
                 )
                 try encoder.encodeAdditionalProperties(additionalProperties)
             }
@@ -5061,7 +5414,68 @@ public enum Components {
                 try encoder.encodeAdditionalProperties(additionalProperties)
             }
         }
-        /// Schema for updating live stream details.
+        /// An RTMP output endpoint that the incoming live stream is forwarded to.
+        ///
+        /// - Remark: Generated from `#/components/schemas/RtmpOutput`.
+        public struct RtmpOutput: Codable, Hashable, Sendable {
+            /// The RTMP output endpoint URL.
+            ///
+            /// - Remark: Generated from `#/components/schemas/RtmpOutput/endpoint`.
+            public var endpoint: Swift.String?
+            /// The stream key for the RTMP output endpoint.
+            ///
+            /// - Remark: Generated from `#/components/schemas/RtmpOutput/streamKey`.
+            public var streamKey: Swift.String?
+            /// A container of undocumented properties.
+            public var additionalProperties: OpenAPIRuntime.OpenAPIObjectContainer
+            /// Creates a new `RtmpOutput`.
+            ///
+            /// - Parameters:
+            ///   - endpoint: The RTMP output endpoint URL.
+            ///   - streamKey: The stream key for the RTMP output endpoint.
+            ///   - additionalProperties: A container of undocumented properties.
+            public init(
+                endpoint: Swift.String? = nil,
+                streamKey: Swift.String? = nil,
+                additionalProperties: OpenAPIRuntime.OpenAPIObjectContainer = .init()
+            ) {
+                self.endpoint = endpoint
+                self.streamKey = streamKey
+                self.additionalProperties = additionalProperties
+            }
+            public enum CodingKeys: String, CodingKey {
+                case endpoint
+                case streamKey
+            }
+            public init(from decoder: any Decoder) throws {
+                let container = try decoder.container(keyedBy: CodingKeys.self)
+                self.endpoint = try container.decodeIfPresent(
+                    Swift.String.self,
+                    forKey: .endpoint
+                )
+                self.streamKey = try container.decodeIfPresent(
+                    Swift.String.self,
+                    forKey: .streamKey
+                )
+                additionalProperties = try decoder.decodeAdditionalProperties(knownKeys: [
+                    "endpoint",
+                    "streamKey"
+                ])
+            }
+            public func encode(to encoder: any Encoder) throws {
+                var container = encoder.container(keyedBy: CodingKeys.self)
+                try container.encodeIfPresent(
+                    self.endpoint,
+                    forKey: .endpoint
+                )
+                try container.encodeIfPresent(
+                    self.streamKey,
+                    forKey: .streamKey
+                )
+                try encoder.encodeAdditionalProperties(additionalProperties)
+            }
+        }
+        /// Schema for updating live stream details. All fields are optional; only the fields present in the request are updated.
         ///
         /// - Remark: Generated from `#/components/schemas/UpdateLiveStreamModel`.
         public struct UpdateLiveStreamModel: Codable, Hashable, Sendable {
@@ -5073,10 +5487,46 @@ public enum Components {
             ///
             /// - Remark: Generated from `#/components/schemas/UpdateLiveStreamModel/description`.
             public var description: Swift.String?
-            /// URL of a thumbnail image to display when the stream is offline.
+            /// The ID of the collection the live stream belongs to.
             ///
-            /// - Remark: Generated from `#/components/schemas/UpdateLiveStreamModel/thumbnailUrl`.
-            public var thumbnailUrl: Swift.String?
+            /// - Remark: Generated from `#/components/schemas/UpdateLiveStreamModel/collectionId`.
+            public var collectionId: Swift.String?
+            /// Enables DVR so viewers can rewind the live stream.
+            ///
+            /// - Remark: Generated from `#/components/schemas/UpdateLiveStreamModel/dvrEnabled`.
+            public var dvrEnabled: Swift.Bool?
+            /// DVR window size in seconds. Required when dvrEnabled is true. Maximum is 43200 (12 hours).
+            ///
+            /// - Remark: Generated from `#/components/schemas/UpdateLiveStreamModel/dvrWindowSeconds`.
+            public var dvrWindowSeconds: Swift.Int32?
+            /// Create a VOD recording after the stream ends.
+            ///
+            /// - Remark: Generated from `#/components/schemas/UpdateLiveStreamModel/recordVod`.
+            public var recordVod: Swift.Bool?
+            /// The scheduled start time in ISO 8601 format. When set, stream status becomes Scheduled (Upcoming).
+            ///
+            /// - Remark: Generated from `#/components/schemas/UpdateLiveStreamModel/scheduledStartTime`.
+            public var scheduledStartTime: Foundation.Date?
+            /// The scheduled end time in ISO 8601 format.
+            ///
+            /// - Remark: Generated from `#/components/schemas/UpdateLiveStreamModel/scheduledEndTime`.
+            public var scheduledEndTime: Foundation.Date?
+            /// Determines if the live stream is publicly accessible.
+            ///
+            /// - Remark: Generated from `#/components/schemas/UpdateLiveStreamModel/public`.
+            public var _public: Swift.Bool?
+            /// Show a countdown in the player before the stream starts (only applies when scheduledStartTime is set).
+            ///
+            /// - Remark: Generated from `#/components/schemas/UpdateLiveStreamModel/enableCountdown`.
+            public var enableCountdown: Swift.Bool?
+            /// Video ID of the VOD to loop as a trailer before the live stream starts.
+            ///
+            /// - Remark: Generated from `#/components/schemas/UpdateLiveStreamModel/preStreamTrailerVideoId`.
+            public var preStreamTrailerVideoId: Swift.String?
+            /// A list of up to 4 RTMP outputs that the incoming stream should be forwarded to.
+            ///
+            /// - Remark: Generated from `#/components/schemas/UpdateLiveStreamModel/rtmpOutputs`.
+            public var rtmpOutputs: [Components.Schemas.RtmpOutput]?
             /// A container of undocumented properties.
             public var additionalProperties: OpenAPIRuntime.OpenAPIObjectContainer
             /// Creates a new `UpdateLiveStreamModel`.
@@ -5084,23 +5534,59 @@ public enum Components {
             /// - Parameters:
             ///   - title: The updated title of the live stream.
             ///   - description: The updated description of the live stream.
-            ///   - thumbnailUrl: URL of a thumbnail image to display when the stream is offline.
+            ///   - collectionId: The ID of the collection the live stream belongs to.
+            ///   - dvrEnabled: Enables DVR so viewers can rewind the live stream.
+            ///   - dvrWindowSeconds: DVR window size in seconds. Required when dvrEnabled is true. Maximum is 43200 (12 hours).
+            ///   - recordVod: Create a VOD recording after the stream ends.
+            ///   - scheduledStartTime: The scheduled start time in ISO 8601 format. When set, stream status becomes Scheduled (Upcoming).
+            ///   - scheduledEndTime: The scheduled end time in ISO 8601 format.
+            ///   - _public: Determines if the live stream is publicly accessible.
+            ///   - enableCountdown: Show a countdown in the player before the stream starts (only applies when scheduledStartTime is set).
+            ///   - preStreamTrailerVideoId: Video ID of the VOD to loop as a trailer before the live stream starts.
+            ///   - rtmpOutputs: A list of up to 4 RTMP outputs that the incoming stream should be forwarded to.
             ///   - additionalProperties: A container of undocumented properties.
             public init(
                 title: Swift.String? = nil,
                 description: Swift.String? = nil,
-                thumbnailUrl: Swift.String? = nil,
+                collectionId: Swift.String? = nil,
+                dvrEnabled: Swift.Bool? = nil,
+                dvrWindowSeconds: Swift.Int32? = nil,
+                recordVod: Swift.Bool? = nil,
+                scheduledStartTime: Foundation.Date? = nil,
+                scheduledEndTime: Foundation.Date? = nil,
+                _public: Swift.Bool? = nil,
+                enableCountdown: Swift.Bool? = nil,
+                preStreamTrailerVideoId: Swift.String? = nil,
+                rtmpOutputs: [Components.Schemas.RtmpOutput]? = nil,
                 additionalProperties: OpenAPIRuntime.OpenAPIObjectContainer = .init()
             ) {
                 self.title = title
                 self.description = description
-                self.thumbnailUrl = thumbnailUrl
+                self.collectionId = collectionId
+                self.dvrEnabled = dvrEnabled
+                self.dvrWindowSeconds = dvrWindowSeconds
+                self.recordVod = recordVod
+                self.scheduledStartTime = scheduledStartTime
+                self.scheduledEndTime = scheduledEndTime
+                self._public = _public
+                self.enableCountdown = enableCountdown
+                self.preStreamTrailerVideoId = preStreamTrailerVideoId
+                self.rtmpOutputs = rtmpOutputs
                 self.additionalProperties = additionalProperties
             }
             public enum CodingKeys: String, CodingKey {
                 case title
                 case description
-                case thumbnailUrl
+                case collectionId
+                case dvrEnabled
+                case dvrWindowSeconds
+                case recordVod
+                case scheduledStartTime
+                case scheduledEndTime
+                case _public = "public"
+                case enableCountdown
+                case preStreamTrailerVideoId
+                case rtmpOutputs
             }
             public init(from decoder: any Decoder) throws {
                 let container = try decoder.container(keyedBy: CodingKeys.self)
@@ -5112,14 +5598,59 @@ public enum Components {
                     Swift.String.self,
                     forKey: .description
                 )
-                self.thumbnailUrl = try container.decodeIfPresent(
+                self.collectionId = try container.decodeIfPresent(
                     Swift.String.self,
-                    forKey: .thumbnailUrl
+                    forKey: .collectionId
+                )
+                self.dvrEnabled = try container.decodeIfPresent(
+                    Swift.Bool.self,
+                    forKey: .dvrEnabled
+                )
+                self.dvrWindowSeconds = try container.decodeIfPresent(
+                    Swift.Int32.self,
+                    forKey: .dvrWindowSeconds
+                )
+                self.recordVod = try container.decodeIfPresent(
+                    Swift.Bool.self,
+                    forKey: .recordVod
+                )
+                self.scheduledStartTime = try container.decodeIfPresent(
+                    Foundation.Date.self,
+                    forKey: .scheduledStartTime
+                )
+                self.scheduledEndTime = try container.decodeIfPresent(
+                    Foundation.Date.self,
+                    forKey: .scheduledEndTime
+                )
+                self._public = try container.decodeIfPresent(
+                    Swift.Bool.self,
+                    forKey: ._public
+                )
+                self.enableCountdown = try container.decodeIfPresent(
+                    Swift.Bool.self,
+                    forKey: .enableCountdown
+                )
+                self.preStreamTrailerVideoId = try container.decodeIfPresent(
+                    Swift.String.self,
+                    forKey: .preStreamTrailerVideoId
+                )
+                self.rtmpOutputs = try container.decodeIfPresent(
+                    [Components.Schemas.RtmpOutput].self,
+                    forKey: .rtmpOutputs
                 )
                 additionalProperties = try decoder.decodeAdditionalProperties(knownKeys: [
                     "title",
                     "description",
-                    "thumbnailUrl"
+                    "collectionId",
+                    "dvrEnabled",
+                    "dvrWindowSeconds",
+                    "recordVod",
+                    "scheduledStartTime",
+                    "scheduledEndTime",
+                    "public",
+                    "enableCountdown",
+                    "preStreamTrailerVideoId",
+                    "rtmpOutputs"
                 ])
             }
             public func encode(to encoder: any Encoder) throws {
@@ -5133,8 +5664,44 @@ public enum Components {
                     forKey: .description
                 )
                 try container.encodeIfPresent(
-                    self.thumbnailUrl,
-                    forKey: .thumbnailUrl
+                    self.collectionId,
+                    forKey: .collectionId
+                )
+                try container.encodeIfPresent(
+                    self.dvrEnabled,
+                    forKey: .dvrEnabled
+                )
+                try container.encodeIfPresent(
+                    self.dvrWindowSeconds,
+                    forKey: .dvrWindowSeconds
+                )
+                try container.encodeIfPresent(
+                    self.recordVod,
+                    forKey: .recordVod
+                )
+                try container.encodeIfPresent(
+                    self.scheduledStartTime,
+                    forKey: .scheduledStartTime
+                )
+                try container.encodeIfPresent(
+                    self.scheduledEndTime,
+                    forKey: .scheduledEndTime
+                )
+                try container.encodeIfPresent(
+                    self._public,
+                    forKey: ._public
+                )
+                try container.encodeIfPresent(
+                    self.enableCountdown,
+                    forKey: .enableCountdown
+                )
+                try container.encodeIfPresent(
+                    self.preStreamTrailerVideoId,
+                    forKey: .preStreamTrailerVideoId
+                )
+                try container.encodeIfPresent(
+                    self.rtmpOutputs,
+                    forKey: .rtmpOutputs
                 )
                 try encoder.encodeAdditionalProperties(additionalProperties)
             }
@@ -12473,22 +13040,22 @@ public enum Operations {
     }
     /// Update Live Stream
     ///
-    /// Updates an existing live stream with the provided details.
+    /// Updates an existing live stream with the provided details. Only the fields present in the request body are updated.
     ///
-    /// - Remark: HTTP `POST /library/{libraryId}/live/{streamId}`.
-    /// - Remark: Generated from `#/paths//library/{libraryId}/live/{streamId}/post(LiveStream_Update)`.
+    /// - Remark: HTTP `PUT /library/{libraryId}/live/{streamId}`.
+    /// - Remark: Generated from `#/paths//library/{libraryId}/live/{streamId}/put(LiveStream_Update)`.
     public enum LiveStreamUpdate {
         public static let id: Swift.String = "LiveStream_Update"
         public struct Input: Sendable, Hashable {
-            /// - Remark: Generated from `#/paths/library/{libraryId}/live/{streamId}/POST/path`.
+            /// - Remark: Generated from `#/paths/library/{libraryId}/live/{streamId}/PUT/path`.
             public struct Path: Sendable, Hashable {
                 /// The ID of the video library.
                 ///
-                /// - Remark: Generated from `#/paths/library/{libraryId}/live/{streamId}/POST/path/libraryId`.
+                /// - Remark: Generated from `#/paths/library/{libraryId}/live/{streamId}/PUT/path/libraryId`.
                 public var libraryId: Swift.Int64
                 /// The unique identifier of the live stream to update.
                 ///
-                /// - Remark: Generated from `#/paths/library/{libraryId}/live/{streamId}/POST/path/streamId`.
+                /// - Remark: Generated from `#/paths/library/{libraryId}/live/{streamId}/PUT/path/streamId`.
                 public var streamId: Swift.String
                 /// Creates a new `Path`.
                 ///
@@ -12504,7 +13071,7 @@ public enum Operations {
                 }
             }
             public var path: Operations.LiveStreamUpdate.Input.Path
-            /// - Remark: Generated from `#/paths/library/{libraryId}/live/{streamId}/POST/header`.
+            /// - Remark: Generated from `#/paths/library/{libraryId}/live/{streamId}/PUT/header`.
             public struct Headers: Sendable, Hashable {
                 public var accept: [OpenAPIRuntime.AcceptHeaderContentType<Operations.LiveStreamUpdate.AcceptableContentType>]
                 /// Creates a new `Headers`.
@@ -12516,35 +13083,10 @@ public enum Operations {
                 }
             }
             public var headers: Operations.LiveStreamUpdate.Input.Headers
-            /// - Remark: Generated from `#/paths/library/{libraryId}/live/{streamId}/POST/requestBody`.
+            /// - Remark: Generated from `#/paths/library/{libraryId}/live/{streamId}/PUT/requestBody`.
             @frozen public enum Body: Sendable, Hashable {
-                /// - Remark: Generated from `#/paths/library/{libraryId}/live/{streamId}/POST/requestBody/json`.
-                @frozen public enum JsonPayload: Codable, Hashable, Sendable {
-                    /// - Remark: Generated from `#/paths/library/{libraryId}/live/{streamId}/POST/requestBody/json/case1`.
-                    case UpdateLiveStreamModel(Components.Schemas.UpdateLiveStreamModel)
-                    public init(from decoder: any Decoder) throws {
-                        var errors: [any Error] = []
-                        do {
-                            self = .UpdateLiveStreamModel(try .init(from: decoder))
-                            return
-                        } catch {
-                            errors.append(error)
-                        }
-                        throw Swift.DecodingError.failedToDecodeOneOfSchema(
-                            type: Self.self,
-                            codingPath: decoder.codingPath,
-                            errors: errors
-                        )
-                    }
-                    public func encode(to encoder: any Encoder) throws {
-                        switch self {
-                        case let .UpdateLiveStreamModel(value):
-                            try value.encode(to: encoder)
-                        }
-                    }
-                }
-                /// - Remark: Generated from `#/paths/library/{libraryId}/live/{streamId}/POST/requestBody/content/application\/json`.
-                case json(Operations.LiveStreamUpdate.Input.Body.JsonPayload)
+                /// - Remark: Generated from `#/paths/library/{libraryId}/live/{streamId}/PUT/requestBody/content/application\/json`.
+                case json(Components.Schemas.UpdateLiveStreamModel)
             }
             public var body: Operations.LiveStreamUpdate.Input.Body
             /// Creates a new `Input`.
@@ -12565,15 +13107,15 @@ public enum Operations {
         }
         @frozen public enum Output: Sendable, Hashable {
             public struct Ok: Sendable, Hashable {
-                /// - Remark: Generated from `#/paths/library/{libraryId}/live/{streamId}/POST/responses/200/content`.
+                /// - Remark: Generated from `#/paths/library/{libraryId}/live/{streamId}/PUT/responses/200/content`.
                 @frozen public enum Body: Sendable, Hashable {
-                    /// - Remark: Generated from `#/paths/library/{libraryId}/live/{streamId}/POST/responses/200/content/application\/json`.
-                    case json(Components.Schemas.StatusModel)
+                    /// - Remark: Generated from `#/paths/library/{libraryId}/live/{streamId}/PUT/responses/200/content/application\/json`.
+                    case json(Components.Schemas.LiveStreamModel)
                     /// The associated value of the enum case if `self` is `.json`.
                     ///
                     /// - Throws: An error if `self` is not `.json`.
                     /// - SeeAlso: `.json`.
-                    public var json: Components.Schemas.StatusModel {
+                    public var json: Components.Schemas.LiveStreamModel {
                         get throws {
                             switch self {
                             case let .json(body):
@@ -12592,9 +13134,9 @@ public enum Operations {
                     self.body = body
                 }
             }
-            /// The live stream was successfully updated.
+            /// The live stream was successfully updated. Returns the updated live stream.
             ///
-            /// - Remark: Generated from `#/paths//library/{libraryId}/live/{streamId}/post(LiveStream_Update)/responses/200`.
+            /// - Remark: Generated from `#/paths//library/{libraryId}/live/{streamId}/put(LiveStream_Update)/responses/200`.
             ///
             /// HTTP response code: `200 ok`.
             case ok(Operations.LiveStreamUpdate.Output.Ok)
@@ -12615,19 +13157,54 @@ public enum Operations {
                     }
                 }
             }
+            public struct BadRequest: Sendable, Hashable {
+                /// Creates a new `BadRequest`.
+                public init() {}
+            }
+            /// The request was invalid.
+            ///
+            /// - Remark: Generated from `#/paths//library/{libraryId}/live/{streamId}/put(LiveStream_Update)/responses/400`.
+            ///
+            /// HTTP response code: `400 badRequest`.
+            case badRequest(Operations.LiveStreamUpdate.Output.BadRequest)
+            /// The request was invalid.
+            ///
+            /// - Remark: Generated from `#/paths//library/{libraryId}/live/{streamId}/put(LiveStream_Update)/responses/400`.
+            ///
+            /// HTTP response code: `400 badRequest`.
+            public static var badRequest: Self {
+                .badRequest(.init())
+            }
+            /// The associated value of the enum case if `self` is `.badRequest`.
+            ///
+            /// - Throws: An error if `self` is not `.badRequest`.
+            /// - SeeAlso: `.badRequest`.
+            public var badRequest: Operations.LiveStreamUpdate.Output.BadRequest {
+                get throws {
+                    switch self {
+                    case let .badRequest(response):
+                        return response
+                    default:
+                        try throwUnexpectedResponseStatus(
+                            expectedStatus: "badRequest",
+                            response: self
+                        )
+                    }
+                }
+            }
             public struct Unauthorized: Sendable, Hashable {
                 /// Creates a new `Unauthorized`.
                 public init() {}
             }
             /// The request authorization failed.
             ///
-            /// - Remark: Generated from `#/paths//library/{libraryId}/live/{streamId}/post(LiveStream_Update)/responses/401`.
+            /// - Remark: Generated from `#/paths//library/{libraryId}/live/{streamId}/put(LiveStream_Update)/responses/401`.
             ///
             /// HTTP response code: `401 unauthorized`.
             case unauthorized(Operations.LiveStreamUpdate.Output.Unauthorized)
             /// The request authorization failed.
             ///
-            /// - Remark: Generated from `#/paths//library/{libraryId}/live/{streamId}/post(LiveStream_Update)/responses/401`.
+            /// - Remark: Generated from `#/paths//library/{libraryId}/live/{streamId}/put(LiveStream_Update)/responses/401`.
             ///
             /// HTTP response code: `401 unauthorized`.
             public static var unauthorized: Self {
@@ -12656,13 +13233,13 @@ public enum Operations {
             }
             /// The requested live stream was not found.
             ///
-            /// - Remark: Generated from `#/paths//library/{libraryId}/live/{streamId}/post(LiveStream_Update)/responses/404`.
+            /// - Remark: Generated from `#/paths//library/{libraryId}/live/{streamId}/put(LiveStream_Update)/responses/404`.
             ///
             /// HTTP response code: `404 notFound`.
             case notFound(Operations.LiveStreamUpdate.Output.NotFound)
             /// The requested live stream was not found.
             ///
-            /// - Remark: Generated from `#/paths//library/{libraryId}/live/{streamId}/post(LiveStream_Update)/responses/404`.
+            /// - Remark: Generated from `#/paths//library/{libraryId}/live/{streamId}/put(LiveStream_Update)/responses/404`.
             ///
             /// HTTP response code: `404 notFound`.
             public static var notFound: Self {
@@ -12691,13 +13268,13 @@ public enum Operations {
             }
             /// Internal Server Error.
             ///
-            /// - Remark: Generated from `#/paths//library/{libraryId}/live/{streamId}/post(LiveStream_Update)/responses/500`.
+            /// - Remark: Generated from `#/paths//library/{libraryId}/live/{streamId}/put(LiveStream_Update)/responses/500`.
             ///
             /// HTTP response code: `500 internalServerError`.
             case internalServerError(Operations.LiveStreamUpdate.Output.InternalServerError)
             /// Internal Server Error.
             ///
-            /// - Remark: Generated from `#/paths//library/{libraryId}/live/{streamId}/post(LiveStream_Update)/responses/500`.
+            /// - Remark: Generated from `#/paths//library/{libraryId}/live/{streamId}/put(LiveStream_Update)/responses/500`.
             ///
             /// HTTP response code: `500 internalServerError`.
             public static var internalServerError: Self {
@@ -13634,6 +14211,287 @@ public enum Operations {
             /// - Throws: An error if `self` is not `.internalServerError`.
             /// - SeeAlso: `.internalServerError`.
             public var internalServerError: Operations.LiveStreamGetStreamPlayData.Output.InternalServerError {
+                get throws {
+                    switch self {
+                    case let .internalServerError(response):
+                        return response
+                    default:
+                        try throwUnexpectedResponseStatus(
+                            expectedStatus: "internalServerError",
+                            response: self
+                        )
+                    }
+                }
+            }
+            /// Undocumented response.
+            ///
+            /// A response with a code that is not documented in the OpenAPI document.
+            case undocumented(statusCode: Swift.Int, OpenAPIRuntime.UndocumentedPayload)
+        }
+        @frozen public enum AcceptableContentType: AcceptableProtocol {
+            case json
+            case other(Swift.String)
+            public init?(rawValue: Swift.String) {
+                switch rawValue.lowercased() {
+                case "application/json":
+                    self = .json
+                default:
+                    self = .other(rawValue)
+                }
+            }
+            public var rawValue: Swift.String {
+                switch self {
+                case let .other(string):
+                    return string
+                case .json:
+                    return "application/json"
+                }
+            }
+            public static var allCases: [Self] {
+                [
+                    .json
+                ]
+            }
+        }
+    }
+    /// Get Live Stream Status
+    ///
+    /// Retrieves the current ingest status of the specified live stream — a lightweight call suited for frequent polling.
+    ///
+    /// - Remark: HTTP `GET /library/{libraryId}/live/{streamId}/status`.
+    /// - Remark: Generated from `#/paths//library/{libraryId}/live/{streamId}/status/get(LiveStream_GetStreamStatus)`.
+    public enum LiveStreamGetStreamStatus {
+        public static let id: Swift.String = "LiveStream_GetStreamStatus"
+        public struct Input: Sendable, Hashable {
+            /// - Remark: Generated from `#/paths/library/{libraryId}/live/{streamId}/status/GET/path`.
+            public struct Path: Sendable, Hashable {
+                /// The ID of the video library.
+                ///
+                /// - Remark: Generated from `#/paths/library/{libraryId}/live/{streamId}/status/GET/path/libraryId`.
+                public var libraryId: Swift.Int64
+                /// The unique identifier of the live stream.
+                ///
+                /// - Remark: Generated from `#/paths/library/{libraryId}/live/{streamId}/status/GET/path/streamId`.
+                public var streamId: Swift.String
+                /// Creates a new `Path`.
+                ///
+                /// - Parameters:
+                ///   - libraryId: The ID of the video library.
+                ///   - streamId: The unique identifier of the live stream.
+                public init(
+                    libraryId: Swift.Int64,
+                    streamId: Swift.String
+                ) {
+                    self.libraryId = libraryId
+                    self.streamId = streamId
+                }
+            }
+            public var path: Operations.LiveStreamGetStreamStatus.Input.Path
+            /// - Remark: Generated from `#/paths/library/{libraryId}/live/{streamId}/status/GET/header`.
+            public struct Headers: Sendable, Hashable {
+                public var accept: [OpenAPIRuntime.AcceptHeaderContentType<Operations.LiveStreamGetStreamStatus.AcceptableContentType>]
+                /// Creates a new `Headers`.
+                ///
+                /// - Parameters:
+                ///   - accept:
+                public init(accept: [OpenAPIRuntime.AcceptHeaderContentType<Operations.LiveStreamGetStreamStatus.AcceptableContentType>] = .defaultValues()) {
+                    self.accept = accept
+                }
+            }
+            public var headers: Operations.LiveStreamGetStreamStatus.Input.Headers
+            /// Creates a new `Input`.
+            ///
+            /// - Parameters:
+            ///   - path:
+            ///   - headers:
+            public init(
+                path: Operations.LiveStreamGetStreamStatus.Input.Path,
+                headers: Operations.LiveStreamGetStreamStatus.Input.Headers = .init()
+            ) {
+                self.path = path
+                self.headers = headers
+            }
+        }
+        @frozen public enum Output: Sendable, Hashable {
+            public struct Ok: Sendable, Hashable {
+                /// - Remark: Generated from `#/paths/library/{libraryId}/live/{streamId}/status/GET/responses/200/content`.
+                @frozen public enum Body: Sendable, Hashable {
+                    /// - Remark: Generated from `#/paths/library/{libraryId}/live/{streamId}/status/GET/responses/200/content/application\/json`.
+                    case json(Components.Schemas.LiveStreamStatusModel)
+                    /// The associated value of the enum case if `self` is `.json`.
+                    ///
+                    /// - Throws: An error if `self` is not `.json`.
+                    /// - SeeAlso: `.json`.
+                    public var json: Components.Schemas.LiveStreamStatusModel {
+                        get throws {
+                            switch self {
+                            case let .json(body):
+                                return body
+                            }
+                        }
+                    }
+                }
+                /// Received HTTP response body
+                public var body: Operations.LiveStreamGetStreamStatus.Output.Ok.Body
+                /// Creates a new `Ok`.
+                ///
+                /// - Parameters:
+                ///   - body: Received HTTP response body
+                public init(body: Operations.LiveStreamGetStreamStatus.Output.Ok.Body) {
+                    self.body = body
+                }
+            }
+            /// The current status of the live stream.
+            ///
+            /// - Remark: Generated from `#/paths//library/{libraryId}/live/{streamId}/status/get(LiveStream_GetStreamStatus)/responses/200`.
+            ///
+            /// HTTP response code: `200 ok`.
+            case ok(Operations.LiveStreamGetStreamStatus.Output.Ok)
+            /// The associated value of the enum case if `self` is `.ok`.
+            ///
+            /// - Throws: An error if `self` is not `.ok`.
+            /// - SeeAlso: `.ok`.
+            public var ok: Operations.LiveStreamGetStreamStatus.Output.Ok {
+                get throws {
+                    switch self {
+                    case let .ok(response):
+                        return response
+                    default:
+                        try throwUnexpectedResponseStatus(
+                            expectedStatus: "ok",
+                            response: self
+                        )
+                    }
+                }
+            }
+            public struct BadRequest: Sendable, Hashable {
+                /// Creates a new `BadRequest`.
+                public init() {}
+            }
+            /// The request was invalid.
+            ///
+            /// - Remark: Generated from `#/paths//library/{libraryId}/live/{streamId}/status/get(LiveStream_GetStreamStatus)/responses/400`.
+            ///
+            /// HTTP response code: `400 badRequest`.
+            case badRequest(Operations.LiveStreamGetStreamStatus.Output.BadRequest)
+            /// The request was invalid.
+            ///
+            /// - Remark: Generated from `#/paths//library/{libraryId}/live/{streamId}/status/get(LiveStream_GetStreamStatus)/responses/400`.
+            ///
+            /// HTTP response code: `400 badRequest`.
+            public static var badRequest: Self {
+                .badRequest(.init())
+            }
+            /// The associated value of the enum case if `self` is `.badRequest`.
+            ///
+            /// - Throws: An error if `self` is not `.badRequest`.
+            /// - SeeAlso: `.badRequest`.
+            public var badRequest: Operations.LiveStreamGetStreamStatus.Output.BadRequest {
+                get throws {
+                    switch self {
+                    case let .badRequest(response):
+                        return response
+                    default:
+                        try throwUnexpectedResponseStatus(
+                            expectedStatus: "badRequest",
+                            response: self
+                        )
+                    }
+                }
+            }
+            public struct Unauthorized: Sendable, Hashable {
+                /// Creates a new `Unauthorized`.
+                public init() {}
+            }
+            /// The request authorization failed.
+            ///
+            /// - Remark: Generated from `#/paths//library/{libraryId}/live/{streamId}/status/get(LiveStream_GetStreamStatus)/responses/401`.
+            ///
+            /// HTTP response code: `401 unauthorized`.
+            case unauthorized(Operations.LiveStreamGetStreamStatus.Output.Unauthorized)
+            /// The request authorization failed.
+            ///
+            /// - Remark: Generated from `#/paths//library/{libraryId}/live/{streamId}/status/get(LiveStream_GetStreamStatus)/responses/401`.
+            ///
+            /// HTTP response code: `401 unauthorized`.
+            public static var unauthorized: Self {
+                .unauthorized(.init())
+            }
+            /// The associated value of the enum case if `self` is `.unauthorized`.
+            ///
+            /// - Throws: An error if `self` is not `.unauthorized`.
+            /// - SeeAlso: `.unauthorized`.
+            public var unauthorized: Operations.LiveStreamGetStreamStatus.Output.Unauthorized {
+                get throws {
+                    switch self {
+                    case let .unauthorized(response):
+                        return response
+                    default:
+                        try throwUnexpectedResponseStatus(
+                            expectedStatus: "unauthorized",
+                            response: self
+                        )
+                    }
+                }
+            }
+            public struct NotFound: Sendable, Hashable {
+                /// Creates a new `NotFound`.
+                public init() {}
+            }
+            /// The requested live stream was not found.
+            ///
+            /// - Remark: Generated from `#/paths//library/{libraryId}/live/{streamId}/status/get(LiveStream_GetStreamStatus)/responses/404`.
+            ///
+            /// HTTP response code: `404 notFound`.
+            case notFound(Operations.LiveStreamGetStreamStatus.Output.NotFound)
+            /// The requested live stream was not found.
+            ///
+            /// - Remark: Generated from `#/paths//library/{libraryId}/live/{streamId}/status/get(LiveStream_GetStreamStatus)/responses/404`.
+            ///
+            /// HTTP response code: `404 notFound`.
+            public static var notFound: Self {
+                .notFound(.init())
+            }
+            /// The associated value of the enum case if `self` is `.notFound`.
+            ///
+            /// - Throws: An error if `self` is not `.notFound`.
+            /// - SeeAlso: `.notFound`.
+            public var notFound: Operations.LiveStreamGetStreamStatus.Output.NotFound {
+                get throws {
+                    switch self {
+                    case let .notFound(response):
+                        return response
+                    default:
+                        try throwUnexpectedResponseStatus(
+                            expectedStatus: "notFound",
+                            response: self
+                        )
+                    }
+                }
+            }
+            public struct InternalServerError: Sendable, Hashable {
+                /// Creates a new `InternalServerError`.
+                public init() {}
+            }
+            /// Internal Server Error.
+            ///
+            /// - Remark: Generated from `#/paths//library/{libraryId}/live/{streamId}/status/get(LiveStream_GetStreamStatus)/responses/500`.
+            ///
+            /// HTTP response code: `500 internalServerError`.
+            case internalServerError(Operations.LiveStreamGetStreamStatus.Output.InternalServerError)
+            /// Internal Server Error.
+            ///
+            /// - Remark: Generated from `#/paths//library/{libraryId}/live/{streamId}/status/get(LiveStream_GetStreamStatus)/responses/500`.
+            ///
+            /// HTTP response code: `500 internalServerError`.
+            public static var internalServerError: Self {
+                .internalServerError(.init())
+            }
+            /// The associated value of the enum case if `self` is `.internalServerError`.
+            ///
+            /// - Throws: An error if `self` is not `.internalServerError`.
+            /// - SeeAlso: `.internalServerError`.
+            public var internalServerError: Operations.LiveStreamGetStreamStatus.Output.InternalServerError {
                 get throws {
                     switch self {
                     case let .internalServerError(response):

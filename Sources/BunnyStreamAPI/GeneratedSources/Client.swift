@@ -2295,10 +2295,10 @@ public struct Client: APIProtocol {
     }
     /// Update Live Stream
     ///
-    /// Updates an existing live stream with the provided details.
+    /// Updates an existing live stream with the provided details. Only the fields present in the request body are updated.
     ///
-    /// - Remark: HTTP `POST /library/{libraryId}/live/{streamId}`.
-    /// - Remark: Generated from `#/paths//library/{libraryId}/live/{streamId}/post(LiveStream_Update)`.
+    /// - Remark: HTTP `PUT /library/{libraryId}/live/{streamId}`.
+    /// - Remark: Generated from `#/paths//library/{libraryId}/live/{streamId}/put(LiveStream_Update)`.
     public func liveStreamUpdate(_ input: Operations.LiveStreamUpdate.Input) async throws -> Operations.LiveStreamUpdate.Output {
         try await client.send(
             input: input,
@@ -2313,7 +2313,7 @@ public struct Client: APIProtocol {
                 )
                 var request: HTTPTypes.HTTPRequest = .init(
                     soar_path: path,
-                    method: .post
+                    method: .put
                 )
                 suppressMutabilityWarning(&request)
                 converter.setAcceptHeader(
@@ -2345,7 +2345,7 @@ public struct Client: APIProtocol {
                     switch chosenContentType {
                     case "application/json":
                         body = try await converter.getResponseBodyAsJSON(
-                            Components.Schemas.StatusModel.self,
+                            Components.Schemas.LiveStreamModel.self,
                             from: responseBody,
                             transforming: { value in
                                 .json(value)
@@ -2355,6 +2355,8 @@ public struct Client: APIProtocol {
                         preconditionFailure("bestContentType chose an invalid content type.")
                     }
                     return .ok(.init(body: body))
+                case 400:
+                    return .badRequest(.init())
                 case 401:
                     return .unauthorized(.init())
                 case 404:
@@ -2615,6 +2617,79 @@ public struct Client: APIProtocol {
                         preconditionFailure("bestContentType chose an invalid content type.")
                     }
                     return .ok(.init(body: body))
+                case 401:
+                    return .unauthorized(.init())
+                case 404:
+                    return .notFound(.init())
+                case 500:
+                    return .internalServerError(.init())
+                default:
+                    return .undocumented(
+                        statusCode: response.status.code,
+                        .init(
+                            headerFields: response.headerFields,
+                            body: responseBody
+                        )
+                    )
+                }
+            }
+        )
+    }
+    /// Get Live Stream Status
+    ///
+    /// Retrieves the current ingest status of the specified live stream — a lightweight call suited for frequent polling.
+    ///
+    /// - Remark: HTTP `GET /library/{libraryId}/live/{streamId}/status`.
+    /// - Remark: Generated from `#/paths//library/{libraryId}/live/{streamId}/status/get(LiveStream_GetStreamStatus)`.
+    public func liveStreamGetStreamStatus(_ input: Operations.LiveStreamGetStreamStatus.Input) async throws -> Operations.LiveStreamGetStreamStatus.Output {
+        try await client.send(
+            input: input,
+            forOperation: Operations.LiveStreamGetStreamStatus.id,
+            serializer: { input in
+                let path = try converter.renderedPath(
+                    template: "/library/{}/live/{}/status",
+                    parameters: [
+                        input.path.libraryId,
+                        input.path.streamId
+                    ]
+                )
+                var request: HTTPTypes.HTTPRequest = .init(
+                    soar_path: path,
+                    method: .get
+                )
+                suppressMutabilityWarning(&request)
+                converter.setAcceptHeader(
+                    in: &request.headerFields,
+                    contentTypes: input.headers.accept
+                )
+                return (request, nil)
+            },
+            deserializer: { response, responseBody in
+                switch response.status.code {
+                case 200:
+                    let contentType = converter.extractContentTypeIfPresent(in: response.headerFields)
+                    let body: Operations.LiveStreamGetStreamStatus.Output.Ok.Body
+                    let chosenContentType = try converter.bestContentType(
+                        received: contentType,
+                        options: [
+                            "application/json"
+                        ]
+                    )
+                    switch chosenContentType {
+                    case "application/json":
+                        body = try await converter.getResponseBodyAsJSON(
+                            Components.Schemas.LiveStreamStatusModel.self,
+                            from: responseBody,
+                            transforming: { value in
+                                .json(value)
+                            }
+                        )
+                    default:
+                        preconditionFailure("bestContentType chose an invalid content type.")
+                    }
+                    return .ok(.init(body: body))
+                case 400:
+                    return .badRequest(.init())
                 case 401:
                     return .unauthorized(.init())
                 case 404:

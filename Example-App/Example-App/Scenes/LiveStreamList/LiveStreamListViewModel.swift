@@ -94,6 +94,52 @@ class LiveStreamListViewModel: ObservableObject {
         }
     }
 
+    func update(
+        stream: Components.Schemas.LiveStreamModel,
+        name: String,
+        description: String? = nil,
+        scheduledStartTime: Date? = nil,
+        enableCountdown: Bool = false,
+        dvrEnabled: Bool = false,
+        dvrWindowSeconds: Int? = nil,
+        recordVod: Bool = false,
+        trailerVideoId: String? = nil,
+        isPublic: Bool? = nil
+    ) async throws -> Components.Schemas.LiveStreamModel {
+        guard let guid = stream.guid, !guid.isEmpty else { throw CreateError.invalidRequest }
+        var model = Components.Schemas.UpdateLiveStreamModel()
+        model.title = name
+        model.description = description ?? ""
+        // `scheduledStartTime` is a Date in the model; the SDK's date transcoder serializes it.
+        model.scheduledStartTime = scheduledStartTime
+        model.enableCountdown = enableCountdown
+        model.dvrEnabled = dvrEnabled
+        model.dvrWindowSeconds = dvrEnabled ? dvrWindowSeconds.map { Int32($0) } : nil
+        model.recordVod = recordVod
+        model.preStreamTrailerVideoId = (trailerVideoId?.isEmpty == false) ? trailerVideoId : nil
+        if let isPublic { model._public = isPublic }
+
+        let output = try await api.client.liveStreamUpdate(
+            path: .init(libraryId: Int64(libraryId), streamId: guid),
+            body: .json(model)
+        )
+        switch output {
+        case .ok(let ok):
+            guard case .json(let updated) = ok.body else { throw CreateError.invalidResponse }
+            return updated
+        case .unauthorized:
+            throw CreateError.unauthorized
+        case .badRequest:
+            throw CreateError.invalidRequest
+        case .notFound:
+            throw CreateError.httpError(404)
+        case .internalServerError:
+            throw CreateError.httpError(500)
+        case .undocumented(statusCode: let code, _):
+            throw CreateError.httpError(code)
+        }
+    }
+
     func createTrailerEntry(name: String) async throws -> (id: String, title: String) {
         let output = try await api.client.createVideo(
             path: .init(libraryId: Int64(libraryId)),

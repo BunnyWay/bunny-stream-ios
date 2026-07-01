@@ -1,7 +1,10 @@
+import BunnyStreamAPI
 import SwiftUI
 
 struct CreateLiveStreamView: View {
     let viewModel: LiveStreamListViewModel
+    /// When set, the form edits this existing stream (PUT) instead of creating a new one.
+    let editingStream: Components.Schemas.LiveStreamModel?
     let onCreated: () async -> Void
 
     @State private var name: String = ""
@@ -14,6 +17,7 @@ struct CreateLiveStreamView: View {
     @State private var dvrEnabled = false
     @State private var dvrWindowSeconds = 3600
     @State private var recordVod = false
+    @State private var isPublic = true
     @State private var trailerEnabled = false
     @State private var trailerVideoId = ""
     @State private var isPickingTrailer = false
@@ -22,6 +26,48 @@ struct CreateLiveStreamView: View {
     @State private var isCreating = false
     @State private var errorMessage: String?
     @Environment(\.dismiss) private var dismiss
+
+    private var isEditing: Bool { editingStream != nil }
+
+    init(
+        viewModel: LiveStreamListViewModel,
+        editingStream: Components.Schemas.LiveStreamModel? = nil,
+        onCreated: @escaping () async -> Void
+    ) {
+        self.viewModel = viewModel
+        self.editingStream = editingStream
+        self.onCreated = onCreated
+
+        guard let stream = editingStream else { return }
+        _name = State(initialValue: stream.title ?? stream.name ?? "")
+        _streamDescription = State(initialValue: stream.description ?? "")
+        if let scheduled = stream.scheduledStartTime,
+           let date = CreateLiveStreamView.parseDate(scheduled) {
+            _scheduleEnabled = State(initialValue: true)
+            _scheduledDate = State(initialValue: date)
+        }
+        _enableCountdown = State(initialValue: stream.enableCountdown ?? false)
+        _dvrEnabled = State(initialValue: stream.dvrEnabled ?? false)
+        if let window = stream.dvrWindowSeconds {
+            _dvrWindowSeconds = State(initialValue: Int(window))
+        }
+        _recordVod = State(initialValue: stream.recordVod ?? false)
+        _isPublic = State(initialValue: stream._public ?? true)
+        if let trailerId = stream.preStreamTrailerVideoId, !trailerId.isEmpty {
+            _trailerEnabled = State(initialValue: true)
+            _trailerVideoId = State(initialValue: trailerId)
+        }
+    }
+
+    /// Parses Bunny's ISO 8601 timestamps (with or without fractional seconds).
+    private static func parseDate(_ value: String) -> Date? {
+        let withFraction = ISO8601DateFormatter()
+        withFraction.formatOptions = [.withInternetDateTime, .withFractionalSeconds]
+        if let date = withFraction.date(from: value) { return date }
+        let plain = ISO8601DateFormatter()
+        plain.formatOptions = [.withInternetDateTime]
+        return plain.date(from: value)
+    }
 
     private let dvrWindowOptions: [(label: String, seconds: Int)] = [
         ("30 min", 1800),
@@ -104,7 +150,8 @@ struct CreateLiveStreamView: View {
                     }
                 }
 
-                Section {
+                if !isEditing {
+                  Section {
                     Toggle("Offline thumbnail", isOn: $thumbnailEnabled.animation())
                     if thumbnailEnabled {
                         TextField("https://example.com/thumb.jpg", text: $thumbnailUrl)
@@ -134,11 +181,18 @@ struct CreateLiveStreamView: View {
                             }
                         }
                     }
-                } header: {
+                  } header: {
                     Text("Thumbnail")
-                } footer: {
+                  } footer: {
                     if thumbnailEnabled {
                         Text("Shown in the player while the stream is offline. Bunny's live API sets the thumbnail by URL.")
+                    }
+                  }
+                }
+
+                if isEditing {
+                    Section("Visibility") {
+                        Toggle("Public", isOn: $isPublic)
                     }
                 }
 
@@ -173,7 +227,7 @@ struct CreateLiveStreamView: View {
             .sheet(isPresented: $isPickingTimeZone) {
                 TimezonePickerView(selected: $scheduledTimeZone)
             }
-            .navigationTitle("New Live Stream")
+            .navigationTitle(isEditing ? "Edit Live Stream" : "New Live Stream")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
@@ -183,7 +237,7 @@ struct CreateLiveStreamView: View {
                     if isCreating {
                         ProgressView()
                     } else {
-                        Button("Create") { Task { await create() } }
+                        Button(isEditing ? "Save" : "Create") { Task { await save() } }
                             .disabled(name.trimmingCharacters(in: .whitespaces).isEmpty)
                             .bold()
                     }
@@ -213,21 +267,38 @@ struct CreateLiveStreamView: View {
         return formatter.string(from: resolvedScheduledStartTime)
     }
 
-    private func create() async {
+    private func save() async {
         isCreating = true
         errorMessage = nil
+        let trimmedName = name.trimmingCharacters(in: .whitespaces)
+        let trimmedDescription = streamDescription.trimmingCharacters(in: .whitespacesAndNewlines)
         do {
-            _ = try await viewModel.create(
-                name: name.trimmingCharacters(in: .whitespaces),
-                description: streamDescription.trimmingCharacters(in: .whitespacesAndNewlines),
-                scheduledStartTime: scheduleEnabled ? resolvedScheduledStartTime : nil,
-                enableCountdown: scheduleEnabled && enableCountdown,
-                dvrEnabled: dvrEnabled,
-                dvrWindowSeconds: dvrEnabled ? dvrWindowSeconds : nil,
-                recordVod: recordVod,
-                trailerVideoId: trailerEnabled ? trailerVideoId : nil,
-                thumbnailUrl: thumbnailEnabled ? thumbnailUrl.trimmingCharacters(in: .whitespaces) : nil
-            )
+            if let editingStream {
+                _ = try await viewModel.update(
+                    stream: editingStream,
+                    name: trimmedName,
+                    description: trimmedDescription,
+                    scheduledStartTime: scheduleEnabled ? resolvedScheduledStartTime : nil,
+                    enableCountdown: scheduleEnabled && enableCountdown,
+                    dvrEnabled: dvrEnabled,
+                    dvrWindowSeconds: dvrEnabled ? dvrWindowSeconds : nil,
+                    recordVod: recordVod,
+                    trailerVideoId: trailerEnabled ? trailerVideoId : nil,
+                    isPublic: isPublic
+                )
+            } else {
+                _ = try await viewModel.create(
+                    name: trimmedName,
+                    description: trimmedDescription,
+                    scheduledStartTime: scheduleEnabled ? resolvedScheduledStartTime : nil,
+                    enableCountdown: scheduleEnabled && enableCountdown,
+                    dvrEnabled: dvrEnabled,
+                    dvrWindowSeconds: dvrEnabled ? dvrWindowSeconds : nil,
+                    recordVod: recordVod,
+                    trailerVideoId: trailerEnabled ? trailerVideoId : nil,
+                    thumbnailUrl: thumbnailEnabled ? thumbnailUrl.trimmingCharacters(in: .whitespaces) : nil
+                )
+            }
             await onCreated()
             dismiss()
         } catch {
