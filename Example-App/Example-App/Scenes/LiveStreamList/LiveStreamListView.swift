@@ -62,7 +62,11 @@ struct LiveStreamListView: View {
                 await viewModel.load()
             }
         }
-        .fullScreenCover(item: $broadcasterStream) { selection in
+        .fullScreenCover(item: $broadcasterStream, onDismiss: {
+            // .onAppear doesn't re-fire when a fullScreenCover dismisses, so reload here to pick
+            // up the new status after broadcasting ends.
+            Task { await viewModel.load(showLoadingState: false) }
+        }) { selection in
             BunnyStreamCameraUploadView(
                 liveStream: selection.stream,
                 accessKey: dependenciesManager.accessKey,

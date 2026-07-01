@@ -1,4 +1,5 @@
 import BunnyStreamAPI
+import BunnyStreamPlayer
 import PhotosUI
 import SwiftUI
 import UIKit
@@ -33,6 +34,13 @@ struct CreateLiveStreamView: View {
     @Environment(\.dismiss) private var dismiss
 
     private var isEditing: Bool { editingStream != nil }
+
+    /// Scheduling only applies to streams that haven't started or ended yet.
+    private var canSchedule: Bool {
+        guard let stream = editingStream else { return true }
+        guard case .LiveStreamStatus(let status)? = stream.status else { return true }
+        return status == .created || status == .scheduled
+    }
 
     init(
         viewModel: LiveStreamListViewModel,
@@ -79,14 +87,23 @@ struct CreateLiveStreamView: View {
         return resized.jpegData(compressionQuality: quality)
     }
 
-    /// Parses Bunny's ISO 8601 timestamps (with or without fractional seconds).
+    /// Parses Bunny's timestamps. Handles ISO 8601 with a timezone AND the timezone-less form
+    /// Bunny returns for scheduledStartTime (e.g. "2026-07-01T08:20:00"). The naive form is
+    /// interpreted in the device time zone so the DatePicker shows the same wall-clock value.
     private static func parseDate(_ value: String) -> Date? {
-        let withFraction = ISO8601DateFormatter()
-        withFraction.formatOptions = [.withInternetDateTime, .withFractionalSeconds]
-        if let date = withFraction.date(from: value) { return date }
-        let plain = ISO8601DateFormatter()
-        plain.formatOptions = [.withInternetDateTime]
-        return plain.date(from: value)
+        let iso = ISO8601DateFormatter()
+        iso.formatOptions = [.withInternetDateTime, .withFractionalSeconds]
+        if let date = iso.date(from: value) { return date }
+        iso.formatOptions = [.withInternetDateTime]
+        if let date = iso.date(from: value) { return date }
+        for format in ["yyyy-MM-dd'T'HH:mm:ss.SSSSSSS", "yyyy-MM-dd'T'HH:mm:ss.SSS", "yyyy-MM-dd'T'HH:mm:ss"] {
+            let df = DateFormatter()
+            df.locale = Locale(identifier: "en_US_POSIX")
+            df.timeZone = .current
+            df.dateFormat = format
+            if let date = df.date(from: value) { return date }
+        }
+        return nil
     }
 
     private let dvrWindowOptions: [(label: String, seconds: Int)] = [
@@ -111,7 +128,8 @@ struct CreateLiveStreamView: View {
                         .lineLimit(2...4)
                 }
 
-                Section {
+                if canSchedule {
+                  Section {
                     Toggle("Schedule start time", isOn: $scheduleEnabled.animation())
                     if scheduleEnabled {
                         DatePicker(
@@ -138,10 +156,11 @@ struct CreateLiveStreamView: View {
                         }
                         Toggle("Show countdown in player", isOn: $enableCountdown)
                     }
-                } footer: {
+                  } footer: {
                     Text(scheduleEnabled
                         ? "Stream will start at \(scheduledStartDescription). It will appear as \"Upcoming\" in the dashboard."
                         : "Stream will appear as \"Created\" — start it manually via RTMP.")
+                  }
                 }
 
                 Section {
@@ -339,8 +358,8 @@ struct CreateLiveStreamView: View {
                     stream: editingStream,
                     name: trimmedName,
                     description: trimmedDescription,
-                    scheduledStartTime: scheduleEnabled ? resolvedScheduledStartTime : nil,
-                    enableCountdown: scheduleEnabled && enableCountdown,
+                    scheduledStartTime: (canSchedule && scheduleEnabled) ? resolvedScheduledStartTime : nil,
+                    enableCountdown: canSchedule && scheduleEnabled && enableCountdown,
                     dvrEnabled: dvrEnabled,
                     dvrWindowSeconds: dvrEnabled ? dvrWindowSeconds : nil,
                     recordVod: recordVod,
@@ -352,8 +371,8 @@ struct CreateLiveStreamView: View {
                 let created = try await viewModel.create(
                     name: trimmedName,
                     description: trimmedDescription,
-                    scheduledStartTime: scheduleEnabled ? resolvedScheduledStartTime : nil,
-                    enableCountdown: scheduleEnabled && enableCountdown,
+                    scheduledStartTime: (canSchedule && scheduleEnabled) ? resolvedScheduledStartTime : nil,
+                    enableCountdown: canSchedule && scheduleEnabled && enableCountdown,
                     dvrEnabled: dvrEnabled,
                     dvrWindowSeconds: dvrEnabled ? dvrWindowSeconds : nil,
                     recordVod: recordVod,
