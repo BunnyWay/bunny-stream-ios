@@ -1,6 +1,9 @@
 import SwiftUI
 import AVKit
 import Combine
+#if canImport(UIKit)
+import UIKit
+#endif
 
 struct VideoPlayerControls: View {
   @Environment(\.videoPlayerTheme) var theme: VideoPlayerTheme
@@ -15,21 +18,28 @@ struct VideoPlayerControls: View {
   }
   
   var body: some View {
+    GeometryReader { proxy in
     VStack {
       topControlsView()
         .padding(.vertical, 4)
         .padding(.horizontal, 8)
         .opacity(viewModel.isDraggingSeekBar ? 0 : 1)
-      
+
       Spacer()
-      
+
       centerControlsView()
         .opacity(viewModel.isDraggingSeekBar ? 0 : 1)
-      
+
       Spacer()
-      
+
       bottomControlsView()
     }
+    // Keep controls clear of the notch / home-indicator when the player is edge-to-edge (fullscreen
+    // or full-screen presented). `proxy.safeAreaInsets` reads 0 here because the underlying video
+    // layer ignores the safe area, so we read the real window insets and apply them only on the
+    // edges the player actually reaches — an embedded, inset player gets no extra padding.
+    .frame(maxWidth: .infinity, maxHeight: .infinity)
+    .padding(edgeSafeAreaPadding(in: proxy))
     .confirmationDialog(Lingua.Settings.actionsTitle, isPresented: $viewModel.isOptionsMenuActive) {
       mainOptionsDialog()
     }
@@ -58,6 +68,7 @@ struct VideoPlayerControls: View {
         .environment(\.videoPlayerTheme, theme)
       }
     .foregroundColor(theme.tintColor)
+    }
   }
 }
 
@@ -286,4 +297,38 @@ extension VideoPlayerControls {
         .shouldAddView(controlsToCheck: .duration, in: videoPlayerConfig.controls)
     }
   }
+}
+
+// MARK: - Safe-area padding for edge-to-edge playback
+
+private extension VideoPlayerControls {
+  /// Window insets applied only on the edges the controls overlay actually reaches, so an
+  /// edge-to-edge (fullscreen / full-screen presented) player keeps its controls off the notch and
+  /// home-indicator, while an embedded, already-inset player is left untouched.
+  func edgeSafeAreaPadding(in proxy: GeometryProxy) -> EdgeInsets {
+    #if os(iOS)
+    guard let window = keyWindow else { return EdgeInsets() }
+    let insets = window.safeAreaInsets
+    let frame = proxy.frame(in: .global)
+    let bounds = window.bounds
+    let tolerance: CGFloat = 1
+    return EdgeInsets(
+      top: frame.minY <= bounds.minY + tolerance ? insets.top : 0,
+      leading: frame.minX <= bounds.minX + tolerance ? insets.left : 0,
+      bottom: frame.maxY >= bounds.maxY - tolerance ? insets.bottom : 0,
+      trailing: frame.maxX >= bounds.maxX - tolerance ? insets.right : 0
+    )
+    #else
+    return EdgeInsets()
+    #endif
+  }
+
+  #if os(iOS)
+  var keyWindow: UIWindow? {
+    UIApplication.shared.connectedScenes
+      .compactMap { $0 as? UIWindowScene }
+      .flatMap { $0.windows }
+      .first { $0.isKeyWindow }
+  }
+  #endif
 }

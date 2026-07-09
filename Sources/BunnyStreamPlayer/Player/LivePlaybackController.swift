@@ -8,7 +8,7 @@ import UIKit
 final class LivePlaybackController: ObservableObject {
     enum State {
         case loading
-        case playable(MediaPlayer)
+        case playable(MediaPlayer, Video)
         case countdown(until: Date, thumbnailUrl: URL?, title: String?)
         case trailer(vodId: String, scheduledStart: Date?, statusMessage: String?, title: String?)
         case offline(message: String, thumbnailUrl: URL?)
@@ -44,8 +44,20 @@ final class LivePlaybackController: ObservableObject {
 
     func start() {
         isStopped = false
+        configureAudioSession()
         observeLifecycle()
         firePoll()
+    }
+
+    /// Activates the `.playback` audio session so audio keeps playing under the silent switch and,
+    /// crucially, so Picture in Picture can start (`isPictureInPicturePossible` requires it). The
+    /// VOD player does the same; the live path previously skipped it.
+    private func configureAudioSession() {
+        #if os(iOS)
+        let session = AVAudioSession.sharedInstance()
+        try? session.setCategory(.playback, mode: .moviePlayback, options: [])
+        try? session.setActive(true)
+        #endif
     }
 
     func stop() {
@@ -147,7 +159,7 @@ private extension LivePlaybackController {
 
     func handlePlayable(url: URL, isVodRecording: Bool) {
         // Don't restart if already playing the same URL — unless the player item has failed.
-        if case .playable(let existing) = state {
+        if case .playable(let existing, _) = state {
             let existingURL = existing.sourceURL ?? (existing.currentItem?.asset as? AVURLAsset)?.url
             let itemFailed = existing.currentItem?.status == .failed
             if existingURL == url && !itemFailed { return }
@@ -172,7 +184,8 @@ private extension LivePlaybackController {
                 await MainActor.run { [weak self] in
                     guard let self, !self.isStopped else { return }
                     self.teardownCurrentPlayer()
-                    self.state = .playable(player)
+                    // Live has no named renditions from /play, so only "Auto" is offered.
+                    self.state = .playable(player, Self.liveStubVideo(streamId: self.streamId, libraryId: self.libraryId))
                 }
             }
         }
@@ -189,10 +202,15 @@ private extension LivePlaybackController {
         Task { [weak self] in
             guard let self else { return }
             let player: MediaPlayer
+            let video: Video
             do {
                 let config = try await VideoPlayerConfigLoader().load(libraryId: libraryId, videoId: streamId)
-                player = MediaPlayer.make(video: Video(response: config))
+                // The real Video carries the recording's resolutions/captions so the quality menu
+                // offers actual renditions instead of only "Auto".
+                video = Video(response: config)
+                player = MediaPlayer.make(video: video)
             } catch {
+                video = Self.liveStubVideo(streamId: streamId, libraryId: libraryId)
                 player = MediaPlayer(url: fallbackURL)
             }
             observeItem(player)
@@ -200,7 +218,7 @@ private extension LivePlaybackController {
             await MainActor.run { [weak self] in
                 guard let self, !self.isStopped else { return }
                 self.teardownCurrentPlayer()
-                self.state = .playable(player)
+                self.state = .playable(player, video)
                 // The recording is static — stop the 5s poll. Player-failure recovery still re-polls.
                 self.pollTask?.cancel()
                 self.pollTask = nil
@@ -208,8 +226,27 @@ private extension LivePlaybackController {
         }
     }
 
+    /// Minimal `Video` for players without a fetched VOD config (live edge, or recording fallback).
+    /// Only "Auto" quality is offered since no named renditions are known.
+    static func liveStubVideo(streamId: String, libraryId: Int) -> Video {
+        Video(
+            guid: streamId,
+            chaptersList: nil,
+            moments: [],
+            thumbnailCount: 0,
+            width: 0,
+            height: 0,
+            length: 0,
+            captions: [],
+            libraryId: libraryId,
+            resolutions: [.auto],
+            seekPath: nil,
+            playlistUrl: nil
+        )
+    }
+
     func teardownCurrentPlayer() {
-        guard case .playable(let player) = state else { return }
+        guard case .playable(let player, _) = state else { return }
         player.pause()
         removeItemObservers()
     }

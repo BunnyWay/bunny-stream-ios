@@ -44,8 +44,8 @@ public struct BunnyStreamLivePlayer: View {
             switch controller.state {
             case .loading:
                 loadingView
-            case .playable(let player):
-                liveContainerView(player)
+            case .playable(let player, let video):
+                liveContainerView(player, video: video)
             case .countdown(let date, let thumbnailUrl, let title):
                 countdownView(until: date, thumbnailUrl: thumbnailUrl, title: title)
             case .trailer(let vodId, let scheduledStart, let statusMessage, let title):
@@ -79,22 +79,10 @@ private extension BunnyStreamLivePlayer {
         }
     }
 
-    func liveContainerView(_ player: MediaPlayer) -> some View {
-        let video = Video(
-            guid: streamId,
-            chaptersList: nil,
-            moments: [],
-            thumbnailCount: 0,
-            width: 0,
-            height: 0,
-            length: 0,
-            captions: [],
-            libraryId: libraryId,
-            resolutions: [.auto],
-            seekPath: nil,
-            playlistUrl: nil
-        )
-        return BunnyStreamPlayerContainerView(player: player, video: video, heatmap: Heatmap(data: [:]))
+    func liveContainerView(_ player: MediaPlayer, video: Video) -> some View {
+        // `video` carries real resolutions/captions for an ended-live recording (so the quality
+        // menu offers actual renditions); for the live edge it's a minimal "Auto-only" stub.
+        BunnyStreamPlayerContainerView(player: player, video: video, heatmap: Heatmap(data: [:]))
             .environment(\.playerWatermark, watermark)
     }
 

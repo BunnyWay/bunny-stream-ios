@@ -151,8 +151,11 @@ extension VideoPlayerControlsViewModel: MediaPlayerDelegate {
   }
   
   func mediaPlayer(_ player: MediaPlayer, didChangeVolume volume: Float) {
-    isMuted = volume.isZero
-    player.isMuted = isMuted
+    // Reflect a hardware mute (volume → 0) in the icon, but never force-UNMUTE the player just
+    // because the system volume is non-zero — that would silently undo the user's mute-button tap.
+    guard volume.isZero else { return }
+    isMuted = true
+    player.isMuted = true
   }
   
   func mediaPlayer(_ player: MediaPlayer, didChangeRate rate: Float) {
