@@ -2,6 +2,9 @@ import Foundation
 
 struct StreamConfig {
   var uri: String = "rtmp://49.13.154.169/ingest"
+  /// Backup RTMP ingest URL. Used for failover when the primary ingest keeps failing.
+  /// `nil`/empty means no backup is available and reconnects stay on `uri`.
+  var backupUri: String?
   let accessKey: String
   let libraryId: Int
   var videoId: String?
@@ -26,8 +29,9 @@ struct StreamConfig {
   }
 
   /// For live-stream broadcast flow: uses rtmpUrl + streamKey from the API directly.
-  init(rtmpUrl: String, streamKey: String, accessKey: String = "", libraryId: Int = 0, streamId: String? = nil) {
+  init(rtmpUrl: String, streamKey: String, backupRtmpUrl: String? = nil, accessKey: String = "", libraryId: Int = 0, streamId: String? = nil) {
     self.uri = rtmpUrl
+    self.backupUri = backupRtmpUrl
     self.accessKey = accessKey
     self.libraryId = libraryId
     self.streamId = streamId

@@ -8,6 +8,19 @@ final class BunnyStreamCameraUploadViewModel: ObservableObject {
   private var streamConfig: StreamConfig
   private var retryCount: Int = 0
   private let maxRetryCount: Int = 5
+  /// Whether the current reconnect attempt targets the backup ingest. Alternates
+  /// primary <-> backup on each retry so a dead primary fails over to backup quickly.
+  private var usingBackup: Bool = false
+  /// In-flight reconnect (delay + connect). Non-nil while a retry is scheduled, which
+  /// also de-duplicates the two failure sources (.rtmpStatus and .ioError).
+  private var reconnectTask: Task<Void, Never>?
+  /// Proactive failover: whether the ingest we're currently publishing to has reported live at
+  /// least once. Guards against acting on the startup window where the ingest hasn't seen data yet.
+  private var currentIngestConfirmedLive: Bool = false
+  /// Consecutive `/status` polls reporting the current ingest as not-live after it was confirmed live.
+  private var consecutiveIngestMisses: Int = 0
+  /// How many consecutive not-live polls (≈5s each) trigger a proactive failover to the other ingest.
+  private let proactiveFailoverMissThreshold: Int = 2
   private var notifications = NotificationCenter.default
   private var rtmpConnection = RTMPConnection()
   private var subscriptions = Set<AnyCancellable>()
@@ -72,6 +85,11 @@ extension BunnyStreamCameraUploadViewModel {
   func startPublish() {
     setIsIdleTimerDisabled(true)
     retryCount = 0
+    usingBackup = false
+    currentIngestConfirmedLive = false
+    consecutiveIngestMisses = 0
+    reconnectTask?.cancel()
+    reconnectTask = nil
     startStreamingTimer()
     rtmpConnection.addEventListener(.rtmpStatus, selector: #selector(rtmpStatusHandler), observer: self)
     rtmpConnection.addEventListener(.ioError, selector: #selector(rtmpErrorHandler), observer: self)
@@ -82,6 +100,8 @@ extension BunnyStreamCameraUploadViewModel {
     videoId = nil
     setIsIdleTimerDisabled(false)
     state = .notStreaming
+    reconnectTask?.cancel()
+    reconnectTask = nil
     stopStreamingTimer()
     stopIngestStatusPolling()
     rtmpConnection.removeEventListener(.rtmpStatus, selector: #selector(rtmpStatusHandler), observer: self)
@@ -215,29 +235,68 @@ private extension BunnyStreamCameraUploadViewModel {
   
   @objc
   private func rtmpErrorHandler(_ notification: Notification) {
-    rtmpConnection.connect(streamConfig.uri)
+    // Route through the same reconnect path as .rtmpStatus so both failure sources
+    // share one retry budget, backoff and failover (no immediate, uncounted connect).
+    Task { @MainActor [weak self] in self?.scheduleReconnect() }
   }
-  
+
   @MainActor func handleRtmpCode(_ code: String) {
     switch code {
     case RTMPConnection.Code.connectSuccess.rawValue:
+      // Connected (possibly after a reconnect): clear the retry budget and any pending retry.
+      retryCount = 0
+      reconnectTask?.cancel()
+      reconnectTask = nil
       state = .liveStreaming
       updateElapsedTime()
       rtmpStream.publish(streamConfig.streamKey)
       startIngestStatusPolling()
     case RTMPConnection.Code.connectFailed.rawValue, RTMPConnection.Code.connectClosed.rawValue:
-      guard retryCount <= maxRetryCount else {
-        stopStreamingTimer()
-        stopIngestStatusPolling()
-        state = .notStreaming
-        snackbarMessage = Lingua.LiveStream.streamFailedMessage
-        return
-      }
-      rtmpConnection.connect(streamConfig.uri)
-      retryCount += 1
+      scheduleReconnect()
     default:
       break
     }
+  }
+
+  /// Schedules a single reconnect attempt with exponential backoff, failing over
+  /// between the primary and backup ingest URLs. Gives up after `maxRetryCount` attempts.
+  @MainActor private func scheduleReconnect() {
+    // Only one reconnect in flight — de-duplicates concurrent .ioError/.rtmpStatus events.
+    guard reconnectTask == nil else { return }
+
+    guard retryCount < maxRetryCount else {
+      stopStreamingTimer()
+      stopIngestStatusPolling()
+      state = .notStreaming
+      snackbarMessage = Lingua.LiveStream.streamFailedMessage
+      return
+    }
+    retryCount += 1
+
+    // We're changing/re-establishing the connection: the target ingest is not confirmed live yet.
+    currentIngestConfirmedLive = false
+    consecutiveIngestMisses = 0
+
+    // Alternate primary <-> backup when a backup URL is configured; otherwise stay on primary.
+    if let backup = streamConfig.backupUri, !backup.isEmpty {
+      usingBackup.toggle()
+    }
+    let targetUri = (usingBackup ? streamConfig.backupUri : nil) ?? streamConfig.uri
+    let delay = reconnectDelay(for: retryCount)
+
+    reconnectTask = Task { [weak self] in
+      try? await Task.sleep(nanoseconds: UInt64(delay * 1_000_000_000))
+      guard let self, !Task.isCancelled else { return }
+      await MainActor.run {
+        self.reconnectTask = nil
+        self.rtmpConnection.connect(targetUri)
+      }
+    }
+  }
+
+  /// Exponential backoff capped at 8s: 1, 2, 4, 8, 8 seconds for attempts 1...5.
+  private func reconnectDelay(for attempt: Int) -> Double {
+    min(pow(2.0, Double(attempt - 1)), 8.0)
   }
   
   func setIsIdleTimerDisabled(_ disabled: Bool) {
@@ -317,8 +376,40 @@ private extension BunnyStreamCameraUploadViewModel {
       path: .init(libraryId: Int64(streamConfig.libraryId), streamId: streamId)
     ), case .json(let model) = ok.body else { return }
     await MainActor.run { [weak self] in
-      self?.primaryLive = model.primaryLive
-      self?.backupLive = model.backupLive
+      guard let self else { return }
+      self.primaryLive = model.primaryLive
+      self.backupLive = model.backupLive
+      self.proactiveFailoverIfNeeded()
+    }
+  }
+
+  /// Proactively fails over to the other ingest when `/status` reports the ingest we're publishing
+  /// to as not-live for `proactiveFailoverMissThreshold` consecutive polls — catching "silent"
+  /// degradations where the RTMP/TCP connection stays up but Bunny stops receiving (so the reactive
+  /// reconnect never fires). Works by dropping the degraded connection; the reactive path then
+  /// toggles primary<->backup and republishes.
+  @MainActor func proactiveFailoverIfNeeded() {
+    // Only while publishing, with a backup to switch to, and no reactive reconnect already running.
+    guard state == .liveStreaming,
+          reconnectTask == nil,
+          let backup = streamConfig.backupUri, !backup.isEmpty else { return }
+
+    let liveOnCurrent = usingBackup ? backupLive : primaryLive
+    switch liveOnCurrent {
+    case .some(true):
+      currentIngestConfirmedLive = true
+      consecutiveIngestMisses = 0
+    case .some(false):
+      // Ignore the startup window: only act once the current ingest was actually confirmed live.
+      guard currentIngestConfirmedLive else { return }
+      consecutiveIngestMisses += 1
+      guard consecutiveIngestMisses >= proactiveFailoverMissThreshold else { return }
+      consecutiveIngestMisses = 0
+      currentIngestConfirmedLive = false
+      // Drop the silently-degraded connection; connectClosed -> scheduleReconnect fails over.
+      rtmpConnection.close()
+    case .none:
+      break // Unknown status this tick — wait for the next poll.
     }
   }
 }

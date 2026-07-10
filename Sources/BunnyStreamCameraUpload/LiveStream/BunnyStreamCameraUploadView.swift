@@ -84,10 +84,12 @@ public struct BunnyStreamCameraUploadView: View {
   public init(liveStream: Components.Schemas.LiveStreamModel, accessKey: String, libraryId: Int) {
     let rtmpUrl = liveStream.ingestEndpoints?.rtmp?.primaryIngestUrl
       ?? BunnyStreamCameraUploadView.bunnyFallbackRtmpUrl
+    let backupRtmpUrl = liveStream.ingestEndpoints?.rtmp?.backupIngestUrl
     let streamId = BunnyStreamCameraUploadView.extractStreamId(from: liveStream)
     let config = StreamConfig(
       rtmpUrl: rtmpUrl,
       streamKey: liveStream.streamKey ?? "",
+      backupRtmpUrl: backupRtmpUrl,
       accessKey: accessKey,
       libraryId: libraryId,
       streamId: streamId
