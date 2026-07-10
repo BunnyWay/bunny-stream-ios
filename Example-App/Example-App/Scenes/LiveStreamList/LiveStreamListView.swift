@@ -142,9 +142,11 @@ private extension LiveStreamListView {
                     .navigationBarTitleDisplayMode(.inline)
                     .ignoresSafeArea()
                 } label: {
-                    LiveStreamRowView(stream: stream) { stream in
-                        await viewModel.liveThumbnailURL(for: stream)
-                    }
+                    LiveStreamRowView(
+                        stream: stream,
+                        resolveThumbnail: { stream in await viewModel.liveThumbnailURL(for: stream) },
+                        resolveIngestStatus: { stream in await viewModel.liveIngestStatus(for: stream) }
+                    )
                 }
                 .swipeActions(edge: .trailing, allowsFullSwipe: false) {
                     if canBroadcast(stream) {

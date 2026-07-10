@@ -304,6 +304,30 @@ class LiveStreamListViewModel: ObservableObject {
         }
     }
 
+    /// Live ingest status (primary/backup) shown as badges in the stream list.
+    struct IngestLiveStatus: Equatable {
+        let primaryLive: Bool
+        let backupLive: Bool
+    }
+
+    /// Resolves the live ingest status for a RUNNING stream. Prefers the stream model's own
+    /// `primaryLive`/`backupLive` when the API populates them, otherwise falls back to the
+    /// lightweight `/status` endpoint. Returns nil for non-running streams (no live ingest) or failure.
+    func liveIngestStatus(for stream: Components.Schemas.LiveStreamModel) async -> IngestLiveStatus? {
+        guard case .LiveStreamStatus(.running) = stream.status else { return nil }
+        if let primary = stream.primaryLive, let backup = stream.backupLive {
+            return IngestLiveStatus(primaryLive: primary, backupLive: backup)
+        }
+        guard let guid = stream.guid, !guid.isEmpty else { return nil }
+        guard case .ok(let ok) = try? await api.client.liveStreamGetStreamStatus(
+            path: .init(libraryId: Int64(libraryId), streamId: guid)
+        ), case .json(let model) = ok.body else { return nil }
+        return IngestLiveStatus(
+            primaryLive: model.primaryLive ?? false,
+            backupLive: model.backupLive ?? false
+        )
+    }
+
     func delete(stream: Components.Schemas.LiveStreamModel) async {
         guard let guid = stream.guid, !guid.isEmpty else { return }
         // Optimistically remove from the list, restore on failure.
