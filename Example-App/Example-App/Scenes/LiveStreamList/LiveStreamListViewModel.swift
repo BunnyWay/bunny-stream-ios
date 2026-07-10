@@ -221,6 +221,29 @@ class LiveStreamListViewModel: ObservableObject {
         }
     }
 
+    /// A single auto-generated thumbnail returned by the live-stream thumbnails endpoint.
+    struct LiveThumbnailItem: Identifiable, Hashable {
+        let id = UUID()
+        let url: String
+        let timestamp: String?
+    }
+
+    /// Lists the thumbnails Bunny automatically generates while the stream is/was live
+    /// (`GET /library/{libraryId}/live/{streamId}/thumbnails`, most recent first).
+    func liveThumbnails(streamId: String, limit: Int = 24) async throws -> [LiveThumbnailItem] {
+        let output = try await api.client.liveStreamGetThumbnails(
+            path: .init(libraryId: Int64(libraryId), streamId: streamId),
+            query: .init(limit: Int32(limit))
+        )
+        guard case .ok(let ok) = output, case .json(let list) = ok.body else {
+            throw ThumbnailError.failed(nil)
+        }
+        return list.compactMap { item in
+            guard let url = item.url, !url.isEmpty else { return nil }
+            return LiveThumbnailItem(url: url, timestamp: item.timestamp)
+        }
+    }
+
     /// Builds the full offline-thumbnail URL from the stream's `thumbnailFileName` and playback
     /// host: `https://{host}/{guid}/{thumbnailFileName}`. Returns nil when no thumbnail is set.
     func offlineThumbnailURL(for stream: Components.Schemas.LiveStreamModel) -> URL? {

@@ -30,6 +30,7 @@ struct CreateLiveStreamView: View {
     @State private var thumbnailImageData: Data?
     @State private var thumbnailPickerItem: PhotosPickerItem?
     @State private var existingThumbnailURL: URL?
+    @State private var isPickingGeneratedThumbnail = false
     @State private var isCreating = false
     @State private var errorMessage: String?
     @Environment(\.dismiss) private var dismiss
@@ -213,6 +214,13 @@ struct CreateLiveStreamView: View {
                             .autocorrectionDisabled()
                             .textInputAutocapitalization(.never)
                             .keyboardType(.URL)
+                        if isEditing {
+                            Button {
+                                isPickingGeneratedThumbnail = true
+                            } label: {
+                                Label("Browse generated thumbnails", systemImage: "square.grid.2x2")
+                            }
+                        }
                         thumbnailPreview
                     }
                 } header: {
@@ -285,6 +293,15 @@ struct CreateLiveStreamView: View {
             }
             .sheet(isPresented: $isPickingTrailer) {
                 TrailerPickerView(viewModel: viewModel, selectedId: $trailerVideoId)
+            }
+            .sheet(isPresented: $isPickingGeneratedThumbnail) {
+                if let stream = editingStream {
+                    LiveThumbnailPickerView(viewModel: viewModel, stream: stream) { url in
+                        thumbnailUrl = url
+                        thumbnailImageData = nil
+                        thumbnailPickerItem = nil
+                    }
+                }
             }
             .sheet(isPresented: $isPickingTimeZone) {
                 TimezonePickerView(selected: $scheduledTimeZone)

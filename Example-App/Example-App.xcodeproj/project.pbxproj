@@ -12,6 +12,7 @@
 		CC000005CC000005CC000005 /* LiveStreamListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = CC000002CC000002CC000002 /* LiveStreamListView.swift */; };
 		DD000002DD000002DD000002 /* CreateLiveStreamView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD000001DD000001DD000001 /* CreateLiveStreamView.swift */; };
 		EE000001EE000001EE000001 /* TrailerPickerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = EE000002EE000002EE000002 /* TrailerPickerView.swift */; };
+		EE000101EE000101EE000101 /* LiveThumbnailPickerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = EE000102EE000102EE000102 /* LiveThumbnailPickerView.swift */; };
 		EE000003EE000003EE000003 /* TimezonePickerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = EE000004EE000004EE000004 /* TimezonePickerView.swift */; };
 		EE000005EE000005EE000005 /* LiveStreamIngestDetailsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = EE000006EE000006EE000006 /* LiveStreamIngestDetailsView.swift */; };
 		CC000006CC000006CC000006 /* LiveStreamListViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = CC000003CC000003CC000003 /* LiveStreamListViewModel.swift */; };
@@ -58,6 +59,7 @@
 		CC000002CC000002CC000002 /* LiveStreamListView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LiveStreamListView.swift; sourceTree = "<group>"; };
 		DD000001DD000001DD000001 /* CreateLiveStreamView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CreateLiveStreamView.swift; sourceTree = "<group>"; };
 		EE000002EE000002EE000002 /* TrailerPickerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TrailerPickerView.swift; sourceTree = "<group>"; };
+		EE000102EE000102EE000102 /* LiveThumbnailPickerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LiveThumbnailPickerView.swift; sourceTree = "<group>"; };
 		EE000004EE000004EE000004 /* TimezonePickerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TimezonePickerView.swift; sourceTree = "<group>"; };
 		EE000006EE000006EE000006 /* LiveStreamIngestDetailsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LiveStreamIngestDetailsView.swift; sourceTree = "<group>"; };
 		CC000003CC000003CC000003 /* LiveStreamListViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LiveStreamListViewModel.swift; sourceTree = "<group>"; };
@@ -128,6 +130,7 @@
 				CC000004CC000004CC000004 /* LiveStreamRowView.swift */,
 				DD000001DD000001DD000001 /* CreateLiveStreamView.swift */,
 				EE000002EE000002EE000002 /* TrailerPickerView.swift */,
+				EE000102EE000102EE000102 /* LiveThumbnailPickerView.swift */,
 				EE000004EE000004EE000004 /* TimezonePickerView.swift */,
 				EE000006EE000006EE000006 /* LiveStreamIngestDetailsView.swift */,
 			);
@@ -458,6 +461,7 @@
 				CC000007CC000007CC000007 /* LiveStreamRowView.swift in Sources */,
 				DD000002DD000002DD000002 /* CreateLiveStreamView.swift in Sources */,
 				EE000001EE000001EE000001 /* TrailerPickerView.swift in Sources */,
+				EE000101EE000101EE000101 /* LiveThumbnailPickerView.swift in Sources */,
 				EE000003EE000003EE000003 /* TimezonePickerView.swift in Sources */,
 				EE000005EE000005EE000005 /* LiveStreamIngestDetailsView.swift in Sources */,
 				77116BDB2AFEBFA8000BB64C /* DefaultTextField.swift in Sources */,
