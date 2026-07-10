@@ -16,6 +16,8 @@ final class LivePlaybackController: ObservableObject {
     }
 
     @Published private(set) var state: State = .loading
+    /// Player UI customization (font, primary color, controls…) from the /play endpoint, once loaded.
+    @Published private(set) var customization: LiveStreamPlayData.PlayerCustomization?
     var userWantsPlay = false
 
     private let api: BunnyStreamAPI
@@ -173,8 +175,10 @@ private extension LivePlaybackController {
             Task { [weak self] in
                 guard let self else { return }
                 let player: MediaPlayer
+                var loadedCustomization: LiveStreamPlayData.PlayerCustomization?
                 do {
                     let playData = try await playDataLoader.load(libraryId: libraryId, streamId: streamId)
+                    loadedCustomization = playData.customization
                     player = MediaPlayer.makeLive(url: playData.playbackURL, seekableWindowSeconds: playData.seekableWindow, contentId: streamId)
                 } catch {
                     player = MediaPlayer.makeLive(url: url, seekableWindowSeconds: 0, contentId: streamId)
@@ -184,6 +188,7 @@ private extension LivePlaybackController {
                 await MainActor.run { [weak self] in
                     guard let self, !self.isStopped else { return }
                     self.teardownCurrentPlayer()
+                    if let loadedCustomization { self.customization = loadedCustomization }
                     // Live has no named renditions from /play, so only "Auto" is offered.
                     self.state = .playable(player, Self.liveStubVideo(streamId: self.streamId, libraryId: self.libraryId))
                 }

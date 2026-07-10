@@ -79,11 +79,40 @@ private extension BunnyStreamLivePlayer {
         }
     }
 
+    /// The ambient theme with the live stream's dashboard font/primary-color applied on top, so the
+    /// live transport bar reflects the Bunny-configured player settings (falls back to the ambient
+    /// theme for any field the /play endpoint doesn't provide).
+    var resolvedTheme: VideoPlayerTheme {
+        guard let customization = controller.customization else { return theme }
+        var resolved = theme
+        if let family = customization.fontFamily, let font = Fonts(rawValue: family) {
+            resolved.font = font
+        }
+        if let hex = customization.playerKeyColor, let color = Color(hex: hex) {
+            resolved.tintColor = color
+        }
+        return resolved
+    }
+
+    /// The player config built from the /play endpoint: honors the dashboard's control list and
+    /// heatmap setting. Falls back to the default (all controls) when the API doesn't specify them.
+    var resolvedConfig: VideoPlayerConfig {
+        var config = VideoPlayerConfig()
+        guard let customization = controller.customization else { return config }
+        if !customization.controlTokens.isEmpty {
+            config.controls = customization.controlTokens.compactMap { VideoPlayerConfig.Control(rawValue: $0) }
+        }
+        config.showHeatmap = customization.showHeatmap
+        return config
+    }
+
     func liveContainerView(_ player: MediaPlayer, video: Video) -> some View {
         // `video` carries real resolutions/captions for an ended-live recording (so the quality
         // menu offers actual renditions); for the live edge it's a minimal "Auto-only" stub.
         BunnyStreamPlayerContainerView(player: player, video: video, heatmap: Heatmap(data: [:]))
             .environment(\.playerWatermark, watermark)
+            .environment(\.videoPlayerTheme, resolvedTheme)
+            .environment(\.videoPlayerConfig, resolvedConfig)
     }
 
     func countdownView(until date: Date, thumbnailUrl: URL?, title: String?) -> some View {

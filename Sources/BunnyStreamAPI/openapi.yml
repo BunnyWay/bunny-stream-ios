@@ -2753,6 +2753,28 @@ components:
         enableDRM:
           type: boolean
           description: Indicates whether DRM is enabled for the live stream.
+        playerKeyColor:
+          type: string
+          description: The primary player color (hex) configured for the library/stream.
+          nullable: true
+        fontFamily:
+          type: string
+          description: The player font family configured for the library/stream.
+          nullable: true
+        uiLanguage:
+          type: string
+          description: The player UI language configured for the library/stream.
+          nullable: true
+        showHeatmap:
+          type: boolean
+          description: Whether the watch-time heatmap should be shown in the player.
+        enableCompactControls:
+          type: boolean
+          description: Whether the player should use compact controls.
+        controls:
+          type: string
+          description: Comma-separated list of enabled player controls.
+          nullable: true
     PaginationListOfLiveStreamModel:
       type: object
       description: A paginated list of live streams.

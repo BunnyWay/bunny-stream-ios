@@ -55,6 +55,19 @@ private extension LiveStreamPlayData {
       return value == .running
     }()
 
-    self.init(playbackURL: url, seekableWindow: seekableWindow, isLive: isLive)
+    // Player UI customization configured in the Bunny dashboard, so the live player reflects it.
+    let customization = LiveStreamPlayData.PlayerCustomization(
+      fontFamily: model.fontFamily,
+      playerKeyColor: model.playerKeyColor,
+      uiLanguage: model.uiLanguage,
+      showHeatmap: model.showHeatmap ?? false,
+      enableCompactControls: model.enableCompactControls ?? false,
+      controlTokens: model.controls?
+        .split(separator: ",")
+        .map { $0.trimmingCharacters(in: .whitespaces) }
+        .filter { !$0.isEmpty } ?? []
+    )
+
+    self.init(playbackURL: url, seekableWindow: seekableWindow, isLive: isLive, customization: customization)
   }
 }
