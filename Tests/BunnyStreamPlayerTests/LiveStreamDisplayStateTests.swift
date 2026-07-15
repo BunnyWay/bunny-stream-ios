@@ -79,7 +79,7 @@ final class LiveStreamDisplayStateTests: XCTestCase {
             enableCountdown: true,
             scheduledStartTime: iso8601(futureDate)
         )
-        guard case .countdown(let date, _) = resolveDisplayState(from: model, now: Date()) else {
+        guard case .countdown(let date, _, _) = resolveDisplayState(from: model, now: Date()) else {
             return XCTFail("Expected .countdown")
         }
         XCTAssertGreaterThan(date, Date())
@@ -117,7 +117,7 @@ final class LiveStreamDisplayStateTests: XCTestCase {
             preStreamTrailerVideoId: "abc-123",
             startedAt: nil
         )
-        guard case .trailer(let vodId, _) = resolveDisplayState(from: model) else {
+        guard case .trailer(let vodId, _, _, _) = resolveDisplayState(from: model) else {
             return XCTFail("Expected .trailer")
         }
         XCTAssertEqual(vodId, "abc-123")
@@ -163,7 +163,7 @@ final class LiveStreamDisplayStateTests: XCTestCase {
             scheduledStartTime: iso8601(futureDate),
             thumbnailUrl: "https://cdn.example.com/thumb.jpg"
         )
-        guard case .countdown(_, let url) = resolveDisplayState(from: model, now: Date()) else {
+        guard case .countdown(_, let url, _) = resolveDisplayState(from: model, now: Date()) else {
             return XCTFail("Expected .countdown")
         }
         XCTAssertEqual(url?.absoluteString, "https://cdn.example.com/thumb.jpg")
@@ -230,26 +230,20 @@ private func makeModel(
     let statusPayload = status.map {
         Components.Schemas.LiveStreamModel.StatusPayload.LiveStreamStatus($0)
     }
+    // Only the fields the resolver reads are passed; every other init parameter is defaulted
+    // (all are `= nil`), keeping this helper resilient to generated-model field drift.
     return Components.Schemas.LiveStreamModel(
-        id: nil,
         guid: "test-guid",
         videoLibraryId: 123,
-        name: nil,
         title: "Test Stream",
-        streamKey: nil,
-        rtmpUrl: nil,
-        playbackUrl: nil,
         playbackUrlHls: playbackUrlHls,
-        ingestEndpoint: nil,
         status: statusPayload,
-        hasArchive: nil,
         recordVod: recordVod,
         enableCountdown: enableCountdown,
         scheduledStartTime: scheduledStartTime,
         preStreamTrailerVideoId: preStreamTrailerVideoId,
         startedAt: startedAt,
-        thumbnailUrl: thumbnailUrl,
-        additionalProperties: .init()
+        thumbnailUrl: thumbnailUrl
     )
 }
 

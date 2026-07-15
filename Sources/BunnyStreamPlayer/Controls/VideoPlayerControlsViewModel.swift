@@ -41,6 +41,14 @@ extension VideoPlayerControlsViewModel {
     player.kind == .live || player.kind == .event
   }
 
+  /// A live stream without a DVR window (`.live`, not `.event`): its timeline slides against the
+  /// HLS live window, so the VOD-style scrubber and skip buttons are meaningless and are hidden.
+  /// `.event` (DVR live) and `.vod` (ended-stream recording) stay `false` and keep those controls.
+  /// Mirrors Android's `liveControlsFor(dvrEnabled:)`.
+  var isLiveWithoutDVR: Bool {
+    player.kind == .live
+  }
+
   func snapToLiveEdge() {
     player.snapToLiveEdge()
   }

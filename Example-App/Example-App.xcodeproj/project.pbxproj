@@ -3,20 +3,12 @@
 	archiveVersion = 1;
 	classes = {
 	};
-	objectVersion = 56;
+	objectVersion = 60;
 	objects = {
 
 /* Begin PBXBuildFile section */
 		65FC6F442D9D64AE00D29974 /* PublicVideoDemoView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 65FC6F432D9D64A700D29974 /* PublicVideoDemoView.swift */; };
 		6A86ED722FBA727B00A713E8 /* LiveStreamDemoView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6A86ED702FBA727B00A713E8 /* LiveStreamDemoView.swift */; };
-		CC000005CC000005CC000005 /* LiveStreamListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = CC000002CC000002CC000002 /* LiveStreamListView.swift */; };
-		DD000002DD000002DD000002 /* CreateLiveStreamView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD000001DD000001DD000001 /* CreateLiveStreamView.swift */; };
-		EE000001EE000001EE000001 /* TrailerPickerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = EE000002EE000002EE000002 /* TrailerPickerView.swift */; };
-		EE000101EE000101EE000101 /* LiveThumbnailPickerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = EE000102EE000102EE000102 /* LiveThumbnailPickerView.swift */; };
-		EE000003EE000003EE000003 /* TimezonePickerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = EE000004EE000004EE000004 /* TimezonePickerView.swift */; };
-		EE000005EE000005EE000005 /* LiveStreamIngestDetailsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = EE000006EE000006EE000006 /* LiveStreamIngestDetailsView.swift */; };
-		CC000006CC000006CC000006 /* LiveStreamListViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = CC000003CC000003CC000003 /* LiveStreamListViewModel.swift */; };
-		CC000007CC000007CC000007 /* LiveStreamRowView.swift in Sources */ = {isa = PBXBuildFile; fileRef = CC000004CC000004CC000004 /* LiveStreamRowView.swift */; };
 		770375792AD832B40034C47F /* VideoPicker.swift in Sources */ = {isa = PBXBuildFile; fileRef = 770375782AD832B40034C47F /* VideoPicker.swift */; };
 		7703757B2AD877040034C47F /* DefaultTextFieldStyle.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7703757A2AD877040034C47F /* DefaultTextFieldStyle.swift */; };
 		77116BD92AFE6774000BB64C /* VideoResponseInfo.swift in Sources */ = {isa = PBXBuildFile; fileRef = 77116BD82AFE6774000BB64C /* VideoResponseInfo.swift */; };
@@ -51,19 +43,19 @@
 		972F24512D77448C00D716F5 /* Double+Ext.swift in Sources */ = {isa = PBXBuildFile; fileRef = 972F24502D77448C00D716F5 /* Double+Ext.swift */; };
 		97A123882D805E5E00EB3B71 /* BunnyStreamAPI in Frameworks */ = {isa = PBXBuildFile; productRef = 97A123872D805E5E00EB3B71 /* BunnyStreamAPI */; };
 		97EEEB4C2D805F64008C3289 /* BunnyService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 97EEEB4B2D805F64008C3289 /* BunnyService.swift */; };
+		CC000005CC000005CC000005 /* LiveStreamListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = CC000002CC000002CC000002 /* LiveStreamListView.swift */; };
+		CC000006CC000006CC000006 /* LiveStreamListViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = CC000003CC000003CC000003 /* LiveStreamListViewModel.swift */; };
+		CC000007CC000007CC000007 /* LiveStreamRowView.swift in Sources */ = {isa = PBXBuildFile; fileRef = CC000004CC000004CC000004 /* LiveStreamRowView.swift */; };
+		DD000002DD000002DD000002 /* CreateLiveStreamView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD000001DD000001DD000001 /* CreateLiveStreamView.swift */; };
+		EE000001EE000001EE000001 /* TrailerPickerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = EE000002EE000002EE000002 /* TrailerPickerView.swift */; };
+		EE000003EE000003EE000003 /* TimezonePickerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = EE000004EE000004EE000004 /* TimezonePickerView.swift */; };
+		EE000005EE000005EE000005 /* LiveStreamIngestDetailsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = EE000006EE000006EE000006 /* LiveStreamIngestDetailsView.swift */; };
+		EE000101EE000101EE000101 /* LiveThumbnailPickerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = EE000102EE000102EE000102 /* LiveThumbnailPickerView.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
 		65FC6F432D9D64A700D29974 /* PublicVideoDemoView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PublicVideoDemoView.swift; sourceTree = "<group>"; };
 		6A86ED702FBA727B00A713E8 /* LiveStreamDemoView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LiveStreamDemoView.swift; sourceTree = "<group>"; };
-		CC000002CC000002CC000002 /* LiveStreamListView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LiveStreamListView.swift; sourceTree = "<group>"; };
-		DD000001DD000001DD000001 /* CreateLiveStreamView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CreateLiveStreamView.swift; sourceTree = "<group>"; };
-		EE000002EE000002EE000002 /* TrailerPickerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TrailerPickerView.swift; sourceTree = "<group>"; };
-		EE000102EE000102EE000102 /* LiveThumbnailPickerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LiveThumbnailPickerView.swift; sourceTree = "<group>"; };
-		EE000004EE000004EE000004 /* TimezonePickerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TimezonePickerView.swift; sourceTree = "<group>"; };
-		EE000006EE000006EE000006 /* LiveStreamIngestDetailsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LiveStreamIngestDetailsView.swift; sourceTree = "<group>"; };
-		CC000003CC000003CC000003 /* LiveStreamListViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LiveStreamListViewModel.swift; sourceTree = "<group>"; };
-		CC000004CC000004CC000004 /* LiveStreamRowView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LiveStreamRowView.swift; sourceTree = "<group>"; };
 		770375782AD832B40034C47F /* VideoPicker.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VideoPicker.swift; sourceTree = "<group>"; };
 		7703757A2AD877040034C47F /* DefaultTextFieldStyle.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DefaultTextFieldStyle.swift; sourceTree = "<group>"; };
 		77116BD82AFE6774000BB64C /* VideoResponseInfo.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VideoResponseInfo.swift; sourceTree = "<group>"; };
@@ -97,6 +89,14 @@
 		77FB976A2ADD339C004CED84 /* VideoUploaderViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VideoUploaderViewModel.swift; sourceTree = "<group>"; };
 		972F24502D77448C00D716F5 /* Double+Ext.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Double+Ext.swift"; sourceTree = "<group>"; };
 		97EEEB4B2D805F64008C3289 /* BunnyService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BunnyService.swift; sourceTree = "<group>"; };
+		CC000002CC000002CC000002 /* LiveStreamListView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LiveStreamListView.swift; sourceTree = "<group>"; };
+		CC000003CC000003CC000003 /* LiveStreamListViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LiveStreamListViewModel.swift; sourceTree = "<group>"; };
+		CC000004CC000004CC000004 /* LiveStreamRowView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LiveStreamRowView.swift; sourceTree = "<group>"; };
+		DD000001DD000001DD000001 /* CreateLiveStreamView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CreateLiveStreamView.swift; sourceTree = "<group>"; };
+		EE000002EE000002EE000002 /* TrailerPickerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TrailerPickerView.swift; sourceTree = "<group>"; };
+		EE000004EE000004EE000004 /* TimezonePickerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TimezonePickerView.swift; sourceTree = "<group>"; };
+		EE000006EE000006EE000006 /* LiveStreamIngestDetailsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LiveStreamIngestDetailsView.swift; sourceTree = "<group>"; };
+		EE000102EE000102EE000102 /* LiveThumbnailPickerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LiveThumbnailPickerView.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -120,21 +120,6 @@
 				6A86ED702FBA727B00A713E8 /* LiveStreamDemoView.swift */,
 			);
 			path = LiveStreamDemo;
-			sourceTree = "<group>";
-		};
-		CC000001CC000001CC000001 /* LiveStreamList */ = {
-			isa = PBXGroup;
-			children = (
-				CC000002CC000002CC000002 /* LiveStreamListView.swift */,
-				CC000003CC000003CC000003 /* LiveStreamListViewModel.swift */,
-				CC000004CC000004CC000004 /* LiveStreamRowView.swift */,
-				DD000001DD000001DD000001 /* CreateLiveStreamView.swift */,
-				EE000002EE000002EE000002 /* TrailerPickerView.swift */,
-				EE000102EE000102EE000102 /* LiveThumbnailPickerView.swift */,
-				EE000004EE000004EE000004 /* TimezonePickerView.swift */,
-				EE000006EE000006EE000006 /* LiveStreamIngestDetailsView.swift */,
-			);
-			path = LiveStreamList;
 			sourceTree = "<group>";
 		};
 		77116BDC2AFEC3D9000BB64C /* Player */ = {
@@ -329,6 +314,21 @@
 				7789474C2AD002CF00DAF8DB /* VideoList */,
 			);
 			path = VideoPlayerDemo;
+			sourceTree = "<group>";
+		};
+		CC000001CC000001CC000001 /* LiveStreamList */ = {
+			isa = PBXGroup;
+			children = (
+				CC000002CC000002CC000002 /* LiveStreamListView.swift */,
+				CC000003CC000003CC000003 /* LiveStreamListViewModel.swift */,
+				CC000004CC000004CC000004 /* LiveStreamRowView.swift */,
+				DD000001DD000001DD000001 /* CreateLiveStreamView.swift */,
+				EE000002EE000002EE000002 /* TrailerPickerView.swift */,
+				EE000102EE000102EE000102 /* LiveThumbnailPickerView.swift */,
+				EE000004EE000004EE000004 /* TimezonePickerView.swift */,
+				EE000006EE000006EE000006 /* LiveStreamIngestDetailsView.swift */,
+			);
+			path = LiveStreamList;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -646,10 +646,12 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_IDENTITY = "Apple Development";
-				CODE_SIGN_STYLE = Automatic;
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Distribution";
+				CODE_SIGN_STYLE = Manual;
 				CURRENT_PROJECT_VERSION = 12;
 				DEVELOPMENT_ASSET_PATHS = "\"Example-App/Preview Content\"";
-				DEVELOPMENT_TEAM = 9JUDK7LK5C;
+				DEVELOPMENT_TEAM = "";
+				"DEVELOPMENT_TEAM[sdk=iphoneos*]" = GX6PPA6X9F;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = "Example-App/Info.plist";
@@ -671,6 +673,7 @@
 				PRODUCT_BUNDLE_IDENTIFIER = net.bunny.StreamSDKDemo;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";
+				"PROVISIONING_PROFILE_SPECIFIER[sdk=iphoneos*]" = "Stream SDK Demo Provisioning profile";
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";

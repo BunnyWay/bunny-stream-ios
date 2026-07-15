@@ -96,9 +96,10 @@ extension VideoPlayerControls {
           .foregroundColor(.white)
       }
       .shouldAddView(controlsToCheck: .rewind, in: videoPlayerConfig.controls)
-      
+      .shouldAddView(!viewModel.isLiveWithoutDVR)
+
       Spacer()
-      
+
       Button(action: viewModel.togglePlayPause) {
         (viewModel.isPlaying ? theme.images.pause : theme.images.play)
           .resizable()
@@ -118,7 +119,8 @@ extension VideoPlayerControls {
           .foregroundColor(.white)
       }
       .shouldAddView(controlsToCheck: .fastForward, in: videoPlayerConfig.controls)
-      
+      .shouldAddView(!viewModel.isLiveWithoutDVR)
+
       Spacer()
     }
   }
@@ -127,6 +129,7 @@ extension VideoPlayerControls {
     VStack {
       seekBarView()
         .shouldAddView(controlsToCheck: .progress, in: videoPlayerConfig.controls)
+        .shouldAddView(!viewModel.isLiveWithoutDVR)
       
       HStack {
         timeView()
