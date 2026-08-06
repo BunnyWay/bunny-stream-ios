@@ -47,6 +47,22 @@ final class LiveStreamDisplayStateTests: XCTestCase {
         XCTAssertFalse(message.isEmpty)
     }
 
+    func test_offline_notActive_whenPreview() {
+        // Preview means an encoder is connected but the stream hasn't been taken live —
+        // viewers can't watch yet, so it renders as not-active rather than playable.
+        let model = makeModel(status: .preview)
+        guard case .offline = resolveDisplayState(from: model) else {
+            return XCTFail("Expected .offline")
+        }
+    }
+
+    func test_offline_notActive_whenUnknown() {
+        let model = makeModel(status: .unknown)
+        guard case .offline = resolveDisplayState(from: model) else {
+            return XCTFail("Expected .offline")
+        }
+    }
+
     func test_offline_ended_whenEndedWithoutRecordVod() {
         let model = makeModel(status: .ended, recordVod: false)
         guard case .offline = resolveDisplayState(from: model) else {
@@ -114,6 +130,19 @@ final class LiveStreamDisplayStateTests: XCTestCase {
     func test_trailer_whenPreStreamTrailerSetAndNotStarted() {
         let model = makeModel(
             status: .scheduled,
+            preStreamTrailerVideoId: "abc-123",
+            startedAt: nil
+        )
+        guard case .trailer(let vodId, _, _, _) = resolveDisplayState(from: model) else {
+            return XCTFail("Expected .trailer")
+        }
+        XCTAssertEqual(vodId, "abc-123")
+    }
+
+    func test_trailer_whenPreviewAndNotStarted() {
+        // Mirrors Android, which counts PREVIEW as a pre-start state for the trailer.
+        let model = makeModel(
+            status: .preview,
             preStreamTrailerVideoId: "abc-123",
             startedAt: nil
         )

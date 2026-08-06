@@ -52,11 +52,8 @@ class LiveStreamListViewModel: ObservableObject {
         if !rtmpOutputs.isEmpty {
             model.rtmpOutputs = rtmpOutputs
         }
-        if let date = scheduledStartTime {
-            let formatter = ISO8601DateFormatter()
-            formatter.formatOptions = [.withInternetDateTime, .withFractionalSeconds]
-            model.scheduledStartTime = formatter.string(from: date)
-        }
+        // `scheduledStartTime` is a Date in the model; the SDK's date transcoder serializes it.
+        model.scheduledStartTime = scheduledStartTime
         if enableCountdown {
             model.enableCountdown = true
         }

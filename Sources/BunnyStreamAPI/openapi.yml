@@ -1397,6 +1397,44 @@ paths:
           description: Internal Server Error.
       security:
         - AccessKey: []
+  /library/{libraryId}/live/{streamId}/regenerate-key:
+    put:
+      tags:
+        - Manage Live Streams
+      summary: Regenerate Stream Key
+      description: Regenerates the stream key for the live stream. This operation is not allowed for streams that ended.
+      operationId: LiveStream_RegenerateStreamKey
+      parameters:
+        - name: libraryId
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+          description: The ID of the video library.
+        - name: streamId
+          in: path
+          required: true
+          schema:
+            type: string
+          description: The unique identifier of the live stream.
+      responses:
+        '200':
+          description: The stream key was successfully regenerated. Returns the updated live stream.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LiveStreamModel'
+        '400':
+          description: The request was invalid, for example the stream has already ended.
+        '401':
+          description: The request authorization failed.
+        '404':
+          description: The requested live stream was not found.
+        '500':
+          description: Internal Server Error.
+      security:
+        - AccessKey: []
   /library/{libraryId}/live/{streamId}/play:
     get:
       tags:
@@ -1418,6 +1456,20 @@ paths:
           schema:
             type: string
           description: The unique identifier of the live stream.
+        - name: token
+          in: query
+          schema:
+            type: string
+            default: ''
+            nullable: true
+          description: Authentication token for accessing the live stream playback data.
+        - name: expires
+          in: query
+          schema:
+            type: integer
+            format: int64
+            default: 0
+          description: Expiration timestamp for the provided token.
       responses:
         '200':
           description: The playback data for the live stream.
@@ -2655,17 +2707,21 @@ components:
             $ref: '#/components/schemas/RtmpOutput'
     LiveStreamStatus:
       type: integer
-      description: 'The current status of the live stream: 1 = Created, 2 = Scheduled, 4 = Running, 5 = Ended, 6 = VodProcessing, 7 = Error.'
+      description: 'The current status of the live stream: 0 = Unknown, 1 = Created, 2 = Scheduled, 3 = Preview, 4 = Running, 5 = Ended, 6 = VodProcessing, 7 = Error.'
       x-enumNames:
+        - Unknown
         - Created
         - Scheduled
+        - Preview
         - Running
         - Ended
         - VodProcessing
         - Error
       enum:
+        - 0
         - 1
         - 2
+        - 3
         - 4
         - 5
         - 6
@@ -2813,9 +2869,23 @@ components:
           type: string
           description: An optional description of the live stream.
           nullable: true
+        collectionId:
+          type: string
+          description: The ID of the collection the live stream belongs to.
+          nullable: true
         scheduledStartTime:
           type: string
           description: The scheduled start time in ISO 8601 format. When set, stream status becomes Scheduled (Upcoming).
+          format: date-time
+          nullable: true
+        scheduledEndTime:
+          type: string
+          description: The scheduled end time in ISO 8601 format.
+          format: date-time
+          nullable: true
+        public:
+          type: boolean
+          description: Determines if the live stream is publicly accessible.
           nullable: true
         dvrEnabled:
           type: boolean

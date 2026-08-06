@@ -8,9 +8,20 @@ public struct LiveStreamPlayDataLoader {
     self.bunnyStreamAPI = bunnyStreamAPI
   }
 
-  public func load(libraryId: Int, streamId: String) async throws -> LiveStreamPlayData {
+  /// - Parameters:
+  ///   - libraryId: The ID of the video library.
+  ///   - streamId: The GUID of the live stream.
+  ///   - token: Optional playback token for token-authenticated streams.
+  ///   - expires: Expiration timestamp that the token was signed with.
+  public func load(
+    libraryId: Int,
+    streamId: String,
+    token: String? = nil,
+    expires: Int64? = nil
+  ) async throws -> LiveStreamPlayData {
     let output = try await bunnyStreamAPI.client.liveStreamGetStreamPlayData(
-      path: .init(libraryId: Int64(libraryId), streamId: streamId)
+      path: .init(libraryId: Int64(libraryId), streamId: streamId),
+      query: .init(token: token, expires: expires)
     )
 
     switch output {

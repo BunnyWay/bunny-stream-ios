@@ -12,8 +12,11 @@ enum LiveStreamDisplayState {
 // MARK: - Readable aliases for the generated integer enum
 
 public extension Components.Schemas.LiveStreamStatus {
+    static let unknown: Self = ._0
     static let created: Self = ._1
     static let scheduled: Self = ._2
+    /// An encoder is connected and pushing, but the stream has not been taken live yet.
+    static let preview: Self = ._3
     static let running: Self = ._4
     static let ended: Self = ._5
     static let vodProcessing: Self = ._6
@@ -41,7 +44,8 @@ func resolveDisplayState(
     }
 
     // pre-stream trailer: preStreamTrailerVideoId set, stream not yet started
-    let preStreamStatuses: [Components.Schemas.LiveStreamStatus] = [.created, .scheduled]
+    // Preview counts as pre-start: the encoder is connected but viewers can't watch yet.
+    let preStreamStatuses: [Components.Schemas.LiveStreamStatus] = [.created, .scheduled, .preview]
     if let vodId = model.preStreamTrailerVideoId,
        !vodId.isEmpty,
        model.startedAt == nil,
