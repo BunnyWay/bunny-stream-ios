@@ -20,6 +20,8 @@ public struct BunnyStreamLivePlayer: View {
     private let libraryId: Int
     private let streamId: String
     private let watermark: PlayerWatermark?
+    private let onStateChange: ((BunnyLiveStreamPlaybackState) -> Void)?
+    private let onPlaybackError: ((Error) -> Void)?
     @State private var isTrailerMuted = true
 
     /// - Parameters:
@@ -27,15 +29,39 @@ public struct BunnyStreamLivePlayer: View {
     ///   - libraryId: The ID of the video library.
     ///   - streamId: The GUID of the live stream.
     ///   - watermark: Optional client-side watermark rendered on top of the live video.
-    public init(accessKey: String, libraryId: Int, streamId: String, watermark: PlayerWatermark? = nil) {
+    ///   - token: Optional playback token, required when the library enforces token authentication.
+    ///   - expires: Expiration timestamp that `token` was signed with.
+    ///   - onStateChange: Called on the main actor whenever what the player is showing changes —
+    ///     use it to keep surrounding UI or analytics in step. Not called for changes that don't
+    ///     alter the public state.
+    ///   - onPlaybackError: Called on the main actor when a poll fails, including transient
+    ///     failures the player recovers from on its own. Check
+    ///     `(error as? BunnyLiveStreamError)?.isPermanent` to tell the two apart: after a
+    ///     permanent failure the player stops polling and settles on
+    ///     ``BunnyLiveStreamPlaybackState/failed(message:)``.
+    public init(
+        accessKey: String,
+        libraryId: Int,
+        streamId: String,
+        watermark: PlayerWatermark? = nil,
+        token: String? = nil,
+        expires: Int64? = nil,
+        onStateChange: ((BunnyLiveStreamPlaybackState) -> Void)? = nil,
+        onPlaybackError: ((Error) -> Void)? = nil
+    ) {
         self.accessKey = accessKey
         self.libraryId = libraryId
         self.streamId = streamId
         self.watermark = watermark
+        self.onStateChange = onStateChange
+        self.onPlaybackError = onPlaybackError
         self._controller = StateObject(wrappedValue: LivePlaybackController(
             bunnyStreamAPI: BunnyStreamAPI(accessKey: accessKey),
+            accessKey: accessKey,
             libraryId: libraryId,
-            streamId: streamId
+            streamId: streamId,
+            token: token,
+            expires: expires
         ))
     }
 
@@ -57,10 +83,17 @@ public struct BunnyStreamLivePlayer: View {
             }
         }
         .onAppear {
+            // Wire the observers before starting, so the first state is reported too.
+            controller.onPlaybackError = onPlaybackError
+            controller.onStateChange = onStateChange
             controller.userWantsPlay = true
             controller.start()
         }
-        .onDisappear { controller.stop() }
+        .onDisappear {
+            controller.stop()
+            controller.onStateChange = nil
+            controller.onPlaybackError = nil
+        }
     }
 }
 
@@ -94,8 +127,15 @@ private extension BunnyStreamLivePlayer {
         return resolved
     }
 
-    /// The player config built from the /play endpoint: honors the dashboard's control list and
-    /// heatmap setting. Falls back to the default (all controls) when the API doesn't specify them.
+    /// The language the dashboard pinned the player UI to, if any. `nil` leaves the overlay
+    /// strings following the device's own language.
+    var uiLanguage: String? {
+        controller.customization?.uiLanguage
+    }
+
+    /// The player config built from the /play endpoint: honors the dashboard's control list,
+    /// heatmap and compact-controls settings. Falls back to the default (all controls) when the
+    /// API doesn't specify them.
     var resolvedConfig: VideoPlayerConfig {
         var config = VideoPlayerConfig()
         guard let customization = controller.customization else { return config }
@@ -103,6 +143,7 @@ private extension BunnyStreamLivePlayer {
             config.controls = customization.controlTokens.compactMap { VideoPlayerConfig.Control(rawValue: $0) }
         }
         config.showHeatmap = customization.showHeatmap
+        config.compactControls = customization.enableCompactControls
         return config
     }
 
@@ -140,9 +181,9 @@ private extension BunnyStreamLivePlayer {
         }
     }
 
-    func trailerWithOverlay(vodId: String, scheduledStart: Date?, statusMessage: String?, title: String?) -> some View {
+    func trailerWithOverlay(vodId: String, scheduledStart: Date?, statusMessage: LiveStreamMessage?, title: String?) -> some View {
         ZStack {
-            LoopingTrailerView(libraryId: libraryId, vodId: vodId, isMuted: $isTrailerMuted)
+            LoopingTrailerView(libraryId: libraryId, vodId: vodId, accessKey: accessKey, isMuted: $isTrailerMuted)
                 .ignoresSafeArea()
             if let scheduledStart {
                 countdownOverlay(until: scheduledStart, title: title)
@@ -173,7 +214,7 @@ private extension BunnyStreamLivePlayer {
                         .foregroundStyle(.white)
                         .shadow(color: .black.opacity(0.5), radius: 4, y: 2)
                 } else {
-                    Text(Lingua.LiveStream.streamStartingSoon)
+                    Text(LiveStreamMessage.startingSoon.localized(languageCode: uiLanguage))
                         .font(theme.font.size(20))
                         .fontWeight(.semibold)
                         .foregroundStyle(.white)
@@ -213,8 +254,8 @@ private extension BunnyStreamLivePlayer {
             : String(format: "%d:%02d", m, s)
     }
 
-    func trailerStatusOverlay(message: String) -> some View {
-        Text(message)
+    func trailerStatusOverlay(message: LiveStreamMessage) -> some View {
+        Text(message.localized(languageCode: uiLanguage))
             .font(theme.font.size(14))
             .foregroundStyle(.white)
             .padding(.horizontal, 14)
@@ -225,7 +266,7 @@ private extension BunnyStreamLivePlayer {
             .padding(.bottom, 32)
     }
 
-    func offlineView(message: String, thumbnailUrl: URL?) -> some View {
+    func offlineView(message: LiveStreamMessage, thumbnailUrl: URL?) -> some View {
         ZStack {
             Color.black
             posterImage(thumbnailUrl, dim: 0.55)
@@ -234,7 +275,7 @@ private extension BunnyStreamLivePlayer {
                 Image(systemName: "antenna.radiowaves.left.and.right.slash")
                     .font(.system(size: 40))
                     .foregroundStyle(theme.tintColor.opacity(0.8))
-                Text(message)
+                Text(message.localized(languageCode: uiLanguage))
                     .font(theme.font.size(16))
                     .foregroundStyle(.white)
                     .multilineTextAlignment(.center)
@@ -243,7 +284,7 @@ private extension BunnyStreamLivePlayer {
         }
     }
 
-    func errorView(message: String, thumbnailUrl: URL?) -> some View {
+    func errorView(message: LiveStreamMessage, thumbnailUrl: URL?) -> some View {
         ZStack {
             Color.black
             posterImage(thumbnailUrl, dim: 0.65)
@@ -252,7 +293,7 @@ private extension BunnyStreamLivePlayer {
                 Image(systemName: "exclamationmark.triangle.fill")
                     .font(.system(size: 40))
                     .foregroundStyle(theme.tintColor)
-                Text(message)
+                Text(message.localized(languageCode: uiLanguage))
                     .font(theme.font.size(16))
                     .foregroundStyle(.white)
                     .multilineTextAlignment(.center)
@@ -267,6 +308,7 @@ private extension BunnyStreamLivePlayer {
 private struct LoopingTrailerView: View {
     let libraryId: Int
     let vodId: String
+    let accessKey: String
     @Binding var isMuted: Bool
 
     @State private var player: AVQueuePlayer?
@@ -296,7 +338,7 @@ private struct LoopingTrailerView: View {
 
     private func loadAndPlay() async {
         do {
-            let config = try await VideoPlayerConfigLoader().load(libraryId: libraryId, videoId: vodId)
+            let config = try await VideoPlayerConfigLoader().load(libraryId: libraryId, videoId: vodId, accessKey: accessKey)
             guard let url = URL(string: config.videoPlaylistUrl) else { return }
             let item = AVPlayerItem(url: url)
             let queuePlayer = AVQueuePlayer()

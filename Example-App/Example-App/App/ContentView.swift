@@ -9,6 +9,38 @@ import SwiftUI
 import BunnyStreamUploader
 import BunnyStreamCameraUpload
 
+/// Broadcast quality options exposed in the Example App UI, each mapping to a `BroadcastQuality` preset.
+/// The selection is shared (via `@AppStorage`) between the Camera Upload and Live Streams screens.
+enum BroadcastQualityOption: String, CaseIterable, Identifiable {
+  case sd480
+  case hd720
+  case fullHd1080
+  case fullHd1080p60
+
+  var id: String { rawValue }
+
+  var label: String {
+    switch self {
+    case .sd480: return "480p · 30fps"
+    case .hd720: return "720p · 30fps"
+    case .fullHd1080: return "1080p · 30fps"
+    case .fullHd1080p60: return "1080p · 60fps"
+    }
+  }
+
+  var quality: BroadcastQuality {
+    switch self {
+    case .sd480: return .sd480
+    case .hd720: return .hd720
+    case .fullHd1080: return .fullHd1080
+    case .fullHd1080p60: return .fullHd1080p60
+    }
+  }
+}
+
+/// Shared AppStorage key for the selected broadcast quality across Example App screens.
+let broadcastQualityStorageKey = "broadcastQuality"
+
 struct ContentView: View {
   @EnvironmentObject var dependenciesManager: DependenciesManager
   @State private var isShowingSheet = false
@@ -18,6 +50,11 @@ struct ContentView: View {
   @State private var isShowingVideoIdAlert = false
   @State private var videoId: String = ""
   @State private var showPublicVideoPlayer = false
+  @AppStorage(broadcastQualityStorageKey) private var broadcastQualityRaw = BroadcastQualityOption.fullHd1080.rawValue
+
+  private var broadcastQuality: BroadcastQualityOption {
+    BroadcastQualityOption(rawValue: broadcastQualityRaw) ?? .fullHd1080
+  }
   
   var body: some View {
     NavigationStack {
@@ -32,12 +69,25 @@ struct ContentView: View {
               .environmentObject(dependenciesManager)
           }
           NavigationLink("Camera Upload") {
-            Button {
-              isStreamingPresented.toggle()
-            } label: {
-              Image(systemName: "dot.radiowaves.left.and.right")
-              Text("Start uploading")
+            Form {
+              Section("Broadcast Quality") {
+                Picker("Quality", selection: $broadcastQualityRaw) {
+                  ForEach(BroadcastQualityOption.allCases) { option in
+                    Text(option.label).tag(option.rawValue)
+                  }
+                }
+                .pickerStyle(.inline)
+                .labelsHidden()
+              }
+              Section {
+                Button {
+                  isStreamingPresented.toggle()
+                } label: {
+                  Label("Start uploading", systemImage: "dot.radiowaves.left.and.right")
+                }
+              }
             }
+            .navigationTitle("Camera Upload")
           }
           Button {
             videoId = ""
@@ -79,7 +129,8 @@ struct ContentView: View {
                      content: {
       BunnyStreamCameraUploadView(
         accessKey: dependenciesManager.accessKey,
-        libraryId: dependenciesManager.libraryId
+        libraryId: dependenciesManager.libraryId,
+        quality: broadcastQuality.quality
       )
     })
     .onAppear {

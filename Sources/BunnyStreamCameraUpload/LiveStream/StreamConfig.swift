@@ -8,6 +8,8 @@ struct StreamConfig {
   let accessKey: String
   let libraryId: Int
   var videoId: String?
+  /// Encoder configuration (resolution, frame rate, bitrates) used when publishing.
+  var quality: BroadcastQuality
   private var directStreamKey: String?
 
   var streamKey: String? {
@@ -23,19 +25,21 @@ struct StreamConfig {
   }
 
   /// For camera-upload flow: creates a VOD video on publish start.
-  init(accessKey: String, libraryId: Int) {
+  init(accessKey: String, libraryId: Int, quality: BroadcastQuality = .default) {
     self.accessKey = accessKey
     self.libraryId = libraryId
+    self.quality = quality
   }
 
   /// For live-stream broadcast flow: uses rtmpUrl + streamKey from the API directly.
-  init(rtmpUrl: String, streamKey: String, backupRtmpUrl: String? = nil, accessKey: String = "", libraryId: Int = 0, streamId: String? = nil) {
+  init(rtmpUrl: String, streamKey: String, backupRtmpUrl: String? = nil, accessKey: String = "", libraryId: Int = 0, streamId: String? = nil, quality: BroadcastQuality = .default) {
     self.uri = rtmpUrl
     self.backupUri = backupRtmpUrl
     self.accessKey = accessKey
     self.libraryId = libraryId
     self.streamId = streamId
     self.directStreamKey = streamKey
+    self.quality = quality
   }
 
   /// The live stream ID used for activate/complete API calls.

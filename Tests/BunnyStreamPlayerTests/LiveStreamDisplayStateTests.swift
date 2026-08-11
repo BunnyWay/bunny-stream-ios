@@ -44,7 +44,7 @@ final class LiveStreamDisplayStateTests: XCTestCase {
         guard case .offline(let message, _) = resolveDisplayState(from: model) else {
             return XCTFail("Expected .offline")
         }
-        XCTAssertFalse(message.isEmpty)
+        XCTAssertEqual(message, .notActive)
     }
 
     func test_offline_notActive_whenPreview() {
@@ -65,9 +65,10 @@ final class LiveStreamDisplayStateTests: XCTestCase {
 
     func test_offline_ended_whenEndedWithoutRecordVod() {
         let model = makeModel(status: .ended, recordVod: false)
-        guard case .offline = resolveDisplayState(from: model) else {
+        guard case .offline(let message, _) = resolveDisplayState(from: model) else {
             return XCTFail("Expected .offline")
         }
+        XCTAssertEqual(message, .ended, "an ended stream says so, rather than 'not active'")
     }
 
     func test_offline_whenVodProcessingWithoutRecordVod() {
@@ -93,7 +94,7 @@ final class LiveStreamDisplayStateTests: XCTestCase {
         let model = makeModel(
             status: .scheduled,
             enableCountdown: true,
-            scheduledStartTime: iso8601(futureDate)
+            scheduledStartTime: futureDate
         )
         guard case .countdown(let date, _, _) = resolveDisplayState(from: model, now: Date()) else {
             return XCTFail("Expected .countdown")
@@ -106,7 +107,7 @@ final class LiveStreamDisplayStateTests: XCTestCase {
         let model = makeModel(
             status: .scheduled,
             enableCountdown: true,
-            scheduledStartTime: iso8601(pastDate)
+            scheduledStartTime: pastDate
         )
         guard case .offline = resolveDisplayState(from: model, now: Date()) else {
             return XCTFail("Expected .offline for past scheduled date")
@@ -118,7 +119,7 @@ final class LiveStreamDisplayStateTests: XCTestCase {
         let model = makeModel(
             status: .scheduled,
             enableCountdown: false,
-            scheduledStartTime: iso8601(futureDate)
+            scheduledStartTime: futureDate
         )
         guard case .offline = resolveDisplayState(from: model, now: Date()) else {
             return XCTFail("Expected .offline when countdown disabled")
@@ -156,7 +157,7 @@ final class LiveStreamDisplayStateTests: XCTestCase {
         let model = makeModel(
             status: .scheduled,
             preStreamTrailerVideoId: "abc-123",
-            startedAt: "2026-06-04T10:00:00"
+            startedAt: Date()
         )
         if case .trailer = resolveDisplayState(from: model) {
             XCTFail("Should not show trailer after stream started")
@@ -189,7 +190,7 @@ final class LiveStreamDisplayStateTests: XCTestCase {
         let model = makeModel(
             status: .scheduled,
             enableCountdown: true,
-            scheduledStartTime: iso8601(futureDate),
+            scheduledStartTime: futureDate,
             thumbnailUrl: "https://cdn.example.com/thumb.jpg"
         )
         guard case .countdown(_, let url, _) = resolveDisplayState(from: model, now: Date()) else {
@@ -207,77 +208,30 @@ final class LiveStreamDisplayStateTests: XCTestCase {
     }
 }
 
-// MARK: - Date parsing tests
-
-final class BunnyDateParserTests: XCTestCase {
-
-    func test_parsesFullISO8601WithMicroseconds() {
-        XCTAssertNotNil(Date(bunnyString: "2026-06-04T18:42:24.671615Z"))
-    }
-
-    func test_parsesISO8601WithMilliseconds() {
-        XCTAssertNotNil(Date(bunnyString: "2026-06-04T18:42:24.671Z"))
-    }
-
-    func test_parsesISO8601WithoutMilliseconds() {
-        XCTAssertNotNil(Date(bunnyString: "2026-06-04T18:42:24"))
-    }
-
-    func test_parsesISO8601WithZSuffix() {
-        XCTAssertNotNil(Date(bunnyString: "2026-06-04T18:42:24Z"))
-    }
-
-    func test_returnsNilForInvalidString() {
-        XCTAssertNil(Date(bunnyString: "not-a-date"))
-    }
-
-    func test_returnsNilForEmptyString() {
-        XCTAssertNil(Date(bunnyString: ""))
-    }
-
-    func test_parsedDateIsReasonable() {
-        let date = Date(bunnyString: "2026-06-04T18:42:24Z")
-        XCTAssertNotNil(date)
-        // Year should be 2026
-        let year = Calendar.current.component(.year, from: date!)
-        XCTAssertEqual(year, 2026)
-    }
-}
-
 // MARK: - Helpers
 
+/// Only the fields the resolver reads are passed; the rest of ``BunnyLiveStream`` is defaulted.
 private func makeModel(
-    status: Components.Schemas.LiveStreamStatus? = nil,
-    recordVod: Bool? = nil,
-    enableCountdown: Bool? = nil,
-    scheduledStartTime: String? = nil,
+    status: BunnyLiveStreamStatus = .unknown,
+    recordVod: Bool = false,
+    enableCountdown: Bool = false,
+    scheduledStartTime: Date? = nil,
     preStreamTrailerVideoId: String? = nil,
-    startedAt: String? = nil,
+    startedAt: Date? = nil,
     playbackUrlHls: String? = nil,
     thumbnailUrl: String? = nil
-) -> Components.Schemas.LiveStreamModel {
-    let statusPayload = status.map {
-        Components.Schemas.LiveStreamModel.StatusPayload.LiveStreamStatus($0)
-    }
-    // Only the fields the resolver reads are passed; every other init parameter is defaulted
-    // (all are `= nil`), keeping this helper resilient to generated-model field drift.
-    return Components.Schemas.LiveStreamModel(
-        guid: "test-guid",
-        videoLibraryId: 123,
+) -> BunnyLiveStream {
+    BunnyLiveStream(
+        id: "test-guid",
+        libraryId: 123,
         title: "Test Stream",
-        playbackUrlHls: playbackUrlHls,
-        status: statusPayload,
+        playbackUrl: playbackUrlHls,
+        status: status,
         recordVod: recordVod,
-        enableCountdown: enableCountdown,
         scheduledStartTime: scheduledStartTime,
+        enableCountdown: enableCountdown,
         preStreamTrailerVideoId: preStreamTrailerVideoId,
         startedAt: startedAt,
         thumbnailUrl: thumbnailUrl
     )
-}
-
-private func iso8601(_ date: Date) -> String {
-    let f = ISO8601DateFormatter()
-    f.formatOptions = [.withInternetDateTime]
-    return f.string(from: date)
 }

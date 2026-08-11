@@ -38,8 +38,14 @@ public struct BunnyStreamCameraUploadView: View {
 
   /// Creates a new camera upload view with the specified stream view model.
   /// - Parameter streamViewModel: The view model that manages streaming functionality.
-  init(streamViewModel: BunnyStreamCameraUploadViewModel) {
+  init(
+    streamViewModel: BunnyStreamCameraUploadViewModel,
+    controller: BunnyBroadcastController? = nil
+  ) {
     self.streamViewModel = streamViewModel
+    // Link both ways: the controller drives the view model, the view model reports back.
+    streamViewModel.broadcastController = controller
+    controller?.viewModel = streamViewModel
     streamViewModel.configureStream()
     lfView = MTHKSwiftUiView(rtmpStream: $streamViewModel.rtmpStream)
     controlsView = ControlsView(viewModel: streamViewModel)
@@ -53,6 +59,9 @@ public struct BunnyStreamCameraUploadView: View {
   /// - Parameters:
   ///   - accessKey: The access key for authentication.
   ///   - libraryId: The ID of the video library.
+  ///   - quality: The encoder configuration (resolution, frame rate, bitrates). Defaults to `.default` (1080p30).
+  ///   - controller: An optional handle for starting/stopping the broadcast and observing it
+  ///     from outside the view. The view works without one, using its built-in controls.
   ///
   /// Usage Example:
   /// ```
@@ -63,7 +72,8 @@ public struct BunnyStreamCameraUploadView: View {
   ///                      content: {
   ///      BunnyStreamCameraUploadView(
   ///       accessKey: "<access_key>",
-  ///       libraryId: <library_id>
+  ///       libraryId: <library_id>,
+  ///       quality: .fullHd1080
   ///      )
   ///   })
   ///  }
@@ -71,35 +81,42 @@ public struct BunnyStreamCameraUploadView: View {
   /// ```
   public init(
     accessKey: String,
-    libraryId: Int
+    libraryId: Int,
+    quality: BroadcastQuality = .default,
+    controller: BunnyBroadcastController? = nil
   ) {
-    let config = StreamConfig(accessKey: accessKey, libraryId: libraryId)
+    let config = StreamConfig(accessKey: accessKey, libraryId: libraryId, quality: quality)
     let videoCreator = VideoCreator(bunnyStreamAPI: .init(accessKey: accessKey), libraryId: libraryId)
     let streamViewModel = BunnyStreamCameraUploadViewModel(streamConfig: config, videoCreator: videoCreator)
-    self.init(streamViewModel: streamViewModel)
+    self.init(streamViewModel: streamViewModel, controller: controller)
   }
 
-  /// Initializes the broadcaster directly from a live stream model returned by the Bunny API.
-  /// Uses the primary RTMP ingest endpoint and `streamKey` from the model — no video creation step needed.
-  public init(liveStream: Components.Schemas.LiveStreamModel, accessKey: String, libraryId: Int) {
-    let rtmpUrl = liveStream.ingestEndpoints?.rtmp?.primaryIngestUrl
-      ?? BunnyStreamCameraUploadView.bunnyFallbackRtmpUrl
-    let backupRtmpUrl = liveStream.ingestEndpoints?.rtmp?.backupIngestUrl
-    let streamId = BunnyStreamCameraUploadView.extractStreamId(from: liveStream)
+  /// Initializes the broadcaster directly from an existing live stream.
+  /// Uses the primary RTMP ingest endpoint and `streamKey` from the stream — no video creation step needed.
+  /// - Parameters:
+  ///   - liveStream: The live stream to publish to. Build it from an API response with
+  ///     `BunnyLiveStream(from:)`.
+  ///   - quality: The encoder configuration (resolution, frame rate, bitrates). Defaults to `.default` (1080p30).
+  ///   - controller: An optional handle for starting/stopping the broadcast and observing it
+  ///     from outside the view.
+  public init(
+    liveStream: BunnyLiveStream,
+    accessKey: String,
+    libraryId: Int,
+    quality: BroadcastQuality = .default,
+    controller: BunnyBroadcastController? = nil
+  ) {
     let config = StreamConfig(
-      rtmpUrl: rtmpUrl,
+      rtmpUrl: liveStream.primaryIngestUrl ?? BunnyStreamCameraUploadView.bunnyFallbackRtmpUrl,
       streamKey: liveStream.streamKey ?? "",
-      backupRtmpUrl: backupRtmpUrl,
+      backupRtmpUrl: liveStream.backupIngestUrl,
       accessKey: accessKey,
       libraryId: libraryId,
-      streamId: streamId
+      streamId: liveStream.id,
+      quality: quality
     )
     let streamViewModel = BunnyStreamCameraUploadViewModel(streamConfig: config)
-    self.init(streamViewModel: streamViewModel)
-  }
-
-  private static func extractStreamId(from model: Components.Schemas.LiveStreamModel) -> String? {
-    return model.guid
+    self.init(streamViewModel: streamViewModel, controller: controller)
   }
 
   /// Bunny global RTMP ingest URL — used when the stream model doesn't include an ingest endpoint.

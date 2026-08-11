@@ -4,15 +4,15 @@ import SwiftUI
 /// Shows the RTMP ingest details a user needs to configure an external encoder
 /// (stream key + primary ingest URL) for a given live stream.
 struct LiveStreamIngestDetailsView: View {
-    let stream: Components.Schemas.LiveStreamModel
+    let stream: BunnyLiveStream
     @Environment(\.dismiss) private var dismiss
 
     private var primaryUrl: String? {
-        stream.ingestEndpoints?.rtmp?.primaryIngestUrl
+        stream.primaryIngestUrl
     }
 
     private var backupUrl: String? {
-        stream.ingestEndpoints?.rtmp?.backupIngestUrl
+        stream.backupIngestUrl
     }
 
     var body: some View {

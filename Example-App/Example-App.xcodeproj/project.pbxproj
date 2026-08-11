@@ -50,6 +50,7 @@
 		EE000001EE000001EE000001 /* TrailerPickerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = EE000002EE000002EE000002 /* TrailerPickerView.swift */; };
 		EE000003EE000003EE000003 /* TimezonePickerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = EE000004EE000004EE000004 /* TimezonePickerView.swift */; };
 		EE000005EE000005EE000005 /* LiveStreamIngestDetailsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = EE000006EE000006EE000006 /* LiveStreamIngestDetailsView.swift */; };
+		EE0000A1EE0000A1EE0000A1 /* BroadcastDemoView.swift in Sources */ = {isa = PBXBuildFile; fileRef = EE0000A2EE0000A2EE0000A2 /* BroadcastDemoView.swift */; };
 		EE000101EE000101EE000101 /* LiveThumbnailPickerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = EE000102EE000102EE000102 /* LiveThumbnailPickerView.swift */; };
 /* End PBXBuildFile section */
 
@@ -96,6 +97,7 @@
 		EE000002EE000002EE000002 /* TrailerPickerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TrailerPickerView.swift; sourceTree = "<group>"; };
 		EE000004EE000004EE000004 /* TimezonePickerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TimezonePickerView.swift; sourceTree = "<group>"; };
 		EE000006EE000006EE000006 /* LiveStreamIngestDetailsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LiveStreamIngestDetailsView.swift; sourceTree = "<group>"; };
+		EE0000A2EE0000A2EE0000A2 /* BroadcastDemoView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BroadcastDemoView.swift; sourceTree = "<group>"; };
 		EE000102EE000102EE000102 /* LiveThumbnailPickerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LiveThumbnailPickerView.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -327,6 +329,7 @@
 				EE000102EE000102EE000102 /* LiveThumbnailPickerView.swift */,
 				EE000004EE000004EE000004 /* TimezonePickerView.swift */,
 				EE000006EE000006EE000006 /* LiveStreamIngestDetailsView.swift */,
+				EE0000A2EE0000A2EE0000A2 /* BroadcastDemoView.swift */,
 			);
 			path = LiveStreamList;
 			sourceTree = "<group>";
@@ -464,6 +467,7 @@
 				EE000101EE000101EE000101 /* LiveThumbnailPickerView.swift in Sources */,
 				EE000003EE000003EE000003 /* TimezonePickerView.swift in Sources */,
 				EE000005EE000005EE000005 /* LiveStreamIngestDetailsView.swift in Sources */,
+				EE0000A1EE0000A1EE0000A1 /* BroadcastDemoView.swift in Sources */,
 				77116BDB2AFEBFA8000BB64C /* DefaultTextField.swift in Sources */,
 				7789CFAA2AD6C8B600CC8BCE /* UploadStatusIndicator.swift in Sources */,
 				65FC6F442D9D64AE00D29974 /* PublicVideoDemoView.swift in Sources */,
@@ -609,10 +613,12 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_IDENTITY = "Apple Development";
-				CODE_SIGN_STYLE = Automatic;
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Distribution";
+				CODE_SIGN_STYLE = Manual;
 				CURRENT_PROJECT_VERSION = 12;
 				DEVELOPMENT_ASSET_PATHS = "\"Example-App/Preview Content\"";
-				DEVELOPMENT_TEAM = 9JUDK7LK5C;
+				DEVELOPMENT_TEAM = "";
+				"DEVELOPMENT_TEAM[sdk=iphoneos*]" = GX6PPA6X9F;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = "Example-App/Info.plist";
@@ -634,6 +640,7 @@
 				PRODUCT_BUNDLE_IDENTIFIER = net.bunny.StreamSDKDemo;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";
+				"PROVISIONING_PROFILE_SPECIFIER[sdk=iphoneos*]" = "Stream SDK Demo Provisioning profile";
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";

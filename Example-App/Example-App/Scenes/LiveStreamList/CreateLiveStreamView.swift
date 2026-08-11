@@ -7,7 +7,7 @@ import UIKit
 struct CreateLiveStreamView: View {
     let viewModel: LiveStreamListViewModel
     /// When set, the form edits this existing stream (PUT) instead of creating a new one.
-    let editingStream: Components.Schemas.LiveStreamModel?
+    let editingStream: BunnyLiveStream?
     let onCreated: () async -> Void
 
     @State private var name: String = ""
@@ -40,13 +40,12 @@ struct CreateLiveStreamView: View {
     /// Scheduling only applies to streams that haven't started or ended yet.
     private var canSchedule: Bool {
         guard let stream = editingStream else { return true }
-        guard case .LiveStreamStatus(let status)? = stream.status else { return true }
-        return status == .created || status == .scheduled
+        return stream.status == .created || stream.status == .scheduled
     }
 
     init(
         viewModel: LiveStreamListViewModel,
-        editingStream: Components.Schemas.LiveStreamModel? = nil,
+        editingStream: BunnyLiveStream? = nil,
         onCreated: @escaping () async -> Void
     ) {
         self.viewModel = viewModel
@@ -54,26 +53,25 @@ struct CreateLiveStreamView: View {
         self.onCreated = onCreated
 
         guard let stream = editingStream else { return }
-        _name = State(initialValue: stream.title ?? stream.name ?? "")
+        _name = State(initialValue: stream.title ?? "")
         _streamDescription = State(initialValue: stream.description ?? "")
-        if let scheduled = stream.scheduledStartTime,
-           let date = CreateLiveStreamView.parseDate(scheduled) {
+        if let scheduled = stream.scheduledStartTime {
             _scheduleEnabled = State(initialValue: true)
-            _scheduledDate = State(initialValue: date)
+            _scheduledDate = State(initialValue: scheduled)
         }
-        _enableCountdown = State(initialValue: stream.enableCountdown ?? false)
-        _dvrEnabled = State(initialValue: stream.dvrEnabled ?? false)
-        if let window = stream.dvrWindowSeconds {
-            _dvrWindowSeconds = State(initialValue: Int(window))
+        _enableCountdown = State(initialValue: stream.enableCountdown)
+        _dvrEnabled = State(initialValue: stream.dvrEnabled)
+        if stream.dvrWindowSeconds > 0 {
+            _dvrWindowSeconds = State(initialValue: stream.dvrWindowSeconds)
         }
-        _recordVod = State(initialValue: stream.recordVod ?? false)
-        _isPublic = State(initialValue: stream._public ?? true)
+        _recordVod = State(initialValue: stream.recordVod)
+        _isPublic = State(initialValue: stream.isPublic)
         if let trailerId = stream.preStreamTrailerVideoId, !trailerId.isEmpty {
             _trailerEnabled = State(initialValue: true)
             _trailerVideoId = State(initialValue: trailerId)
         }
-        if let outputs = stream.rtmpOutputs {
-            let entries = outputs.compactMap { output -> RTMPOutputEntry? in
+        do {
+            let entries = stream.rtmpOutputs.compactMap { output -> RTMPOutputEntry? in
                 let url = output.endpoint ?? ""
                 let key = output.streamKey ?? ""
                 guard !url.isEmpty || !key.isEmpty else { return nil }
@@ -321,7 +319,7 @@ struct CreateLiveStreamView: View {
             }
             .task {
                 guard isEditing, let stream = editingStream else { return }
-                if let url = viewModel.offlineThumbnailURL(for: stream) {
+                if let url = stream.offlineThumbnailUrl {
                     existingThumbnailURL = url
                     thumbnailEnabled = true
                 }
@@ -374,7 +372,7 @@ struct CreateLiveStreamView: View {
                 .aspectRatio(16 / 9, contentMode: .fit)
                 .clipShape(RoundedRectangle(cornerRadius: 8))
         } else if let url = previewURL {
-            AsyncImage(url: url) { phase in
+            RefererAsyncImage(url: url) { phase in
                 switch phase {
                 case .success(let image):
                     image
@@ -403,12 +401,12 @@ struct CreateLiveStreamView: View {
     }
 
     /// Maps the RTMP output rows to API models, dropping rows where both fields are empty.
-    private func mappedRtmpOutputs() -> [Components.Schemas.RtmpOutput] {
+    private func mappedRtmpOutputs() -> [BunnyRtmpOutput] {
         rtmpOutputs.compactMap { entry in
             let url = entry.url.trimmingCharacters(in: .whitespaces)
             let key = entry.key.trimmingCharacters(in: .whitespaces)
             guard !url.isEmpty || !key.isEmpty else { return nil }
-            return Components.Schemas.RtmpOutput(endpoint: url, streamKey: key)
+            return BunnyRtmpOutput(endpoint: url, streamKey: key)
         }
     }
 
@@ -434,7 +432,7 @@ struct CreateLiveStreamView: View {
                     isPublic: isPublic,
                     rtmpOutputs: outputs
                 )
-                streamId = editingStream.guid ?? ""
+                streamId = editingStream.id ?? ""
             } else {
                 let created = try await viewModel.create(
                     name: trimmedName,
@@ -447,7 +445,7 @@ struct CreateLiveStreamView: View {
                     trailerVideoId: trailerEnabled ? trailerVideoId : nil,
                     rtmpOutputs: outputs
                 )
-                streamId = created.guid ?? ""
+                streamId = created.id ?? ""
             }
             // Thumbnail is set via a separate endpoint (needs the stream id) — best-effort so it
             // doesn't block or duplicate the save if it fails.

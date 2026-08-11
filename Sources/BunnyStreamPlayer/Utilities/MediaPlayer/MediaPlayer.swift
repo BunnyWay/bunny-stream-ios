@@ -319,6 +319,14 @@ private extension MediaPlayer {
       case .readyToPlay:
         canPlayVideo = true
         state = .readyToPlay
+        // The asset is loaded now, so `duration` is valid. If the interval's end was captured
+        // before the asset resolved — a deferred-loading VOD asset reports `duration == 0` at
+        // init — it would still be 0 here, and the first time-observer tick would treat t≈0 as
+        // "ended" and freeze playback at 0:00. Backfill a missing end; only when it's unset, so a
+        // caller-supplied custom interval is preserved. (Live's end is `.infinity`, never <= 0.)
+        if playbackInterval.endAt <= 0 {
+          playbackInterval = (playbackInterval.startAt, duration)
+        }
         setupPeriodicTimeObserver()
         if playWhenReady {
           play()
@@ -386,6 +394,9 @@ private extension MediaPlayer {
   }
   
   func timeObserverCallback(time: CMTime) {
+    // Never treat an unresolved interval (endAt == 0) as "ended": that would fire on the very
+    // first tick at t≈0 and freeze playback. A real VOD always has a positive end; live is .infinity.
+    guard playbackInterval.endAt > 0 else { return }
     guard (time.seconds + Double(timeObservingMiliseconds) / 1_000) >= playbackInterval.endAt else { return }
     
     // at this point, item has ended

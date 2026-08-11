@@ -119,7 +119,7 @@ struct TrailerPickerView: View {
     private func thumbnailView(for id: String) -> some View {
         Group {
             if let url = thumbnails[id] {
-                AsyncImage(url: url) { phase in
+                RefererAsyncImage(url: url) { phase in
                     switch phase {
                     case .success(let image):
                         image.resizable().aspectRatio(contentMode: .fill)

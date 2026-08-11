@@ -1,4 +1,5 @@
 import SwiftUI
+import BunnyStreamAPI
 import BunnyStreamPlayer
 
 struct LiveStreamDemoView: View {
@@ -6,6 +7,9 @@ struct LiveStreamDemoView: View {
 
   @State private var streamId: String = ""
   @State private var activeStreamId: String? = nil
+  /// Mirrors what the player reports through `onStateChange` — the app never reaches into it.
+  @State private var playbackState: BunnyLiveStreamPlaybackState = .loading
+  @State private var lastError: String?
 
   var body: some View {
     GeometryReader { geometry in
@@ -32,7 +36,13 @@ private extension LiveStreamDemoView {
         BunnyStreamLivePlayer(
           accessKey: dependenciesManager.accessKey,
           libraryId: dependenciesManager.libraryId,
-          streamId: activeStreamId
+          streamId: activeStreamId,
+          onStateChange: { playbackState = $0 },
+          onPlaybackError: { error in
+            // Transient failures are reported too; only a permanent one has stopped the player.
+            let isPermanent = (error as? BunnyLiveStreamError)?.isPermanent ?? false
+            lastError = "\(isPermanent ? "permanent" : "transient"): \(error.localizedDescription)"
+          }
         )
       } else {
         ZStack {
@@ -66,11 +76,40 @@ private extension LiveStreamDemoView {
         }
         .disabled(streamId.isEmpty)
       }
+
+      if activeStreamId != nil {
+        Section("Player state") {
+          LabeledContent("State", value: stateDescription)
+          if let lastError {
+            LabeledContent("Last error", value: lastError)
+              .foregroundStyle(.secondary)
+          }
+        }
+      }
     }
     .ignoresSafeArea(edges: .bottom)
   }
 
+  var stateDescription: String {
+    switch playbackState {
+    case .loading:
+      return "loading"
+    case .playing(let isVodRecording):
+      return isVodRecording ? "playing (recording)" : "playing (live)"
+    case .countdown(let until, _):
+      return "countdown until \(until.formatted(date: .omitted, time: .shortened))"
+    case .trailer:
+      return "trailer"
+    case .offline(let message):
+      return "offline — \(message)"
+    case .failed(let message):
+      return "failed — \(message)"
+    }
+  }
+
   func loadStream() {
     activeStreamId = streamId
+    playbackState = .loading
+    lastError = nil
   }
 }

@@ -3,11 +3,11 @@ import BunnyStreamPlayer
 import SwiftUI
 
 struct LiveStreamRowView: View {
-    let stream: Components.Schemas.LiveStreamModel
+    let stream: BunnyLiveStream
     /// Resolves the row's thumbnail URL for a stream (its offline thumbnail, else trailer preview).
-    var resolveThumbnail: ((Components.Schemas.LiveStreamModel) async -> URL?)? = nil
+    var resolveThumbnail: ((BunnyLiveStream) async -> URL?)? = nil
     /// Resolves the live ingest status (primary/backup) for a running stream, for the badges.
-    var resolveIngestStatus: ((Components.Schemas.LiveStreamModel) async -> LiveStreamListViewModel.IngestLiveStatus?)? = nil
+    var resolveIngestStatus: ((BunnyLiveStream) async -> LiveStreamListViewModel.IngestLiveStatus?)? = nil
 
     @State private var resolvedThumbnail: URL?
     @State private var ingestStatus: LiveStreamListViewModel.IngestLiveStatus?
@@ -16,7 +16,7 @@ struct LiveStreamRowView: View {
         HStack(spacing: 12) {
             thumbnailView
             VStack(alignment: .leading, spacing: 4) {
-                Text(stream.title ?? stream.name ?? "Unnamed Stream")
+                Text(stream.title ?? "Unnamed Stream")
                     .font(.headline)
                     .lineLimit(1)
                     .foregroundStyle(.primary)
@@ -38,7 +38,7 @@ private extension LiveStreamRowView {
     var thumbnailView: some View {
         Group {
             if let url = resolvedThumbnail {
-                AsyncImage(url: url) { phase in
+                RefererAsyncImage(url: url) { phase in
                     switch phase {
                     case .success(let image):
                         image.resizable().aspectRatio(contentMode: .fill)
@@ -79,7 +79,7 @@ private extension LiveStreamRowView {
     }
 
     /// Re-fetch ingest status when the stream's live status changes (e.g. scheduled → running).
-    var ingestTaskID: String { "\(stream.guid ?? "")|\(statusLabel)" }
+    var ingestTaskID: String { "\(stream.id ?? "")|\(statusLabel)" }
 
     @ViewBuilder
     var ingestBadges: some View {
@@ -104,13 +104,8 @@ private extension LiveStreamRowView {
         .clipShape(Capsule())
     }
 
-    var statusValue: Components.Schemas.LiveStreamStatus? {
-        guard case .LiveStreamStatus(let s) = stream.status else { return nil }
-        return s
-    }
-
     var statusLabel: String {
-        switch statusValue {
+        switch stream.status {
         case .running:       return "LIVE"
         case .scheduled:     return "Upcoming"
         case .created:       return "Idle"
@@ -122,7 +117,7 @@ private extension LiveStreamRowView {
     }
 
     var statusColor: Color {
-        switch statusValue {
+        switch stream.status {
         case .running:       return .red
         case .scheduled:     return .blue
         case .vodProcessing: return .orange

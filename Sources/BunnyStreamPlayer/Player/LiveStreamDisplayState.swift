@@ -1,129 +1,73 @@
 import Foundation
 import BunnyStreamAPI
 
-enum LiveStreamDisplayState {
+enum LiveStreamDisplayState: Equatable {
     case playable(url: URL, isVodRecording: Bool)
     case countdown(until: Date, thumbnailUrl: URL?, title: String?)
-    case trailer(vodId: String, scheduledStart: Date?, statusMessage: String?, title: String?)
-    case offline(message: String, thumbnailUrl: URL?)
-    case error(message: String, thumbnailUrl: URL?)
-}
-
-// MARK: - Readable aliases for the generated integer enum
-
-public extension Components.Schemas.LiveStreamStatus {
-    static let unknown: Self = ._0
-    static let created: Self = ._1
-    static let scheduled: Self = ._2
-    /// An encoder is connected and pushing, but the stream has not been taken live yet.
-    static let preview: Self = ._3
-    static let running: Self = ._4
-    static let ended: Self = ._5
-    static let vodProcessing: Self = ._6
-    static let error: Self = ._7
+    case trailer(vodId: String, scheduledStart: Date?, statusMessage: LiveStreamMessage?, title: String?)
+    case offline(message: LiveStreamMessage, thumbnailUrl: URL?)
+    case error(message: LiveStreamMessage, thumbnailUrl: URL?)
 }
 
 // MARK: - State resolver
 
 func resolveDisplayState(
-    from model: Components.Schemas.LiveStreamModel,
+    from stream: BunnyLiveStream,
     now: Date = .now
 ) -> LiveStreamDisplayState {
-    let status = model.statusValue
+    let status = stream.status
 
     // isPlayable: Running, OR (Ended/VodProcessing AND recordVod)
     let isRunning = status == .running
-    let isRecordingPlayable = (status == .ended || status == .vodProcessing) && model.recordVod == true
+    let isRecordingPlayable = (status == .ended || status == .vodProcessing) && stream.recordVod
 
     if isRunning || isRecordingPlayable {
-        let hlsString = model.playbackUrlHls ?? model.playbackUrl
-        guard let urlString = hlsString, let url = URL(string: urlString) else {
-            return .error(message: Lingua.LiveStream.streamError, thumbnailUrl: nil)
+        guard let urlString = stream.playbackUrl, let url = URL(string: urlString) else {
+            return .error(message: .error, thumbnailUrl: nil)
         }
         return .playable(url: url, isVodRecording: !isRunning)
     }
 
-    // pre-stream trailer: preStreamTrailerVideoId set, stream not yet started
+    // pre-stream trailer: preStreamTrailerVideoId set, stream not yet started.
     // Preview counts as pre-start: the encoder is connected but viewers can't watch yet.
-    let preStreamStatuses: [Components.Schemas.LiveStreamStatus] = [.created, .scheduled, .preview]
-    if let vodId = model.preStreamTrailerVideoId,
+    let preStreamStatuses: [BunnyLiveStreamStatus] = [.created, .scheduled, .preview]
+    if let vodId = stream.preStreamTrailerVideoId,
        !vodId.isEmpty,
-       model.startedAt == nil,
-       let status, preStreamStatuses.contains(status) {
-        let scheduledStart = model.scheduledStartTime.flatMap {
-            Date(bunnyString: $0)
-        }
-        
+       stream.startedAt == nil,
+       preStreamStatuses.contains(status) {
         return .trailer(
             vodId: vodId,
-            scheduledStart: scheduledStart,
-            statusMessage: Lingua.LiveStream.streamNotActive,
-            title: model.title
+            scheduledStart: stream.scheduledStartTime,
+            statusMessage: .notActive,
+            title: stream.title
         )
     }
 
     // countdown: Scheduled + enableCountdown + scheduledStartTime in the future
     if status == .scheduled,
-       model.enableCountdown == true,
-       let startString = model.scheduledStartTime,
-       let start = Date(bunnyString: startString),
+       stream.enableCountdown,
+       let start = stream.scheduledStartTime,
        start > now {
-        return .countdown(until: start, thumbnailUrl: model.thumbnailUrl.flatMap(URL.init(string:)), title: model.title)
+        return .countdown(
+            until: start,
+            thumbnailUrl: stream.thumbnailUrl.flatMap(URL.init(string:)),
+            title: stream.title
+        )
     }
 
-    let thumbnailUrl = model.thumbnailUrl.flatMap(URL.init(string:))
+    let thumbnailUrl = stream.thumbnailUrl.flatMap(URL.init(string:))
 
     // error state
     if status == .error {
-        return .error(message: Lingua.LiveStream.streamError, thumbnailUrl: thumbnailUrl)
+        return .error(message: .error, thumbnailUrl: thumbnailUrl)
     }
 
     // offline with context-aware message
-    let message: String
+    let message: LiveStreamMessage
     if status == .ended || status == .vodProcessing {
-        message = Lingua.LiveStream.streamEnded
+        message = .ended
     } else {
-        message = Lingua.LiveStream.streamNotActive
+        message = .notActive
     }
     return .offline(message: message, thumbnailUrl: thumbnailUrl)
-}
-
-// MARK: - Helpers
-
-private extension Components.Schemas.LiveStreamModel {
-    var statusValue: Components.Schemas.LiveStreamStatus? {
-        guard case .LiveStreamStatus(let s) = status else { return nil }
-        return s
-    }
-}
-
-extension Date {
-    // Bunny returns dates without milliseconds or with varied precision, e.g. "2026-06-03T09:21:41"
-    init?(bunnyString: String) {
-        for formatter in Date.bunnyDateFormatters {
-            if let date = formatter.date(from: bunnyString) {
-                self = date
-                return
-            }
-        }
-        return nil
-    }
-
-    private static let bunnyDateFormatters: [DateFormatter] = {
-        let formats = [
-            "yyyy-MM-dd'T'HH:mm:ss.SSSSSSS'Z'",
-            "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'",
-            "yyyy-MM-dd'T'HH:mm:ss.SSS",
-            "yyyy-MM-dd'T'HH:mm:ss'Z'",
-            "yyyy-MM-dd'T'HH:mm:ss",
-        ]
-        
-        return formats.map { format in
-            let f = DateFormatter()
-            f.locale = Locale(identifier: "en_US_POSIX")
-            f.timeZone = TimeZone(abbreviation: "UTC")
-            f.dateFormat = format
-            return f
-        }
-    }()
 }

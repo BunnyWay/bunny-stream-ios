@@ -10,19 +10,41 @@ final class LivePlaybackController: ObservableObject {
         case loading
         case playable(MediaPlayer, Video)
         case countdown(until: Date, thumbnailUrl: URL?, title: String?)
-        case trailer(vodId: String, scheduledStart: Date?, statusMessage: String?, title: String?)
-        case offline(message: String, thumbnailUrl: URL?)
-        case error(message: String, thumbnailUrl: URL?)
+        case trailer(vodId: String, scheduledStart: Date?, statusMessage: LiveStreamMessage?, title: String?)
+        case offline(message: LiveStreamMessage, thumbnailUrl: URL?)
+        case error(message: LiveStreamMessage, thumbnailUrl: URL?)
     }
 
-    @Published private(set) var state: State = .loading
+    @Published private(set) var state: State = .loading {
+        didSet { notifyStateChangeIfNeeded() }
+    }
     /// Player UI customization (font, primary color, controls…) from the /play endpoint, once loaded.
     @Published private(set) var customization: LiveStreamPlayData.PlayerCustomization?
     var userWantsPlay = false
 
+    /// Called whenever a poll fails, including transient failures the loop recovers from.
+    /// Set by ``BunnyStreamLivePlayer`` from its `onPlaybackError` parameter.
+    var onPlaybackError: ((Error) -> Void)?
+    /// Called when the publicly visible state changes. Set by ``BunnyStreamLivePlayer``.
+    var onStateChange: ((BunnyLiveStreamPlaybackState) -> Void)? {
+        didSet { lastPublishedState = nil; notifyStateChangeIfNeeded() }
+    }
+
+    /// The last value handed to ``onStateChange``, so internal churn that doesn't change the
+    /// public state (a rebuilt player for the same URL, say) doesn't spam the observer.
+    private var lastPublishedState: BunnyLiveStreamPlaybackState?
+
+    /// Whether what's playing is a finished stream's recording rather than the live edge.
+    /// The distinction comes from the resolved display state, not from the player.
+    private var isPlayingVodRecording = false
+
     private let api: BunnyStreamAPI
+    private let liveStreams: DefaultLiveStreamRepository
+    private let accessKey: String
     private let libraryId: Int
     private let streamId: String
+    private let token: String?
+    private let expires: Int64?
     private let playDataLoader: LiveStreamPlayDataLoader
 
     private var pollTask: Task<Void, Never>?
@@ -33,10 +55,21 @@ final class LivePlaybackController: ObservableObject {
     private var itemStatusObserver: NSKeyValueObservation?
     private var lifecycleObservers: [NSObjectProtocol] = []
 
-    init(bunnyStreamAPI: BunnyStreamAPI, libraryId: Int, streamId: String) {
+    init(
+        bunnyStreamAPI: BunnyStreamAPI,
+        accessKey: String,
+        libraryId: Int,
+        streamId: String,
+        token: String? = nil,
+        expires: Int64? = nil
+    ) {
         self.api = bunnyStreamAPI
+        self.liveStreams = DefaultLiveStreamRepository(bunnyStreamAPI: bunnyStreamAPI)
+        self.accessKey = accessKey
         self.libraryId = libraryId
         self.streamId = streamId
+        self.token = token
+        self.expires = expires
         self.playDataLoader = LiveStreamPlayDataLoader(bunnyStreamAPI: bunnyStreamAPI)
     }
 
@@ -94,45 +127,52 @@ private extension LivePlaybackController {
     func executePoll() async {
         guard !isStopped else { return }
         do {
-            let model = try await fetchStreamModel()
+            let stream = try await liveStreams.getLiveStream(libraryId: libraryId, streamId: streamId)
             guard !Task.isCancelled else { return }
-            let displayState = resolveDisplayState(from: model)
+            let displayState = resolveDisplayState(from: stream)
             await MainActor.run { [weak self] in self?.apply(displayState: displayState) }
-        } catch PollError.permanent {
+        } catch let error as BunnyLiveStreamError where error.isPermanent {
+            // 401/403/404/410 and malformed requests — retrying can't help, so stop the loop.
             await MainActor.run { [weak self] in
                 self?.isStopped = true
-                self?.state = .error(message: Lingua.LiveStream.streamError, thumbnailUrl: nil)
+                self?.state = .error(message: .error, thumbnailUrl: nil)
+                self?.onPlaybackError?(error)
             }
         } catch {
-            // Transient (5xx, network) — loop continues after sleep
+            // Transient (5xx, network) — loop continues after sleep.
+            await MainActor.run { [weak self] in self?.onPlaybackError?(error) }
         }
     }
 }
 
-// MARK: - API fetch
+// MARK: - Public state
 
-private extension LivePlaybackController {
-    enum PollError: Error { case permanent }
-
-    func fetchStreamModel() async throws -> Components.Schemas.LiveStreamModel {
-        let output = try await api.client.liveStreamGet(
-            path: .init(libraryId: Int64(libraryId), streamId: streamId)
-        )
-        switch output {
-        case .ok(let ok):
-            guard case .json(let model) = ok.body else { throw PollError.permanent }
-            return model
-        case .unauthorized:
-            throw PollError.permanent
-        case .notFound:
-            throw PollError.permanent
-        case .internalServerError:
-            throw URLError(.badServerResponse)
-        case .undocumented(statusCode: let code, _) where [403, 410].contains(code):
-            throw PollError.permanent
-        default:
-            throw URLError(.unknown)
+extension LivePlaybackController {
+    /// The current state, reduced to what ``BunnyLiveStreamPlaybackState`` exposes.
+    var publicState: BunnyLiveStreamPlaybackState {
+        switch state {
+        case .loading:
+            return .loading
+        case .playable:
+            return .playing(isVodRecording: isPlayingVodRecording)
+        case .countdown(let until, _, let title):
+            return .countdown(until: until, title: title)
+        case .trailer(let vodId, let scheduledStart, _, let title):
+            return .trailer(vodId: vodId, scheduledStart: scheduledStart, title: title)
+        // Observers get a ready-to-display string, already in the language the dashboard pinned.
+        case .offline(let message, _):
+            return .offline(message: message.localized(languageCode: customization?.uiLanguage))
+        case .error(let message, _):
+            return .failed(message: message.localized(languageCode: customization?.uiLanguage))
         }
+    }
+
+    private func notifyStateChangeIfNeeded() {
+        guard let onStateChange else { return }
+        let current = publicState
+        guard current != lastPublishedState else { return }
+        lastPublishedState = current
+        onStateChange(current)
     }
 }
 
@@ -160,6 +200,10 @@ private extension LivePlaybackController {
     }
 
     func handlePlayable(url: URL, isVodRecording: Bool) {
+        // Recorded vs live edge: the player can't tell them apart, so keep it from the
+        // display state for `publicState` to report.
+        isPlayingVodRecording = isVodRecording
+
         // Don't restart if already playing the same URL — unless the player item has failed.
         if case .playable(let existing, _) = state {
             let existingURL = existing.sourceURL ?? (existing.currentItem?.asset as? AVURLAsset)?.url
@@ -177,7 +221,12 @@ private extension LivePlaybackController {
                 let player: MediaPlayer
                 var loadedCustomization: LiveStreamPlayData.PlayerCustomization?
                 do {
-                    let playData = try await playDataLoader.load(libraryId: libraryId, streamId: streamId)
+                    let playData = try await playDataLoader.load(
+                        libraryId: libraryId,
+                        streamId: streamId,
+                        token: token,
+                        expires: expires
+                    )
                     loadedCustomization = playData.customization
                     player = MediaPlayer.makeLive(url: playData.playbackURL, seekableWindowSeconds: playData.seekableWindow, contentId: streamId)
                 } catch {
@@ -209,7 +258,7 @@ private extension LivePlaybackController {
             let player: MediaPlayer
             let video: Video
             do {
-                let config = try await VideoPlayerConfigLoader().load(libraryId: libraryId, videoId: streamId)
+                let config = try await VideoPlayerConfigLoader().load(libraryId: libraryId, videoId: streamId, accessKey: accessKey)
                 // The real Video carries the recording's resolutions/captions so the quality menu
                 // offers actual renditions instead of only "Auto".
                 video = Video(response: config)

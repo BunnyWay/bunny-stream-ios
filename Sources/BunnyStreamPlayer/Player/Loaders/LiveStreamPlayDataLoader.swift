@@ -2,10 +2,10 @@ import Foundation
 import BunnyStreamAPI
 
 public struct LiveStreamPlayDataLoader {
-  private let bunnyStreamAPI: BunnyStreamAPI
+  private let liveStreams: DefaultLiveStreamRepository
 
   public init(bunnyStreamAPI: BunnyStreamAPI) {
-    self.bunnyStreamAPI = bunnyStreamAPI
+    self.liveStreams = DefaultLiveStreamRepository(bunnyStreamAPI: bunnyStreamAPI)
   }
 
   /// - Parameters:
@@ -19,66 +19,64 @@ public struct LiveStreamPlayDataLoader {
     token: String? = nil,
     expires: Int64? = nil
   ) async throws -> LiveStreamPlayData {
-    let output = try await bunnyStreamAPI.client.liveStreamGetStreamPlayData(
-      path: .init(libraryId: Int64(libraryId), streamId: streamId),
-      query: .init(token: token, expires: expires)
-    )
-
-    switch output {
-    case .ok(let okResponse):
-      if case .json(let model) = okResponse.body {
-        return try LiveStreamPlayData(from: model)
-      }
-      throw VideoPlayerError.unknownError
-    case .unauthorized:
-      throw VideoPlayerError.unauthorized
-    case .notFound:
-      throw VideoPlayerError.notFound
-    case .internalServerError:
-      throw VideoPlayerError.internalServerError
-    default:
-      throw VideoPlayerError.unknownError
+    do {
+      let playData = try await liveStreams.fetchPlayData(
+        libraryId: libraryId,
+        streamId: streamId,
+        token: token,
+        expires: expires
+      )
+      return try LiveStreamPlayData(from: playData)
+    } catch let error as BunnyLiveStreamError {
+      throw VideoPlayerError(error)
     }
   }
 }
 
 private extension LiveStreamPlayData {
-  init(from model: Components.Schemas.LiveStreamPlayDataModel) throws {
-    let live = model.liveStream
-
+  init(from playData: BunnyLiveStreamPlayData) throws {
     // The API returns the HLS playlist as `videoPlaylistUrl`; the nested live stream's
-    // `playbackUrlHls` is the same value and serves as a fallback. (`fallbackUrl` is an
+    // playback URL is the same value and serves as a fallback. (`fallbackUrl` is an
     // MP4 rendition prefix, not a playable master playlist, so it's not used here.)
-    guard let urlString = model.videoPlaylistUrl ?? live?.playbackUrlHls,
+    guard let urlString = playData.videoPlaylistUrl ?? playData.liveStream?.playbackUrl,
           let url = URL(string: urlString) else {
       throw VideoPlayerError.notFound
     }
 
     // The /play endpoint doesn't expose the seekable window directly; derive it from the
-    // nested live stream's DVR settings so the player can offer rewind when DVR is enabled.
-    let seekableWindow: Double = {
-      guard live?.dvrEnabled == true, let seconds = live?.dvrWindowSeconds else { return 0 }
-      return Double(seconds)
-    }()
-
-    let isLive: Bool = {
-      guard let status = live?.status, case .LiveStreamStatus(let value) = status else { return false }
-      return value == .running
-    }()
+    // stream's DVR settings so the player can offer rewind when DVR is enabled.
+    let seekableWindow = Double(playData.liveStream?.dvrWindowSeconds ?? 0)
 
     // Player UI customization configured in the Bunny dashboard, so the live player reflects it.
     let customization = LiveStreamPlayData.PlayerCustomization(
-      fontFamily: model.fontFamily,
-      playerKeyColor: model.playerKeyColor,
-      uiLanguage: model.uiLanguage,
-      showHeatmap: model.showHeatmap ?? false,
-      enableCompactControls: model.enableCompactControls ?? false,
-      controlTokens: model.controls?
-        .split(separator: ",")
-        .map { $0.trimmingCharacters(in: .whitespaces) }
-        .filter { !$0.isEmpty } ?? []
+      fontFamily: playData.fontFamily,
+      playerKeyColor: playData.playerKeyColor,
+      uiLanguage: playData.uiLanguage,
+      showHeatmap: playData.showHeatmap,
+      enableCompactControls: playData.enableCompactControls,
+      controlTokens: playData.controls
     )
 
-    self.init(playbackURL: url, seekableWindow: seekableWindow, isLive: isLive, customization: customization)
+    self.init(
+      playbackURL: url,
+      seekableWindow: seekableWindow,
+      isLive: playData.liveStream?.status == .running,
+      customization: customization
+    )
+  }
+}
+
+private extension VideoPlayerError {
+  init(_ error: BunnyLiveStreamError) {
+    switch error.kind {
+    case .unauthorized:
+      self = .unauthorized
+    case .notFound:
+      self = .notFound
+    case .server:
+      self = .internalServerError
+    case .invalidRequest, .unprocessable, .transport, .invalidResponse, .unexpected:
+      self = .unknownError
+    }
   }
 }

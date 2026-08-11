@@ -137,7 +137,7 @@ public struct BunnyStreamPlayer: View {
   func loadVideo() async {
     loadingState = .loading
     do {
-      let videoConfigResponse = try await videoPlayerConfigLoader.load(libraryId: libraryId, videoId: videoId, token: token, expires: expires)
+      let videoConfigResponse = try await videoPlayerConfigLoader.load(libraryId: libraryId, videoId: videoId, accessKey: accessKey, token: token, expires: expires)
       var video = Video(response: videoConfigResponse)
       // If Public Video (no access key), heatmap is not loaded - heatmapLoader is nil
       let heatmap = try? await heatmapLoader?.loadHeatmap(videoId: videoId, libraryId: libraryId)

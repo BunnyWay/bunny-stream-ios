@@ -81,6 +81,10 @@ private extension CMCDResourceLoader {
         // Copy original headers from AVPlayer's request
         loadingRequest.request.allHTTPHeaderFields?.forEach { urlRequest.setValue($1, forHTTPHeaderField: $0) }
         urlRequest.setValue(SDKInfo.userAgent, forHTTPHeaderField: SDKInfo.userAgentHeaderField)
+        // "Block direct url file access" (referer hotlink protection) rejects manifest/segment
+        // requests without a Referer (HTTP 403). AVPlayer sets no Referer on this custom-scheme
+        // request, so attach it explicitly — mirrors the VOD asset headers and the Android player.
+        urlRequest.setValue(BunnyCDN.referer, forHTTPHeaderField: "Referer")
 
         // Only send a Range header for genuine partial requests (offset > 0).
         // Avoid "bytes=0-" for full-segment fetches — live CMAF segments are atomic

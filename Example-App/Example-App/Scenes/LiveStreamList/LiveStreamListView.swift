@@ -9,7 +9,7 @@ struct LiveStreamListView: View {
 
     private struct BroadcastSelection: Identifiable {
         let id: String
-        let stream: Components.Schemas.LiveStreamModel
+        let stream: BunnyLiveStream
     }
 
     @State private var broadcasterStream: BroadcastSelection?
@@ -17,6 +17,11 @@ struct LiveStreamListView: View {
     @State private var streamPendingDeletion: BroadcastSelection?
     @State private var editingStream: BroadcastSelection?
     @State private var isShowingCreate = false
+    @AppStorage(broadcastQualityStorageKey) private var broadcastQualityRaw = BroadcastQualityOption.fullHd1080.rawValue
+
+    private var broadcastQuality: BroadcastQualityOption {
+        BroadcastQualityOption(rawValue: broadcastQualityRaw) ?? .fullHd1080
+    }
 
     init(viewModel: LiveStreamListViewModel, dependenciesManager: DependenciesManager) {
         self.viewModel = viewModel
@@ -51,6 +56,17 @@ struct LiveStreamListView: View {
             Task { await viewModel.load(showLoadingState: viewModel.streams.isEmpty) }
         }
         .toolbar {
+            ToolbarItem(placement: .navigationBarLeading) {
+                Menu {
+                    Picker("Broadcast quality", selection: $broadcastQualityRaw) {
+                        ForEach(BroadcastQualityOption.allCases) { option in
+                            Text(option.label).tag(option.rawValue)
+                        }
+                    }
+                } label: {
+                    Label("Broadcast quality", systemImage: "slider.horizontal.3")
+                }
+            }
             ToolbarItem(placement: .navigationBarTrailing) {
                 Button { isShowingCreate = true } label: {
                     Image(systemName: "plus")
@@ -67,10 +83,11 @@ struct LiveStreamListView: View {
             // up the new status after broadcasting ends.
             Task { await viewModel.load(showLoadingState: false) }
         }) { selection in
-            BunnyStreamCameraUploadView(
+            BroadcastDemoView(
                 liveStream: selection.stream,
                 accessKey: dependenciesManager.accessKey,
-                libraryId: dependenciesManager.libraryId
+                libraryId: dependenciesManager.libraryId,
+                quality: broadcastQuality.quality
             )
         }
         .sheet(item: $ingestDetailsStream) { selection in
@@ -87,7 +104,8 @@ struct LiveStreamListView: View {
             }
             Button("Cancel", role: .cancel) {}
         } message: { selection in
-            Text("\"\(selection.stream.title ?? selection.stream.name ?? "This stream")\" will be permanently deleted.")
+            let title: String = selection.stream.title ?? "This stream"
+            Text("\"\(title)\" will be permanently deleted.")
         }
         .alert("Error", isPresented: actionErrorBinding, presenting: viewModel.actionError) { _ in
             Button("OK", role: .cancel) {}
@@ -131,12 +149,12 @@ private extension LiveStreamListView {
 
     var streamList: some View {
         List {
-            ForEach(viewModel.streams, id: \.guid) { stream in
+            ForEach(viewModel.streams, id: \.id) { stream in
                 NavigationLink {
                     BunnyStreamLivePlayer(
                         accessKey: dependenciesManager.accessKey,
                         libraryId: dependenciesManager.libraryId,
-                        streamId: stream.guid ?? ""
+                        streamId: stream.id ?? ""
                     )
                     .navigationTitle("")
                     .navigationBarTitleDisplayMode(.inline)
@@ -151,7 +169,7 @@ private extension LiveStreamListView {
                 .swipeActions(edge: .trailing, allowsFullSwipe: false) {
                     if canBroadcast(stream) {
                         Button {
-                            guard let guid = stream.guid else { return }
+                            guard let guid = stream.id else { return }
                             broadcasterStream = BroadcastSelection(id: guid, stream: stream)
                         } label: {
                             Label("Go Live", systemImage: "dot.radiowaves.left.and.right")
@@ -159,21 +177,21 @@ private extension LiveStreamListView {
                         .tint(.red)
                     }
                     Button {
-                        guard let guid = stream.guid else { return }
+                        guard let guid = stream.id else { return }
                         ingestDetailsStream = BroadcastSelection(id: guid, stream: stream)
                     } label: {
                         Label("RTMP", systemImage: "info.circle")
                     }
                     .tint(.indigo)
                     Button {
-                        guard let guid = stream.guid else { return }
+                        guard let guid = stream.id else { return }
                         editingStream = BroadcastSelection(id: guid, stream: stream)
                     } label: {
                         Label("Edit", systemImage: "pencil")
                     }
                     .tint(.orange)
                     Button(role: .destructive) {
-                        guard let guid = stream.guid else { return }
+                        guard let guid = stream.id else { return }
                         streamPendingDeletion = BroadcastSelection(id: guid, stream: stream)
                     } label: {
                         Label("Delete", systemImage: "trash")
@@ -184,8 +202,9 @@ private extension LiveStreamListView {
         .refreshable { await viewModel.load(showLoadingState: false) }
     }
 
-    func canBroadcast(_ stream: Components.Schemas.LiveStreamModel) -> Bool {
-        guard case .LiveStreamStatus(let status) = stream.status else { return false }
-        return status == .created || status == .scheduled || status == .running
+    func canBroadcast(_ stream: BunnyLiveStream) -> Bool {
+        // Preview means an encoder is already connected, so going live is still the next step.
+        let broadcastable: [BunnyLiveStreamStatus] = [.created, .scheduled, .preview, .running]
+        return broadcastable.contains(stream.status)
     }
 }

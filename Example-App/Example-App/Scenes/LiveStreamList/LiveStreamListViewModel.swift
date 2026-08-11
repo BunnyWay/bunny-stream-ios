@@ -2,7 +2,6 @@ import BunnyStreamAPI
 import BunnyStreamPlayer
 import BunnyStreamUploader
 import Foundation
-import OpenAPIRuntime
 
 @MainActor
 class LiveStreamListViewModel: ObservableObject {
@@ -10,17 +9,21 @@ class LiveStreamListViewModel: ObservableObject {
         case loading, loaded, failed(String)
     }
 
-    @Published var streams: [Components.Schemas.LiveStreamModel] = []
+    @Published var streams: [BunnyLiveStream] = []
     @Published var loadingState: LoadingState = .loading
     @Published var actionError: String?
 
     private let api: BunnyStreamAPI
+    /// Live stream operations in domain terms. The raw generated client is only still used for
+    /// the VOD calls below, which this repository doesn't cover.
+    private let liveStreams: DefaultLiveStreamRepository
     private let configLoader = VideoPlayerConfigLoader()
     let libraryId: Int
     let accessKey: String
 
     init(api: BunnyStreamAPI, libraryId: Int, accessKey: String) {
         self.api = api
+        self.liveStreams = api.liveStreams
         self.libraryId = libraryId
         self.accessKey = accessKey
     }
@@ -43,57 +46,24 @@ class LiveStreamListViewModel: ObservableObject {
         dvrWindowSeconds: Int? = nil,
         recordVod: Bool = false,
         trailerVideoId: String? = nil,
-        rtmpOutputs: [Components.Schemas.RtmpOutput] = []
-    ) async throws -> Components.Schemas.LiveStreamModel {
-        var model = Components.Schemas.CreateLiveStreamModel(title: name)
-        if let description, !description.isEmpty {
-            model.description = description
-        }
-        if !rtmpOutputs.isEmpty {
-            model.rtmpOutputs = rtmpOutputs
-        }
-        // `scheduledStartTime` is a Date in the model; the SDK's date transcoder serializes it.
-        model.scheduledStartTime = scheduledStartTime
-        if enableCountdown {
-            model.enableCountdown = true
-        }
-        if dvrEnabled {
-            model.dvrEnabled = true
-            model.dvrWindowSeconds = dvrWindowSeconds.map { Int32($0) }
-        }
-        if recordVod {
-            model.recordVod = true
-        }
-        if let id = trailerVideoId, !id.isEmpty {
-            model.preStreamTrailerVideoId = id
-        }
-        let output = try await api.client.liveStreamCreate(
-            path: .init(libraryId: Int64(libraryId)),
-            body: .json(model)
+        rtmpOutputs: [BunnyRtmpOutput] = []
+    ) async throws -> BunnyLiveStream {
+        let request = BunnyLiveStreamCreateRequest(
+            title: name,
+            description: description?.isEmpty == false ? description : nil,
+            scheduledStartTime: scheduledStartTime,
+            dvrEnabled: dvrEnabled ? true : nil,
+            dvrWindowSeconds: dvrEnabled ? dvrWindowSeconds : nil,
+            recordVod: recordVod ? true : nil,
+            enableCountdown: enableCountdown ? true : nil,
+            preStreamTrailerVideoId: trailerVideoId?.isEmpty == false ? trailerVideoId : nil,
+            rtmpOutputs: rtmpOutputs.isEmpty ? nil : rtmpOutputs
         )
-        switch output {
-        case .created(let created):
-            guard case .json(let model) = created.body else { throw CreateError.invalidResponse }
-            return model
-        case .unauthorized:
-            throw CreateError.unauthorized
-        case .undocumented(statusCode: 400, let payload):
-            var detail = "400"
-            if let body = payload.body,
-               let data = try? await Data(collecting: body, upTo: 2000),
-               let text = String(data: data, encoding: .utf8) {
-                detail = text
-            }
-            throw CreateError.rawError(detail)
-        case .undocumented(statusCode: let code, _):
-            throw CreateError.httpError(code)
-        default:
-            throw CreateError.invalidResponse
-        }
+        return try await liveStreams.createLiveStream(libraryId: libraryId, request: request)
     }
 
     func update(
-        stream: Components.Schemas.LiveStreamModel,
+        stream: BunnyLiveStream,
         name: String,
         description: String? = nil,
         scheduledStartTime: Date? = nil,
@@ -103,46 +73,31 @@ class LiveStreamListViewModel: ObservableObject {
         recordVod: Bool = false,
         trailerVideoId: String? = nil,
         isPublic: Bool? = nil,
-        rtmpOutputs: [Components.Schemas.RtmpOutput] = []
-    ) async throws -> Components.Schemas.LiveStreamModel {
-        guard let guid = stream.guid, !guid.isEmpty else { throw CreateError.invalidRequest }
-        var model = Components.Schemas.UpdateLiveStreamModel()
-        model.title = name
-        model.description = description ?? ""
-        // `scheduledStartTime` is a Date in the model; the SDK's date transcoder serializes it.
-        model.scheduledStartTime = scheduledStartTime
-        model.enableCountdown = enableCountdown
-        model.dvrEnabled = dvrEnabled
-        model.dvrWindowSeconds = dvrEnabled ? dvrWindowSeconds.map { Int32($0) } : nil
-        model.recordVod = recordVod
-        model.preStreamTrailerVideoId = (trailerVideoId?.isEmpty == false) ? trailerVideoId : nil
-        if let isPublic { model._public = isPublic }
-        // Only send rtmpOutputs when set — the API rejects an empty array (400). A populated array
-        // matches the documented schema but currently returns 500 (Bunny preview feature not yet
-        // enabled server-side), so the create/edit UI surfaces that as a clear error.
-        if !rtmpOutputs.isEmpty {
-            model.rtmpOutputs = rtmpOutputs
+        rtmpOutputs: [BunnyRtmpOutput] = []
+    ) async throws -> BunnyLiveStream {
+        guard let guid = stream.id, !guid.isEmpty else {
+            throw BunnyLiveStreamError(kind: .invalidRequest)
         }
-
-        let output = try await api.client.liveStreamUpdate(
-            path: .init(libraryId: Int64(libraryId), streamId: guid),
-            body: .json(model)
+        let request = BunnyLiveStreamUpdateRequest(
+            title: name,
+            description: description ?? "",
+            scheduledStartTime: scheduledStartTime,
+            isPublic: isPublic,
+            dvrEnabled: dvrEnabled,
+            dvrWindowSeconds: dvrEnabled ? dvrWindowSeconds : nil,
+            recordVod: recordVod,
+            enableCountdown: enableCountdown,
+            preStreamTrailerVideoId: trailerVideoId?.isEmpty == false ? trailerVideoId : nil,
+            // Only send rtmpOutputs when set — the API rejects an empty array (400). A populated
+            // array matches the documented schema but currently returns 500 (Bunny preview feature
+            // not yet enabled server-side), so the create/edit UI surfaces that as a clear error.
+            rtmpOutputs: rtmpOutputs.isEmpty ? nil : rtmpOutputs
         )
-        switch output {
-        case .ok(let ok):
-            guard case .json(let updated) = ok.body else { throw CreateError.invalidResponse }
-            return updated
-        case .unauthorized:
-            throw CreateError.unauthorized
-        case .badRequest:
-            throw CreateError.invalidRequest
-        case .notFound:
-            throw CreateError.httpError(404)
-        case .internalServerError:
-            throw CreateError.httpError(500)
-        case .undocumented(statusCode: let code, _):
-            throw CreateError.httpError(code)
-        }
+        return try await liveStreams.updateLiveStream(
+            libraryId: libraryId,
+            streamId: guid,
+            request: request
+        )
     }
 
     // MARK: - Thumbnails
@@ -162,104 +117,60 @@ class LiveStreamListViewModel: ObservableObject {
 
     /// Sets the offline thumbnail from a remote URL — Bunny fetches the image.
     func setThumbnail(streamId: String, url: String) async throws {
-        let output = try await api.client.liveStreamSetThumbnail(
-            path: .init(libraryId: Int64(libraryId), streamId: streamId),
-            query: .init(thumbnailUrl: url)
-        )
-        try handleSetThumbnail(output)
+        do {
+            try await liveStreams.setThumbnail(libraryId: libraryId, streamId: streamId, thumbnailUrl: url)
+        } catch let error as BunnyLiveStreamError {
+            throw ThumbnailError(error)
+        }
     }
 
     /// Uploads JPEG image bytes (e.g. a photo picked on the device) as the offline thumbnail.
     /// The bytes must be JPEG — Bunny requires an image Content-Type and rejects HEIC/octet-stream.
     func setThumbnail(streamId: String, jpegData: Data) async throws {
-        let output = try await api.client.liveStreamSetThumbnail(
-            path: .init(libraryId: Int64(libraryId), streamId: streamId),
-            body: .jpeg(HTTPBody([UInt8](jpegData)))
-        )
-        try handleSetThumbnail(output)
-    }
-
-    private func handleSetThumbnail(_ output: Operations.LiveStreamSetThumbnail.Output) throws {
-        switch output {
-        case .ok:
-            return
-        case .unauthorized:
-            throw ThumbnailError.unauthorized
-        case .notFound:
-            throw ThumbnailError.notFound
-        case .badRequest:
-            // Bunny returns 400 for oversized images ("Invalid thumbnail file size").
-            throw ThumbnailError.tooLarge
-        case .unprocessableContent:
-            throw ThumbnailError.failed(422)
-        case .internalServerError:
-            throw ThumbnailError.failed(500)
-        case .undocumented(statusCode: let code, _):
-            throw ThumbnailError.failed(code)
+        do {
+            try await liveStreams.uploadThumbnail(
+                libraryId: libraryId,
+                streamId: streamId,
+                imageData: jpegData,
+                format: .jpeg
+            )
+        } catch let error as BunnyLiveStreamError {
+            throw ThumbnailError(error)
         }
     }
 
     /// Removes the offline thumbnail from the live stream.
     func deleteThumbnail(streamId: String) async throws {
-        let output = try await api.client.liveStreamDeleteThumbnail(
-            path: .init(libraryId: Int64(libraryId), streamId: streamId)
-        )
-        switch output {
-        case .noContent:
-            return
-        case .unauthorized:
-            throw ThumbnailError.unauthorized
-        case .notFound:
-            throw ThumbnailError.notFound
-        case .undocumented(statusCode: let code, _):
-            throw ThumbnailError.failed(code)
-        default:
-            throw ThumbnailError.failed(nil)
+        do {
+            try await liveStreams.deleteThumbnail(libraryId: libraryId, streamId: streamId)
+        } catch let error as BunnyLiveStreamError {
+            throw ThumbnailError(error)
         }
-    }
-
-    /// A single auto-generated thumbnail returned by the live-stream thumbnails endpoint.
-    struct LiveThumbnailItem: Identifiable, Hashable {
-        let id = UUID()
-        let url: String
-        let timestamp: String?
     }
 
     /// Lists the thumbnails Bunny automatically generates while the stream is/was live
-    /// (`GET /library/{libraryId}/live/{streamId}/thumbnails`, most recent first).
-    func liveThumbnails(streamId: String, limit: Int = 24) async throws -> [LiveThumbnailItem] {
-        let output = try await api.client.liveStreamGetThumbnails(
-            path: .init(libraryId: Int64(libraryId), streamId: streamId),
-            query: .init(limit: Int32(limit))
-        )
-        guard case .ok(let ok) = output, case .json(let list) = ok.body else {
-            throw ThumbnailError.failed(nil)
+    /// (most recent first).
+    func liveThumbnails(streamId: String, limit: Int = 24) async throws -> [BunnyLiveStreamThumbnail] {
+        do {
+            return try await liveStreams
+                .listThumbnails(libraryId: libraryId, streamId: streamId, limit: limit)
+                .filter { $0.url?.isEmpty == false }
+        } catch let error as BunnyLiveStreamError {
+            throw ThumbnailError(error)
         }
-        return list.compactMap { item in
-            guard let url = item.url, !url.isEmpty else { return nil }
-            return LiveThumbnailItem(url: url, timestamp: item.timestamp)
-        }
-    }
-
-    /// Builds the full offline-thumbnail URL from the stream's `thumbnailFileName` and playback
-    /// host: `https://{host}/{guid}/{thumbnailFileName}`. Returns nil when no thumbnail is set.
-    func offlineThumbnailURL(for stream: Components.Schemas.LiveStreamModel) -> URL? {
-        guard let fileName = stream.thumbnailFileName, !fileName.isEmpty,
-              let guid = stream.guid, !guid.isEmpty,
-              let hls = stream.playbackUrlHls, let host = URL(string: hls)?.host
-        else { return nil }
-        return URL(string: "https://\(host)/\(guid)/\(fileName)")
     }
 
     /// Best thumbnail for a list row: the stream's own offline thumbnail, else the pre-stream
     /// trailer's thumbnail as a fallback.
-    func liveThumbnailURL(for stream: Components.Schemas.LiveStreamModel) async -> URL? {
-        if let url = offlineThumbnailURL(for: stream) { return url }
+    func liveThumbnailURL(for stream: BunnyLiveStream) async -> URL? {
+        if let url = stream.offlineThumbnailUrl { return url }
         if let trailerId = stream.preStreamTrailerVideoId, !trailerId.isEmpty {
             return await videoThumbnailURL(videoId: trailerId)
         }
         return nil
     }
+
+    // MARK: - VOD helpers (not covered by the live stream repository)
 
     func createTrailerEntry(name: String) async throws -> (id: String, title: String) {
         let output = try await api.client.createVideo(
@@ -288,18 +199,7 @@ class LiveStreamListViewModel: ObservableObject {
         }
     }
 
-    enum CreateError: LocalizedError {
-        case unauthorized, invalidRequest, invalidResponse, httpError(Int), rawError(String)
-        var errorDescription: String? {
-            switch self {
-            case .unauthorized:        return "Unauthorized — check your Access Key."
-            case .invalidRequest:      return "Invalid request. Check stream name."
-            case .invalidResponse:     return "Unexpected response from server."
-            case .httpError(let code): return "HTTP \(code) — live stream creation failed."
-            case .rawError(let body):  return body
-            }
-        }
-    }
+    // MARK: - Ingest status
 
     /// Live ingest status (primary/backup) shown as badges in the stream list.
     struct IngestLiveStatus: Equatable {
@@ -307,46 +207,34 @@ class LiveStreamListViewModel: ObservableObject {
         let backupLive: Bool
     }
 
-    /// Resolves the live ingest status for a RUNNING stream. Prefers the stream model's own
+    /// Resolves the live ingest status for a RUNNING stream. Prefers the stream's own
     /// `primaryLive`/`backupLive` when the API populates them, otherwise falls back to the
     /// lightweight `/status` endpoint. Returns nil for non-running streams (no live ingest) or failure.
-    func liveIngestStatus(for stream: Components.Schemas.LiveStreamModel) async -> IngestLiveStatus? {
-        guard case .LiveStreamStatus(.running) = stream.status else { return nil }
+    func liveIngestStatus(for stream: BunnyLiveStream) async -> IngestLiveStatus? {
+        guard stream.status == .running else { return nil }
         if let primary = stream.primaryLive, let backup = stream.backupLive {
             return IngestLiveStatus(primaryLive: primary, backupLive: backup)
         }
-        guard let guid = stream.guid, !guid.isEmpty else { return nil }
-        guard case .ok(let ok) = try? await api.client.liveStreamGetStreamStatus(
-            path: .init(libraryId: Int64(libraryId), streamId: guid)
-        ), case .json(let model) = ok.body else { return nil }
+        guard let guid = stream.id, !guid.isEmpty,
+              let status = try? await liveStreams.ingestStatus(libraryId: libraryId, streamId: guid)
+        else { return nil }
         return IngestLiveStatus(
-            primaryLive: model.primaryLive ?? false,
-            backupLive: model.backupLive ?? false
+            primaryLive: status.primaryLive ?? false,
+            backupLive: status.backupLive ?? false
         )
     }
 
-    func delete(stream: Components.Schemas.LiveStreamModel) async {
-        guard let guid = stream.guid, !guid.isEmpty else { return }
+    // MARK: - List mutations
+
+    func delete(stream: BunnyLiveStream) async {
+        guard let guid = stream.id, !guid.isEmpty else { return }
         // Optimistically remove from the list, restore on failure.
         let previous = streams
-        streams.removeAll { $0.guid == guid }
+        streams.removeAll { $0.id == guid }
         do {
-            let output = try await api.client.liveStreamDelete(
-                path: .init(libraryId: Int64(libraryId), streamId: guid)
-            )
-            switch output {
-            case .ok:
-                break
-            case .notFound:
-                // Already gone — keep it removed.
-                break
-            case .unauthorized:
-                streams = previous
-                actionError = "Unauthorized — check your Access Key."
-            default:
-                streams = previous
-                actionError = "Couldn't delete the live stream."
-            }
+            try await liveStreams.deleteLiveStream(libraryId: libraryId, streamId: guid)
+        } catch let error as BunnyLiveStreamError where error.kind == .notFound {
+            // Already gone — keep it removed.
         } catch {
             streams = previous
             actionError = error.localizedDescription
@@ -366,32 +254,32 @@ class LiveStreamListViewModel: ObservableObject {
             loadingState = .loading
         }
         do {
-            let output = try await api.client.liveStreamList(
-                path: .init(libraryId: Int64(libraryId))
-            )
-            switch output {
-            case .ok(let ok):
-                if case .json(let model) = ok.body {
-                    streams = model.items ?? []
-                    loadingState = .loaded
-                } else {
-                    loadingState = .failed("OK but unexpected body format.")
-                }
-            case .unauthorized:
-                loadingState = .failed("Unauthorized — check your Access Key.")
-            case .internalServerError:
-                loadingState = .failed("Server error. Try again.")
-            case .undocumented(statusCode: 404, _):
-                // Bunny returns 404 when no streams exist yet — treat as empty list
-                streams = []
-                loadingState = .loaded
-            case .undocumented(statusCode: let code, _):
-                loadingState = .failed("HTTP \(code) — check API URL or credentials.")
-            default:
-                loadingState = .failed("Unexpected response type.")
-            }
+            streams = try await liveStreams.listLiveStreams(libraryId: libraryId).items
+            loadingState = .loaded
+        } catch let error as BunnyLiveStreamError where error.kind == .notFound {
+            // Bunny answers 404 when the library has no streams yet — that's an empty list,
+            // not a failure.
+            streams = []
+            loadingState = .loaded
         } catch {
             loadingState = .failed(error.localizedDescription)
+        }
+    }
+}
+
+private extension LiveStreamListViewModel.ThumbnailError {
+    /// Restates a repository failure in the wording the thumbnail UI uses.
+    init(_ error: BunnyLiveStreamError) {
+        switch error.kind {
+        case .unauthorized:
+            self = .unauthorized
+        case .notFound:
+            self = .notFound
+        case .invalidRequest:
+            // Bunny answers 400 for oversized images ("Invalid thumbnail file size").
+            self = .tooLarge
+        case .unprocessable, .server, .transport, .invalidResponse, .unexpected:
+            self = .failed(error.statusCode)
         }
     }
 }

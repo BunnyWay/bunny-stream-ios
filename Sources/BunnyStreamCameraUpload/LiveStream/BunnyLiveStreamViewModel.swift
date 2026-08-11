@@ -3,6 +3,7 @@ import BunnyStreamAPI
 import Combine
 import SwiftUI
 import HaishinKit
+import VideoToolbox
 
 final class BunnyStreamCameraUploadViewModel: ObservableObject {
   private var streamConfig: StreamConfig
@@ -31,14 +32,45 @@ final class BunnyStreamCameraUploadViewModel: ObservableObject {
   private var videoId: String?
   private let videoCreator: VideoCreator?
 
-  @Published var snackbarMessage: String? = nil
+  /// Live stream operations in domain terms. Built lazily because `streamConfig.accessKey`
+  /// is what identifies the account, and it's set at init.
+  private lazy var liveStreams: DefaultLiveStreamRepository = {
+    DefaultLiveStreamRepository(bunnyStreamAPI: BunnyStreamAPI(accessKey: streamConfig.accessKey))
+  }()
+
+  /// The public handle, when the host app supplied one. Everything user-visible is mirrored
+  /// onto it so callers can drive and observe the broadcast from outside the view.
+  weak var broadcastController: BunnyBroadcastController?
+
+  @Published var snackbarMessage: String? = nil {
+    didSet {
+      guard let message = snackbarMessage, message != oldValue else { return }
+      broadcastController?.emit(.failed(message: message))
+    }
+  }
   @Published var countdownProgress: CGFloat = 1.0
-  @Published var state: StreamState = .notStreaming
-  @Published var isMuted = false
+  @Published var state: StreamState = .notStreaming {
+    didSet {
+      guard state != oldValue else { return }
+      broadcastController?.update(state: state.publicState)
+      switch state {
+      case .preparing:   broadcastController?.emit(.preparing)
+      case .liveStreaming: broadcastController?.emit(.started)
+      case .notStreaming:  broadcastController?.emit(.stopped)
+      }
+    }
+  }
+  @Published var isMuted = false {
+    didSet { broadcastController?.update(isMuted: isMuted) }
+  }
   @Published var isCreatingVideo = false
   @Published var rtmpStream: RTMPStream
-  @Published var currentPosition: AVCaptureDevice.Position = .back
-  @Published var elapsedTime: String?
+  @Published var currentPosition: AVCaptureDevice.Position = .back {
+    didSet { broadcastController?.update(cameraPosition: currentPosition == .front ? .front : .back) }
+  }
+  @Published var elapsedTime: String? {
+    didSet { broadcastController?.update(elapsedTime: elapsedTime) }
+  }
   @Published var primaryLive: Bool? = nil
   @Published var backupLive: Bool? = nil
 
@@ -60,9 +92,18 @@ extension BunnyStreamCameraUploadViewModel {
     if let orientation = DeviceUtil.videoOrientation(by: UIDevice.current.orientation) {
       rtmpStream.videoOrientation = orientation
     }
-    rtmpStream.sessionPreset = .hd1280x720
-    rtmpStream.videoSettings.videoSize = .init(width: 720, height: 1280)
-    rtmpStream.isMultiCamSessionEnabled = true
+
+    let quality = streamConfig.quality
+    rtmpStream.frameRate = quality.frameRate
+    rtmpStream.sessionPreset = quality.resolution.sessionPreset
+    rtmpStream.videoSettings.videoSize = quality.resolution.videoSize
+    rtmpStream.videoSettings.bitRate = quality.videoBitrate
+    // High profile lifts the Baseline-3.1 ceiling (which caps at 720p30) so 1080p/60fps encode correctly.
+    rtmpStream.videoSettings.profileLevel = kVTProfileLevel_H264_High_AutoLevel as String
+    rtmpStream.audioSettings.bitRate = quality.audioBitrate
+    // Single-camera broadcast: MultiCam sessions are capped well below 1080p on most devices,
+    // so keep it off to unlock the full-resolution capture formats. Camera flips reuse channel 0.
+    rtmpStream.isMultiCamSessionEnabled = false
     
     notifications.publisher(for: UIDevice.orientationDidChangeNotification)
       .sink { [rtmpStream] _ in
@@ -125,8 +166,17 @@ extension BunnyStreamCameraUploadViewModel {
   func startStreamingCountdown() {
     Task {
       do {
-        // Activate first — if this fails the stream won't go live, so abort before publishing.
-        try await activateStream()
+        // Activation is best-effort: surface any backend error but DON'T abort the broadcast.
+        // RTMP publishing can still succeed, and aborting here left the user stuck on "Offline"
+        // with the record button appearing to do nothing (notably the camera-upload flow, whose
+        // config has no streamId to activate).
+        do {
+          try await activateStream()
+        } catch {
+          let message = (error as? LifecycleError)?.errorDescription
+            ?? "Couldn't activate the live stream."
+          await MainActor.run { snackbarMessage = message }
+        }
         if videoId == nil, let creator = videoCreator {
             await MainActor.run {
                 isCreatingVideo = true
@@ -267,6 +317,7 @@ private extension BunnyStreamCameraUploadViewModel {
     guard retryCount < maxRetryCount else {
       stopStreamingTimer()
       stopIngestStatusPolling()
+      broadcastController?.emit(.reconnectFailed)
       state = .notStreaming
       snackbarMessage = Lingua.LiveStream.streamFailedMessage
       return
@@ -283,6 +334,7 @@ private extension BunnyStreamCameraUploadViewModel {
     }
     let targetUri = (usingBackup ? streamConfig.backupUri : nil) ?? streamConfig.uri
     let delay = reconnectDelay(for: retryCount)
+    broadcastController?.emit(.reconnecting(attempt: retryCount, usingBackup: usingBackup))
 
     reconnectTask = Task { [weak self] in
       try? await Task.sleep(nanoseconds: UInt64(delay * 1_000_000_000))
@@ -369,16 +421,17 @@ private extension BunnyStreamCameraUploadViewModel {
   }
 
   func fetchIngestStatus(streamId: String) async {
-    let api = BunnyStreamAPI(accessKey: streamConfig.accessKey)
     // Lightweight /status endpoint, suited for frequent polling. (The full live stream
     // model doesn't expose primaryLive/backupLive — only /status does.)
-    guard case .ok(let ok) = try? await api.client.liveStreamGetStreamStatus(
-      path: .init(libraryId: Int64(streamConfig.libraryId), streamId: streamId)
-    ), case .json(let model) = ok.body else { return }
+    guard let status = try? await liveStreams.ingestStatus(
+      libraryId: streamConfig.libraryId,
+      streamId: streamId
+    ) else { return }
     await MainActor.run { [weak self] in
       guard let self else { return }
-      self.primaryLive = model.primaryLive
-      self.backupLive = model.backupLive
+      self.primaryLive = status.primaryLive
+      self.backupLive = status.backupLive
+      self.broadcastController?.update(primaryLive: status.primaryLive, backupLive: status.backupLive)
       self.proactiveFailoverIfNeeded()
     }
   }
@@ -406,6 +459,8 @@ private extension BunnyStreamCameraUploadViewModel {
       guard consecutiveIngestMisses >= proactiveFailoverMissThreshold else { return }
       consecutiveIngestMisses = 0
       currentIngestConfirmedLive = false
+      // The reconnect that follows alternates the ingest, so report where we're heading.
+      broadcastController?.emit(.failedOver(usingBackup: !usingBackup))
       // Drop the silently-degraded connection; connectClosed -> scheduleReconnect fails over.
       rtmpConnection.close()
     case .none:
@@ -434,30 +489,39 @@ extension BunnyStreamCameraUploadViewModel {
       case .http(let code):       return "Request failed (HTTP \(code))."
       }
     }
+
+    /// Restates a repository failure in the wording the broadcaster UI uses.
+    init(_ error: BunnyLiveStreamError) {
+      switch error.kind {
+      case .unauthorized:
+        self = .unauthorized
+      case .notFound:
+        self = .notFound
+      case .server:
+        self = .server
+      case .invalidRequest, .unprocessable, .transport, .invalidResponse, .unexpected:
+        self = error.statusCode.map(LifecycleError.http) ?? .server
+      }
+    }
   }
 }
 
 private extension BunnyStreamCameraUploadViewModel {
-  /// Activates the stream on the Bunny backend. Throws on failure so the caller can abort
-  /// before publishing — an unactivated stream won't go live even if RTMP publishing succeeds.
+  /// Activates the stream on the Bunny backend. HTTP failures throw a `LifecycleError` that the
+  /// caller surfaces to the user — but activation is NOT a precondition for publishing, so the
+  /// caller does not abort the broadcast on failure. When there's nothing to activate (no streamId,
+  /// e.g. the camera-upload-to-VOD flow, or a missing access key) this skips silently.
   func activateStream() async throws {
     guard let streamId = streamConfig.streamId, !streamConfig.accessKey.isEmpty else {
-      throw LifecycleError.missingConfiguration
+      return
     }
-    let output = try await BunnyStreamAPI(accessKey: streamConfig.accessKey).client.liveStreamActivate(
-      path: .init(libraryId: Int64(streamConfig.libraryId), streamId: streamId)
-    )
-    switch output {
-    case .ok:
-      break
-    case .unauthorized:
-      throw LifecycleError.unauthorized
-    case .notFound:
-      throw LifecycleError.notFound
-    case .internalServerError:
-      throw LifecycleError.server
-    case .undocumented(statusCode: let code, _):
-      throw LifecycleError.http(code)
+    do {
+      try await liveStreams.startLiveStream(
+        libraryId: streamConfig.libraryId,
+        streamId: streamId
+      )
+    } catch let error as BunnyLiveStreamError {
+      throw LifecycleError(error)
     }
   }
 
@@ -465,20 +529,13 @@ private extension BunnyStreamCameraUploadViewModel {
   /// torn down before this is called, so failures are surfaced but don't block stopping.
   func completeStream() async throws {
     guard let streamId = streamConfig.streamId, !streamConfig.accessKey.isEmpty else { return }
-    let output = try await BunnyStreamAPI(accessKey: streamConfig.accessKey).client.liveStreamComplete(
-      path: .init(libraryId: Int64(streamConfig.libraryId), streamId: streamId)
-    )
-    switch output {
-    case .ok:
-      break
-    case .unauthorized:
-      throw LifecycleError.unauthorized
-    case .notFound:
-      throw LifecycleError.notFound
-    case .internalServerError:
-      throw LifecycleError.server
-    case .undocumented(statusCode: let code, _):
-      throw LifecycleError.http(code)
+    do {
+      try await liveStreams.stopLiveStream(
+        libraryId: streamConfig.libraryId,
+        streamId: streamId
+      )
+    } catch let error as BunnyLiveStreamError {
+      throw LifecycleError(error)
     }
   }
 }

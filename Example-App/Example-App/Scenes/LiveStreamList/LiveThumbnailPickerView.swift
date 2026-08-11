@@ -6,11 +6,11 @@ import SwiftUI
 /// offline thumbnail URL via the `onSelect` callback.
 struct LiveThumbnailPickerView: View {
     let viewModel: LiveStreamListViewModel
-    let stream: Components.Schemas.LiveStreamModel
+    let stream: BunnyLiveStream
     let onSelect: (String) -> Void
     @Environment(\.dismiss) private var dismiss
 
-    @State private var items: [LiveStreamListViewModel.LiveThumbnailItem] = []
+    @State private var items: [BunnyLiveStreamThumbnail] = []
     @State private var isLoading = true
     @State private var errorMessage: String?
 
@@ -52,9 +52,10 @@ struct LiveThumbnailPickerView: View {
     private var grid: some View {
         ScrollView {
             LazyVGrid(columns: columns, spacing: 12) {
-                ForEach(items) { item in
+                ForEach(Array(items.enumerated()), id: \.offset) { _, item in
                     Button {
-                        onSelect(resolvedURL(item.url)?.absoluteString ?? item.url)
+                        guard let url = item.url else { return }
+                        onSelect(resolvedURL(url)?.absoluteString ?? url)
                         dismiss()
                     } label: {
                         tile(item)
@@ -66,9 +67,9 @@ struct LiveThumbnailPickerView: View {
         }
     }
 
-    private func tile(_ item: LiveStreamListViewModel.LiveThumbnailItem) -> some View {
+    private func tile(_ item: BunnyLiveStreamThumbnail) -> some View {
         VStack(alignment: .leading, spacing: 4) {
-            AsyncImage(url: resolvedURL(item.url)) { phase in
+            RefererAsyncImage(url: item.url.flatMap(resolvedURL)) { phase in
                 switch phase {
                 case .success(let image):
                     image.resizable().aspectRatio(16 / 9, contentMode: .fill)
@@ -85,7 +86,7 @@ struct LiveThumbnailPickerView: View {
             .clipped()
             .clipShape(RoundedRectangle(cornerRadius: 8))
             if let timestamp = item.timestamp {
-                Text(timestamp)
+                Text(timestamp.formatted(date: .abbreviated, time: .shortened))
                     .font(.caption2)
                     .foregroundStyle(.secondary)
                     .lineLimit(1)
@@ -117,10 +118,11 @@ struct LiveThumbnailPickerView: View {
     }
 
     /// Generated thumbnail URLs may be absolute or storage-relative; resolve relative ones against
-    /// the stream's playback host (same host as the HLS playlist), mirroring `offlineThumbnailURL`.
+    /// the stream's playback host (same host as the HLS playlist), mirroring the SDK's
+    /// `BunnyLiveStream.offlineThumbnailUrl`.
     private func resolvedURL(_ raw: String) -> URL? {
         if let url = URL(string: raw), url.scheme != nil { return url }
-        guard let hls = stream.playbackUrlHls, let host = URL(string: hls)?.host else {
+        guard let playbackUrl = stream.playbackUrl, let host = URL(string: playbackUrl)?.host else {
             return URL(string: raw)
         }
         let path = raw.hasPrefix("/") ? String(raw.dropFirst()) : raw
@@ -128,7 +130,7 @@ struct LiveThumbnailPickerView: View {
     }
 
     private func load() async {
-        guard let guid = stream.guid, !guid.isEmpty else {
+        guard let guid = stream.id, !guid.isEmpty else {
             errorMessage = "Missing stream ID."
             isLoading = false
             return

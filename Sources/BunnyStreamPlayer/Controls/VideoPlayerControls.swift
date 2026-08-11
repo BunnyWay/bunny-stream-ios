@@ -80,7 +80,7 @@ extension VideoPlayerControls {
         .shouldAddView(viewModel.isLive)
       Spacer()
       fullScreenButton()
-        .shouldAddView(controlsToCheck: .fullScreen, in: videoPlayerConfig.controls)
+        .shouldAddView(controlsToCheck: .fullScreen, in: videoPlayerConfig)
     }
   }
   
@@ -95,7 +95,7 @@ extension VideoPlayerControls {
           .frame(width: 30, height: 30)
           .foregroundColor(.white)
       }
-      .shouldAddView(controlsToCheck: .rewind, in: videoPlayerConfig.controls)
+      .shouldAddView(controlsToCheck: .rewind, in: videoPlayerConfig)
       .shouldAddView(!viewModel.isLiveWithoutDVR)
 
       Spacer()
@@ -107,7 +107,7 @@ extension VideoPlayerControls {
           .frame(width: 40, height: 40)
           .foregroundColor(.white)
       }
-      .shouldAddView(controlsToCheck: .play, in: videoPlayerConfig.controls)
+      .shouldAddView(controlsToCheck: .play, in: videoPlayerConfig)
       
       Spacer()
       
@@ -118,7 +118,7 @@ extension VideoPlayerControls {
           .frame(width: 30, height: 30)
           .foregroundColor(.white)
       }
-      .shouldAddView(controlsToCheck: .fastForward, in: videoPlayerConfig.controls)
+      .shouldAddView(controlsToCheck: .fastForward, in: videoPlayerConfig)
       .shouldAddView(!viewModel.isLiveWithoutDVR)
 
       Spacer()
@@ -128,28 +128,29 @@ extension VideoPlayerControls {
   func bottomControlsView() -> some View {
     VStack {
       seekBarView()
-        .shouldAddView(controlsToCheck: .progress, in: videoPlayerConfig.controls)
+        .shouldAddView(controlsToCheck: .progress, in: videoPlayerConfig)
         .shouldAddView(!viewModel.isLiveWithoutDVR)
       
       HStack {
         timeView()
           .shouldAddView(!viewModel.isLive)
+          .shouldAddView(controlsToCheck: .currentTime, in: videoPlayerConfig)
         goToLiveButton()
           .shouldAddView(viewModel.isLive && !viewModel.isAtLiveEdge)
         Spacer()
         captionsButton()
           .shouldAddView(!viewModel.captionsMenuViewModel.captions.isEmpty)
-          .shouldAddView(controlsToCheck: .captions, in: videoPlayerConfig.controls)
+          .shouldAddView(controlsToCheck: .captions, in: videoPlayerConfig)
 
         optionsButton()
-          .shouldAddView(controlsToCheck: .settings, in: videoPlayerConfig.controls)
+          .shouldAddView(controlsToCheck: .settings, in: videoPlayerConfig)
         pipButton()
           .shouldAddView(pipManager.isSupported)
-          .shouldAddView(controlsToCheck: .pip, in: videoPlayerConfig.controls)
+          .shouldAddView(controlsToCheck: .pip, in: videoPlayerConfig)
         airplayButton()
-          .shouldAddView(controlsToCheck: .airplay, in: videoPlayerConfig.controls)
+          .shouldAddView(controlsToCheck: .airplay, in: videoPlayerConfig)
         volumeButton()
-          .shouldAddView(controlsToCheck: .mute, in: videoPlayerConfig.controls)
+          .shouldAddView(controlsToCheck: .mute, in: videoPlayerConfig)
       }
       .padding(.horizontal, 8)
     }
@@ -208,7 +209,7 @@ extension VideoPlayerControls {
       viewModel.captionsMenuViewModel.showCaptions = true
     }
     .shouldAddView(!viewModel.captionsMenuViewModel.captions.isEmpty)
-    .shouldAddView(controlsToCheck: .captions, in: videoPlayerConfig.controls)
+    .shouldAddView(controlsToCheck: .captions, in: videoPlayerConfig)
     .foregroundColor(theme.tintColor)
     
     Button(Lingua.Settings.qualityMenuTitle) {
@@ -287,17 +288,17 @@ extension VideoPlayerControls {
       Text(viewModel.currentFormattedTime)
         .font(theme.font.size(11))
         .foregroundColor(.white)
-        .shouldAddView(controlsToCheck: .currentTime, in: videoPlayerConfig.controls)
+        .shouldAddView(controlsToCheck: .currentTime, in: videoPlayerConfig)
       
       Text(" / ")
         .font(.caption)
         .foregroundColor(.white)
-        .shouldAddView(controlsToCheck: .currentTime, .duration, in: videoPlayerConfig.controls)
+        .shouldAddView(controlsToCheck: .currentTime, .duration, in: videoPlayerConfig)
       
       Text(viewModel.totalFormattedTime)
         .font(theme.font.size(11))
         .foregroundColor(.white)
-        .shouldAddView(controlsToCheck: .duration, in: videoPlayerConfig.controls)
+        .shouldAddView(controlsToCheck: .duration, in: videoPlayerConfig)
     }
   }
 }
