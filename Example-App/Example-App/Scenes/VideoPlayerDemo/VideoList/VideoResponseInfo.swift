@@ -16,6 +16,8 @@ struct VideoResponseInfo: Hashable, Identifiable {
   var length: Int32
   var libraryId: Int64
   var encodeProgress: Int32
+  /// Raw `VideoModelStatus` from the API, `nil` when the response omitted it.
+  var status: Int32?
   var storageSize: Double
   var thumbnailFileName: String?
   var averageWatchTime: Int64
@@ -37,11 +39,36 @@ struct VideoResponseInfo: Hashable, Identifiable {
     }
   }
   
-  var isEncodingCompleted: Bool {
-    encodeProgress == 100
+  /// Where the video is in Bunny's encoding pipeline.
+  enum EncodingState {
+    case processing, finished, failed
   }
-  
-  func hash(into hasher: inout Hasher) {
-    hasher.combine(id)
+
+  /// Derived from the API's `status` field: 0 Created, 1 Uploaded, 2 Processing, 3 Transcoding,
+  /// 4 Finished, 5 Error, 6 UploadFailed, 7 JitSegmenting, 8 JitPlaylistsCreated.
+  ///
+  /// `encodeProgress` alone isn't enough: libraries with JIT encoding finish at status 8 without
+  /// the progress ever reaching 100, and a failed encode would otherwise read as "Processing"
+  /// forever.
+  var encodingState: EncodingState {
+    switch status {
+    case 4, 8:
+      return .finished
+    case 5, 6:
+      return .failed
+    case .some:
+      return .processing
+    case .none:
+      return encodeProgress == 100 ? .finished : .processing
+    }
+  }
+
+  var isEncodingCompleted: Bool {
+    encodingState == .finished
+  }
+
+  /// Badge text while encoding — with the percentage once the encoder reports progress.
+  var processingLabel: String {
+    (1..<100).contains(encodeProgress) ? "Processing \(encodeProgress)%" : "Processing"
   }
 }

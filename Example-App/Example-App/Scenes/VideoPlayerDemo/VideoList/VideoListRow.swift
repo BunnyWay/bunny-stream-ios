@@ -70,7 +70,7 @@ struct RefererAsyncImage<Content: View>: View {
 
 struct VideoListRow: View {
   var video: VideoResponseInfo
-  var thumbnailURL: URL?
+  var thumbnail: VideoListViewModel.ThumbnailState
 
   var body: some View {
     ZStack {
@@ -108,52 +108,67 @@ extension VideoListRow {
   var imageView: some View {
     GeometryReader { geometry in
       VStack {
-        RefererAsyncImage(url: thumbnailURL) { phase in
-          switch phase {
-          case .empty:
-            ProgressView()
-              .transition(.opacity)
-          case .success(let image):
-            image
-              .resizable()
-              .transition(.opacity)
-              .aspectRatio(contentMode: .fill)
-              .overlay {
-                LinearGradient(
-                  gradient: Gradient(
-                    colors: [
-                      .clear,
-                      .black.opacity(
-                        0.7
-                      )]
-                  ),
-                  startPoint: .center,
-                  endPoint: .bottom
-                )
-              }
-          case .failure:
-            Image(systemName: "photo")
-              .resizable()
-              .foregroundColor(.black.opacity(0.2))
-              .scaledToFit()
-              .frame(width: 50)
-              .transition(.opacity)
-          @unknown default:
-            EmptyView()
+        switch thumbnail {
+        case .loading:
+          ProgressView()
+            .transition(.opacity)
+        case .unavailable:
+          placeholderImage
+        case .ready(let url):
+          RefererAsyncImage(url: url) { phase in
+            switch phase {
+            case .empty:
+              ProgressView()
+                .transition(.opacity)
+            case .success(let image):
+              image
+                .resizable()
+                .transition(.opacity)
+                .aspectRatio(contentMode: .fill)
+                .overlay {
+                  LinearGradient(
+                    gradient: Gradient(
+                      colors: [
+                        .clear,
+                        .black.opacity(
+                          0.7
+                        )]
+                    ),
+                    startPoint: .center,
+                    endPoint: .bottom
+                  )
+                }
+            case .failure:
+              placeholderImage
+            @unknown default:
+              EmptyView()
+            }
           }
+          .clipped()
         }
-        .clipped()
       }
       .frame(width: geometry.size.width, height: 230)
     }
+  }
+
+  var placeholderImage: some View {
+    Image(systemName: "photo")
+      .resizable()
+      .foregroundColor(.black.opacity(0.2))
+      .scaledToFit()
+      .frame(width: 50)
+      .transition(.opacity)
   }
   
   func topView() -> some View {
     HStack {
       Spacer()
-      if video.encodeProgress != 100 {
-        capsuleText(string: "Processing", foregroundColor: .purple)
-      } else {
+      switch video.encodingState {
+      case .processing:
+        capsuleText(string: video.processingLabel, foregroundColor: .purple)
+      case .failed:
+        capsuleText(string: "Failed", foregroundColor: .red)
+      case .finished:
         capsuleText(string: "\(video.views) views")
       }
     }
