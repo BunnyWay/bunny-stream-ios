@@ -9,6 +9,8 @@ extension MediaPlayer {
   ///
   /// - Parameters:
   ///   - video: A `Video` for the video to be played.
+  ///   - token: Optional embed-view token, required when the library enforces token authentication.
+  ///   - expires: Expiration timestamp that `token` was signed with.
   ///
   /// - Returns: A `MediaPlayer` instance.
   ///
@@ -16,9 +18,9 @@ extension MediaPlayer {
   /// ```
   /// let player = MediaPlayer.make(video: video)
   /// ```
-  static func make(video: Video) -> MediaPlayer {
+  static func make(video: Video, token: String? = nil, expires: Int64? = nil) -> MediaPlayer {
     let url = URL(string: video.playlistUrl ?? "")!
-    let fairPlayHandler = FairPlayStreamHandler(videoId: video.guid, libraryId: video.libraryId)
+    let fairPlayHandler = FairPlayStreamHandler(videoId: video.guid, libraryId: video.libraryId, token: token, expires: expires)
     let subtitlesProvider = MediaPlayerSubtitlesProvider(video: video)
     let cmcdHeaders = CMCDHeaderBuilder.staticSessionHeaders(for: CMCDSession(contentId: video.guid, streamType: .vod))
     let mediaPlayer = MediaPlayer(

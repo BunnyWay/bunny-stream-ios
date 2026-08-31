@@ -262,7 +262,7 @@ private extension LivePlaybackController {
                 // The real Video carries the recording's resolutions/captions so the quality menu
                 // offers actual renditions instead of only "Auto".
                 video = Video(response: config)
-                player = MediaPlayer.make(video: video)
+                player = MediaPlayer.make(video: video, token: token, expires: expires)
             } catch {
                 video = Self.liveStubVideo(streamId: streamId, libraryId: libraryId)
                 player = MediaPlayer(url: fallbackURL)

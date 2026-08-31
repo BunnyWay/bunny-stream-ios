@@ -143,7 +143,7 @@ public struct BunnyStreamPlayer: View {
       let heatmap = try? await heatmapLoader?.loadHeatmap(videoId: videoId, libraryId: libraryId)
       
       VideoPlayerConfig(response: videoConfigResponse).map { self.videoConfig = $0 }
-      let player = MediaPlayer.make(video: video)
+      let player = MediaPlayer.make(video: video, token: token, expires: expires)
       self.player = player
       video.adjustLength(player.duration)
       self.theme = VideoPlayerTheme(config: videoConfigResponse) ?? theme
