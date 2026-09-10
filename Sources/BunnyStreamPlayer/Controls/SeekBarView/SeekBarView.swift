@@ -44,12 +44,15 @@ struct SeekBarView: View {
     }
     .frame(height: UI.seekBarFrameHeight)
     .background(.gray.opacity(0.001))
-    .gesture(DragGesture(minimumDistance: .zero).onChanged { value in
+    .gesture(DragGesture(minimumDistance: 8).onChanged { value in
+        let isHorizontal = abs(value.translation.width) > abs(value.translation.height)
+        guard isHorizontal else { return }
       isDragging = true
       isDraggingOutside = true
       dragPosition = min(max(value.location.x, .zero), size.width)
     }
       .onEnded { _ in
+        guard isDragging else { return }
         isDragging = false
         isDraggingOutside = false
         updatePlayerPosition(for: size)

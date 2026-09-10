@@ -87,7 +87,7 @@ extension VideoPlayerControls {
   func centerControlsView() -> some View {
     HStack {
       Spacer()
-      
+        
       Button(action: viewModel.skipBackward) {
         theme.images.seekBackward
           .resizable()
@@ -95,6 +95,8 @@ extension VideoPlayerControls {
           .frame(width: 30, height: 30)
           .foregroundColor(.white)
       }
+      .frame(minWidth: 44, minHeight: 44)
+      .contentShape(Rectangle())
       .shouldAddView(controlsToCheck: .rewind, in: videoPlayerConfig)
       .shouldAddView(!viewModel.isLiveWithoutDVR)
 
@@ -107,10 +109,12 @@ extension VideoPlayerControls {
           .frame(width: 40, height: 40)
           .foregroundColor(.white)
       }
+      .frame(minWidth: 44, minHeight: 44)
+      .contentShape(Rectangle())
       .shouldAddView(controlsToCheck: .play, in: videoPlayerConfig)
-      
+
       Spacer()
-      
+
       Button(action: viewModel.skipForward) {
         theme.images.seekForward
           .resizable()
@@ -118,6 +122,8 @@ extension VideoPlayerControls {
           .frame(width: 30, height: 30)
           .foregroundColor(.white)
       }
+      .frame(minWidth: 44, minHeight: 44)
+      .contentShape(Rectangle())
       .shouldAddView(controlsToCheck: .fastForward, in: videoPlayerConfig)
       .shouldAddView(!viewModel.isLiveWithoutDVR)
 
@@ -130,7 +136,7 @@ extension VideoPlayerControls {
       seekBarView()
         .shouldAddView(controlsToCheck: .progress, in: videoPlayerConfig)
         .shouldAddView(!viewModel.isLiveWithoutDVR)
-      
+
       HStack {
         timeView()
           .shouldAddView(!viewModel.isLive)
@@ -154,6 +160,7 @@ extension VideoPlayerControls {
       }
       .padding(.horizontal, 8)
     }
+    .padding(.bottom, 8)
   }
   
   func fullScreenButton() -> some View {
@@ -163,8 +170,10 @@ extension VideoPlayerControls {
         .frame(width: 30, height: 30)
         .foregroundColor(.white)
     }
+    .frame(minWidth: 44, minHeight: 44)
+    .contentShape(Rectangle())
   }
-  
+
   func pipButton() -> some View {
     Button(action: pipManager.toggle) {
       (pipManager.isActive ? theme.images.pictureInPictureActive : theme.images.pictureInPicture)
@@ -172,6 +181,8 @@ extension VideoPlayerControls {
         .frame(width: 30, height: 30)
         .foregroundColor(.white)
     }
+    .frame(minWidth: 44, minHeight: 44)
+    .contentShape(Rectangle())
   }
 
   func volumeButton() -> some View {
@@ -181,8 +192,10 @@ extension VideoPlayerControls {
         .frame(width: 30, height: 30)
         .foregroundColor(.white)
     }
+    .frame(minWidth: 44, minHeight: 44)
+    .contentShape(Rectangle())
   }
-  
+
   @ViewBuilder
   func optionsButton() -> some View {
     Button {
@@ -193,6 +206,8 @@ extension VideoPlayerControls {
         .frame(width: 30, height: 30)
         .foregroundColor(.white)
     }
+    .frame(minWidth: 44, minHeight: 44)
+    .contentShape(Rectangle())
   }
   
   @ViewBuilder
@@ -250,6 +265,8 @@ extension VideoPlayerControls {
         .frame(width: 30, height: 30)
         .foregroundColor(.white)
     }
+    .frame(minWidth: 44, minHeight: 44)
+    .contentShape(Rectangle())
   }
   
   func liveBadgeView() -> some View {
@@ -280,7 +297,6 @@ extension VideoPlayerControls {
   func seekBarView() -> some View {
     SeekBarView(viewModel: viewModel.seekBarViewModel, isDraggingOutside: $viewModel.isDraggingSeekBar)
       .environment(\.videoPlayerConfig, videoPlayerConfig)
-      .padding(.bottom, -16)
   }
   
   func timeView() -> some View {

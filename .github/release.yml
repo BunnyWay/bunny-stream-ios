@@ -1,0 +1,54 @@
+changelog:
+  exclude:
+    labels:
+      - ignore-for-release
+    authors:
+      - dependabot
+      - dependabot[bot]
+  categories:
+    - title: Breaking Changes
+      labels:
+        - breaking-change
+        - breaking
+    - title: Features
+      labels:
+        - enhancement
+        - feature
+    - title: Fixes
+      labels:
+        - bug
+        - fix
+    - title: Player
+      labels:
+        - player
+        - avkit
+        - avfoundation
+        - airplay
+        - fairplay
+    - title: Uploads and Camera
+      labels:
+        - upload
+        - video-upload
+        - background-upload
+        - camera-upload
+        - tus
+    - title: API
+      labels:
+        - api
+        - openapi
+        - swift-openapi
+    - title: Documentation
+      labels:
+        - documentation
+        - docs
+        - docc
+    - title: Build, CI, and Dependencies
+      labels:
+        - dependencies
+        - swiftpm
+        - github-actions
+        - ci
+        - build
+    - title: Other Changes
+      labels:
+        - "*"

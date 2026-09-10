@@ -77,5 +77,3 @@ public struct VideoPlayerConfigLoader {
     try await load(libraryId: libraryId, videoId: videoId, accessKey: accessKey, token: token, expires: expires).thumbnailUrl
   }
 }
-
-

@@ -23,6 +23,9 @@ public struct BunnyStreamPlayer: View {
   let token: String?
   /// The expiration timestamp for the embed view token.
   let expires: Int64?
+  /// Optional HTTP headers to be passed to the underlying video player's network requests.
+  /// Useful for bypassing CDN restrictions, such as passing a `Referer`
+  let headers: [String: String]?
 
   /// The loading state of the video player.
   @State private var loadingState: VideoLoadingState = .loading
@@ -63,6 +66,7 @@ public struct BunnyStreamPlayer: View {
   ///   - expires: The expiration timestamp for the embed view token.
   ///   - playerIcons: Optional custom icons for the video player.
   ///   - watermark: Optional client-side watermark rendered on top of the video.
+  ///   - headers: Optional HTTP headers (such as `Referer`) added to the player's manifest and segment requests.
   ///
   /// ### Usage Example:
   /// ```swift
@@ -84,7 +88,8 @@ public struct BunnyStreamPlayer: View {
     token: String? = nil,
     expires: Int64? = nil,
     playerIcons: PlayerIcons? = nil,
-    watermark: PlayerWatermark? = nil
+    watermark: PlayerWatermark? = nil,
+    headers: [String: String]? = nil
   ) {
     self.accessKey = accessKey
     self.videoId = videoId
@@ -92,6 +97,7 @@ public struct BunnyStreamPlayer: View {
     self.token = token
     self.expires = expires
     self.watermark = watermark
+    self.headers = headers
     if let accessKey {
       self.heatmapLoader = HeatmapLoader(bunnyStreamAPI: .init(accessKey: accessKey))
     }
@@ -145,7 +151,7 @@ public struct BunnyStreamPlayer: View {
       let heatmap = try? await heatmapLoader?.loadHeatmap(videoId: videoId, libraryId: libraryId)
       
       VideoPlayerConfig(response: videoConfigResponse).map { self.videoConfig = $0 }
-      let player = MediaPlayer.make(video: video, token: token, expires: expires)
+      let player = MediaPlayer.make(video: video, token: token, expires: expires, headers: headers)
       self.player = player
       video.adjustLength(player.duration)
       self.theme = VideoPlayerTheme(config: videoConfigResponse) ?? theme

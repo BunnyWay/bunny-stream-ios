@@ -35,7 +35,10 @@ class FairPlayStreamHandler: NSObject, AVAssetResourceLoaderDelegate {
     // "Block direct url file access" (referer hotlink protection) rejects manifest/segment
     // requests that arrive without a Referer (HTTP 403). AVURLAssetHTTPHeaderFieldsKey propagates
     // this header to AVPlayer's own manifest + segment requests, alongside any CMCD headers.
-    headers["Referer"] = BunnyCDN.referer
+    // An integrator's own Referer (custom `headers` on `BunnyStreamPlayer`) takes precedence.
+    if !headers.keys.contains(where: { $0.caseInsensitiveCompare("Referer") == .orderedSame }) {
+      headers["Referer"] = BunnyCDN.referer
+    }
     let asset = AVURLAsset(url: url, options: ["AVURLAssetHTTPHeaderFieldsKey": headers])
     asset.resourceLoader.setDelegate(self, queue: DispatchQueue.main)
     return AVPlayerItem(asset: asset)
