@@ -113,9 +113,20 @@ class MediaPlayer: AVPlayer {
   private var rateObservation: NSKeyValueObservation?
   private var fairPlayHandler: FairPlayStreamHandler?
   private var cmcdLoader: CMCDResourceLoader?
+  private var errorLogObserver: NSObjectProtocol?
 
   /// Original (pre-CMCD-rewrite) URL for players backed by a CMCDResourceLoader.
   var sourceURL: URL?
+
+  /// Whether playback was refused with HTTP 403 (geo-blocking, referrer protection, token auth),
+  /// so retrying can't help. A CMCD-backed (live) player reads its loader's latest status, which
+  /// any later success clears — a 403 the stream recovered from never counts. Otherwise only a
+  /// failed item counts.
+  var isRefusedAsForbidden: Bool {
+    if let cmcdLoader { return cmcdLoader.lastFailedStatusCode == 403 }
+    guard let currentItem, currentItem.status == .failed else { return false }
+    return (playbackError(for: currentItem) as? VideoPlayerError) == .notAvailable
+  }
 
   override init() {
     super.init()
@@ -336,14 +347,48 @@ private extension MediaPlayer {
         state = .failed(error: Error.undefinedState)
       case .failed:
         canPlayVideo = false
-        state = .failed(error: playerItem.error ?? Error.undefinedError)
+        state = .failed(error: playbackError(for: playerItem))
       @unknown default:
         canPlayVideo = false
         state = .failed(error: Error.undefinedState)
       }
     }
+    // The error log can land after the item has already failed. Once it shows a 403, upgrade the
+    // generic failure so the viewer gets "not available" instead of a retry that can't help.
+    errorLogObserver = NotificationCenter.default.addObserver(
+      forName: AVPlayerItem.newErrorLogEntryNotification,
+      object: currentItem,
+      queue: .main
+    ) { [weak self] _ in
+      guard let self, case .failed(let error) = state,
+            (error as? VideoPlayerError) != .notAvailable,
+            let currentItem else { return }
+      let resolved = playbackError(for: currentItem)
+      if (resolved as? VideoPlayerError) == .notAvailable {
+        state = .failed(error: resolved)
+      }
+    }
   }
-  
+
+  /// The error a failed item surfaces. Any HTTP 403 — from the CDN (manifest, segments, MP4) or
+  /// the FairPlay license server — becomes `VideoPlayerError.notAvailable`.
+  func playbackError(for item: AVPlayerItem) -> Swift.Error {
+    if let event = item.errorLog()?.events.last(where: { PlaybackForbiddenDetector.isForbidden($0) }) {
+      print("[BunnyStreamPlayer] playback HTTP 403 — \(event.uri ?? "unknown URI")")
+      return VideoPlayerError.notAvailable
+    }
+    if let error = item.error, PlaybackForbiddenDetector.isForbidden(error) {
+      print("[BunnyStreamPlayer] playback HTTP 403 — \(error)")
+      return VideoPlayerError.notAvailable
+    }
+    // Our own loaders' statuses never reach the item's error intact, so they keep them: the
+    // FairPlay license server, and the CMCD loader that fetches live manifests and segments.
+    if fairPlayHandler?.lastFailedStatusCode == 403 || cmcdLoader?.lastFailedStatusCode == 403 {
+      return VideoPlayerError.notAvailable
+    }
+    return item.error ?? Error.undefinedError
+  }
+
   func setupPeriodicTimeObserver() {
     guard periodicTimeObserver == nil else { return }
     periodicTimeObserver = addPeriodicTimeObserver(
@@ -352,8 +397,8 @@ private extension MediaPlayer {
     ) { [weak self] time in
       guard let self, time.isValid else { return }
       
-      if currentItem?.status == .failed, let error = currentItem?.error {
-        state = .failed(error: error)
+      if let currentItem, currentItem.status == .failed, currentItem.error != nil {
+        state = .failed(error: playbackError(for: currentItem))
         removePeriodicTimeObserver()
         return
       }
@@ -413,6 +458,8 @@ private extension MediaPlayer {
   func removePlayerItemObserver() {
     playerItemObserver?.invalidate()
     playerItemObserver = nil
+    errorLogObserver.map(NotificationCenter.default.removeObserver)
+    errorLogObserver = nil
   }
   
   func removePeriodicTimeObserver() {

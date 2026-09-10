@@ -5,6 +5,9 @@ class FairPlayStreamHandler: NSObject, AVAssetResourceLoaderDelegate {
   private let urlSession = URLSession(configuration: .default)
   private let certificateURL: URL
   private let licenseURL: URL
+  /// HTTP status of the last rejected certificate/license request. AVFoundation doesn't carry our
+  /// error through to the failed player item intact, so `MediaPlayer` reads the status from here.
+  private(set) var lastFailedStatusCode: Int?
 
   /// - Parameters:
   ///   - token: Optional embed-view token, required when the library enforces token authentication.
@@ -106,6 +109,7 @@ private extension FairPlayStreamHandler {
       // missing or expired embed token, or referrer protection rejecting the request). The URL is
       // omitted on purpose — its query carries the playback token.
       print("[BunnyStreamPlayer] FairPlay \(endpoint) HTTP \(httpResponse.statusCode)")
+      lastFailedStatusCode = httpResponse.statusCode
       throw FairPlayHandlerError.requestFailed(statusCode: httpResponse.statusCode)
     }
     

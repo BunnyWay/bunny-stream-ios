@@ -56,6 +56,9 @@ public struct VideoPlayerConfigLoader {
         return config
       case 401:
         throw VideoPlayerError.unauthorized
+      case 403:
+        // Deliberately not split by cause (geo-blocking, referrer, token auth) — see `notAvailable`.
+        throw VideoPlayerError.notAvailable
       case 404:
         throw VideoPlayerError.notFound
       case 500:

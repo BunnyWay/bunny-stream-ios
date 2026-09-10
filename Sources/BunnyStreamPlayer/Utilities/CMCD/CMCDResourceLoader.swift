@@ -10,7 +10,30 @@ final class CMCDResourceLoader: NSObject {
     private let session: CMCDSession
     private let urlSession: URLSession
     private var activeTasks: [AVAssetResourceLoadingRequest: URLSessionTask] = [:]
+    private var _lastFailedStatusCode: Int?
     private let lock = NSLock()
+
+    /// Error domain for non-2xx responses handed to AVFoundation; the code is the HTTP status.
+    static let httpErrorDomain = "net.bunny.cmcd.http"
+
+    /// HTTP status of the most recent request if it was rejected, `nil` once a later one succeeds.
+    /// AVFoundation doesn't carry our error through to the failed player item intact, so callers
+    /// read the status from here. Cleared on success so a stale rejection never outlives recovery.
+    var lastFailedStatusCode: Int? {
+        lock.lock()
+        defer { lock.unlock() }
+        return _lastFailedStatusCode
+    }
+
+    /// The error to hand AVFoundation for a non-2xx response, or `nil` for a success.
+    static func httpFailure(for response: HTTPURLResponse) -> NSError? {
+        guard !(200...299).contains(response.statusCode) else { return nil }
+        return NSError(
+            domain: httpErrorDomain,
+            code: response.statusCode,
+            userInfo: [NSLocalizedDescriptionKey: "HTTP \(response.statusCode)"]
+        )
+    }
 
     init(session: CMCDSession) {
         self.session = session
@@ -121,6 +144,21 @@ private extension CMCDResourceLoader {
 
             guard let httpResponse = response as? HTTPURLResponse, let data else {
                 loadingRequest.finishLoading(with: URLError(.badServerResponse))
+                return
+            }
+
+            // A rejected request carries the server's error page as its body — never hand that to
+            // AVPlayer as media, or the item fails with a meaningless decode error instead of the
+            // HTTP status.
+            let failure = Self.httpFailure(for: httpResponse)
+            self.lock.lock()
+            self._lastFailedStatusCode = failure == nil ? nil : httpResponse.statusCode
+            self.lock.unlock()
+            if let failure {
+                // Host + path only: with token auth the query carries the playback token.
+                let requestId = httpResponse.value(forHTTPHeaderField: "cdn-requestid") ?? "none"
+                print("[BunnyStreamPlayer] HTTP \(httpResponse.statusCode) — \(realURL.host ?? "")\(realURL.path) (cdn-requestid: \(requestId))")
+                loadingRequest.finishLoading(with: failure)
                 return
             }
 

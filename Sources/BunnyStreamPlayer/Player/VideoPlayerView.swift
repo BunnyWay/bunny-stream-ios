@@ -10,15 +10,25 @@ struct VideoPlayerView: View {
   @StateObject private var pipManager = PictureInPictureManager()
   private var adComponent: MediaPlayerAdComponent
   private let video: Video
-  
+  private let onRetry: (() -> Void)?
+
   init(controlsViewModel: VideoPlayerControlsViewModel,
        viewModel: VideoPlayerViewModel,
        adComponent: MediaPlayerAdComponent,
-       video: Video) {
+       video: Video,
+       onRetry: (() -> Void)? = nil) {
     self.controlsViewModel = controlsViewModel
     self.viewModel = viewModel
     self.adComponent = adComponent
     self.video = video
+    self.onRetry = onRetry
+  }
+
+  /// The playback error to show over the player, if any. Only when a retry path exists (VOD) —
+  /// live recovers from player failures itself and must not be covered.
+  private var playbackFailure: Error? {
+    guard onRetry != nil, case .failed(let error) = controlsViewModel.playbackState else { return nil }
+    return error
   }
   
   var body: some View {
@@ -28,7 +38,7 @@ struct VideoPlayerView: View {
         adComponent.setupAdsInController(controller)
       }
       .overlay {
-        if !controlsViewModel.isAdPlaying {
+        if !controlsViewModel.isAdPlaying, playbackFailure == nil {
           ZStack {
             VStack {
               Spacer()
@@ -51,6 +61,11 @@ struct VideoPlayerView: View {
           WatermarkOverlayView(watermark: watermark)
         }
       }
+      .overlay {
+        if let playbackFailure, let onRetry {
+          PlaybackFailureView(error: playbackFailure, onRetry: onRetry)
+        }
+      }
       .onTapGesture {
         viewModel.toggleControlsVisibility()
       }
@@ -66,6 +81,12 @@ struct VideoPlayerView: View {
     .onChange(of: controlsViewModel.playbackState) { newState in
       if newState == .playing, let tagUrl = videoPlayerConfig.vastTagUrl {
         adComponent.requestAds(adTagUrl: tagUrl)
+      }
+      // The failure overlay hides the controls, including the fullscreen toggle, so leave
+      // fullscreen rather than trap the viewer behind the cover. Assign, don't toggle: this fires
+      // in both the embedded and the fullscreen instance of this view.
+      if playbackFailure != nil, controlsViewModel.isFullScreen {
+        controlsViewModel.isFullScreen = false
       }
     }
     .onAppear {

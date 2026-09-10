@@ -133,9 +133,11 @@ private extension LivePlaybackController {
             await MainActor.run { [weak self] in self?.apply(displayState: displayState) }
         } catch let error as BunnyLiveStreamError where error.isPermanent {
             // 401/403/404/410 and malformed requests — retrying can't help, so stop the loop.
+            // Any 403 reads as a generic "not available" to viewers — see `VideoPlayerError.notAvailable`.
+            let message: LiveStreamMessage = error.statusCode == 403 ? .notAvailable : .error
             await MainActor.run { [weak self] in
                 self?.isStopped = true
-                self?.state = .error(message: .error, thumbnailUrl: nil)
+                self?.state = .error(message: message, thumbnailUrl: nil)
                 self?.onPlaybackError?(error)
             }
         } catch {
@@ -229,6 +231,10 @@ private extension LivePlaybackController {
                     )
                     loadedCustomization = playData.customization
                     player = MediaPlayer.makeLive(url: playData.playbackURL, seekableWindowSeconds: playData.seekableWindow, contentId: streamId)
+                } catch VideoPlayerError.notAvailable {
+                    // Refused (403), not merely unavailable — the fallback URL would be refused too.
+                    if !isStopped { settleOnNotAvailable() }
+                    return
                 } catch {
                     player = MediaPlayer.makeLive(url: url, seekableWindowSeconds: 0, contentId: streamId)
                 }
@@ -263,6 +269,10 @@ private extension LivePlaybackController {
                 // offers actual renditions instead of only "Auto".
                 video = Video(response: config)
                 player = MediaPlayer.make(video: video, token: token, expires: expires)
+            } catch VideoPlayerError.notAvailable {
+                // Refused (403) — the fallback URL would be refused too.
+                if !isStopped { settleOnNotAvailable() }
+                return
             } catch {
                 video = Self.liveStubVideo(streamId: streamId, libraryId: libraryId)
                 player = MediaPlayer(url: fallbackURL)
@@ -340,7 +350,26 @@ private extension LivePlaybackController {
 
     func handlePlayerFailure() {
         removeItemObservers()
+        // A 403 is final: polling can't lift geo-blocking or a rejected token, and the API keeps
+        // reporting "running", so re-polling would only rebuild the same refused player forever.
+        // Anything else — stalls, 404s while the encoder reconnects, network — keeps recovering.
+        if case .playable(let player, _) = state, player.isRefusedAsForbidden {
+            settleOnNotAvailable()
+            return
+        }
         firePoll()
+    }
+
+    /// Stops for good on "Video is not available" — the same generic wording as VOD, whatever
+    /// caused the 403.
+    func settleOnNotAvailable() {
+        isStopped = true
+        pollTask?.cancel()
+        pollTask = nil
+        teardownCurrentPlayer()
+        state = .error(message: .notAvailable, thumbnailUrl: nil)
+        // Reported as a permanent error, as the `onPlaybackError` contract asks integrators to check.
+        onPlaybackError?(BunnyLiveStreamError(kind: .unauthorized, statusCode: 403))
     }
 
     func removeItemObservers() {

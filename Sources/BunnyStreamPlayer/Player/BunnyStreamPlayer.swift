@@ -110,13 +110,15 @@ public struct BunnyStreamPlayer: View {
         ProgressView()
           .frame(maxWidth: .infinity, maxHeight: .infinity)
       case .loaded(let mediaPlayer, let video, let heatmap):
-        BunnyStreamPlayerContainerView(player: mediaPlayer, video: video, heatmap: heatmap)
+        BunnyStreamPlayerContainerView(player: mediaPlayer, video: video, heatmap: heatmap) {
+          Task { await loadVideo() }
+        }
           .environment(\.videoPlayerTheme, theme)
           .environment(\.videoPlayerConfig, videoConfig)
           .environment(\.playerWatermark, watermark)
           .onAppear {
+            // No autoplay: playback starts when the viewer taps the play button.
             setupAudioSession()
-            mediaPlayer.play()
           }
       case .failed:
         reloadButton()
@@ -185,6 +187,8 @@ public struct BunnyStreamPlayer: View {
           .frame(width: 40, height: 40)
         Text(Lingua.Player.videoNotFound)
           .font(theme.font.size(11))
+      case .notAvailable:
+        VideoNotAvailableView()
       case .audioError:
         Text(Lingua.Error.audioError)
           .font(theme.font.size(13))

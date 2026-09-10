@@ -48,10 +48,18 @@ final class LiveStreamMessageLocalizationTests: XCTestCase {
   }
 
   func test_distinctMessagesHaveDistinctWording() {
-    let messages: [LiveStreamMessage] = [.notActive, .ended, .error, .startingSoon]
+    let messages: [LiveStreamMessage] = [.notActive, .ended, .error, .startingSoon, .notAvailable]
     let wordings = Set(messages.map { $0.localized(languageCode: "en") })
 
     XCTAssertEqual(wordings.count, messages.count, "each state needs its own wording")
+  }
+
+  /// A 403 must read exactly like VOD's, and — unlike the rest of `LiveStream.strings` — it is
+  /// translated, because it borrows VOD's `Player.strings` entry.
+  func test_notAvailableSharesVodWordingAndTranslations() {
+    XCTAssertEqual(LiveStreamMessage.notAvailable.localized(languageCode: "en"), "Video is not available")
+    XCTAssertEqual(LiveStreamMessage.notAvailable.localized(languageCode: "de"), "Video ist nicht verfügbar")
+    XCTAssertEqual(LiveStreamMessage.notAvailable.localized(), Lingua.Player.videoNotAvailable)
   }
 }
 

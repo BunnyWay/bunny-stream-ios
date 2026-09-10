@@ -16,21 +16,27 @@ enum LiveStreamMessage: Equatable {
   case error
   /// A scheduled stream is about to begin.
   case startingSoon
+  /// Playback was refused with HTTP 403 (geo-blocking, referrer protection, token auth). Worded
+  /// generically on purpose, exactly like VOD — the cause is never shown to viewers.
+  case notAvailable
 
-  private var key: String {
+  private var entry: (table: String, key: String) {
     switch self {
-    case .notActive:    return "stream_not_active"
-    case .ended:        return "stream_ended"
-    case .error:        return "stream_error"
-    case .startingSoon: return "stream_starting_soon"
+    case .notActive:    return ("LiveStream", "stream_not_active")
+    case .ended:        return ("LiveStream", "stream_ended")
+    case .error:        return ("LiveStream", "stream_error")
+    case .startingSoon: return ("LiveStream", "stream_starting_soon")
+    // Shared with VOD so both players say the same thing, in every language VOD is translated to.
+    case .notAvailable: return ("Player", "video_not_available")
     }
   }
 
   /// The wording in `languageCode`, falling back to the app's own language when the code is
   /// missing or the SDK carries no translation for it.
   func localized(languageCode: String? = nil) -> String {
-    LiveStreamLocalization.bundle(for: languageCode)
-      .localizedString(forKey: key, value: nil, table: "LiveStream")
+    let entry = entry
+    return LiveStreamLocalization.bundle(for: languageCode)
+      .localizedString(forKey: entry.key, value: nil, table: entry.table)
   }
 }
 

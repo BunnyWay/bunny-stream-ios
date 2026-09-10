@@ -70,7 +70,8 @@ private extension VideoPlayerError {
   init(_ error: BunnyLiveStreamError) {
     switch error.kind {
     case .unauthorized:
-      self = .unauthorized
+      // `.unauthorized` covers both 401 and 403; a 403 is a refusal, shown as "not available".
+      self = error.statusCode == 403 ? .notAvailable : .unauthorized
     case .notFound:
       self = .notFound
     case .server:

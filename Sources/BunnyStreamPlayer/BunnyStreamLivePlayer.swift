@@ -35,7 +35,8 @@ public struct BunnyStreamLivePlayer: View {
     ///     use it to keep surrounding UI or analytics in step. Not called for changes that don't
     ///     alter the public state.
     ///   - onPlaybackError: Called on the main actor when a poll fails, including transient
-    ///     failures the player recovers from on its own. Check
+    ///     failures the player recovers from on its own, or when the CDN refuses playback
+    ///     (HTTP 403, reported as a permanent `BunnyLiveStreamError`). Check
     ///     `(error as? BunnyLiveStreamError)?.isPermanent` to tell the two apart: after a
     ///     permanent failure the player stops polling and settles on
     ///     ``BunnyLiveStreamPlaybackState/failed(message:)``.

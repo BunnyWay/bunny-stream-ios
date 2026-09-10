@@ -38,6 +38,8 @@ public enum Lingua {
 	}
 
 	public enum Player {
+		/// Video is not available
+		public static let videoNotAvailable = tr("Player", "video_not_available")
 		/// Video not found!
 		public static let videoNotFound = tr("Player", "video_not_found")
 	}
