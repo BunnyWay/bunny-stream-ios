@@ -37,6 +37,8 @@ public struct BunnyStreamPlayer: View {
   @State var videoConfig = VideoPlayerConfig()
   /// The set of custom player icons.
   internal var playerIcons: PlayerIcons?
+  /// An optional client-side watermark rendered on top of the video.
+  internal var watermark: PlayerWatermark?
 
   /// The different states of video loading.
   enum VideoLoadingState {
@@ -63,6 +65,8 @@ public struct BunnyStreamPlayer: View {
   ///   - token: The embed view token. Required when token authentication is enabled for the video library.
   ///   - expires: The expiration timestamp for the embed view token.
   ///   - playerIcons: Optional custom icons for the video player.
+  ///   - watermark: Optional client-side watermark rendered on top of the video.
+  ///   - headers: Optional HTTP headers (such as `Referer`) added to the player's manifest and segment requests.
   ///
   /// ### Usage Example:
   /// ```swift
@@ -84,6 +88,7 @@ public struct BunnyStreamPlayer: View {
     token: String? = nil,
     expires: Int64? = nil,
     playerIcons: PlayerIcons? = nil,
+    watermark: PlayerWatermark? = nil,
     headers: [String: String]? = nil
   ) {
     self.accessKey = accessKey
@@ -91,6 +96,7 @@ public struct BunnyStreamPlayer: View {
     self.libraryId = libraryId
     self.token = token
     self.expires = expires
+    self.watermark = watermark
     self.headers = headers
     if let accessKey {
       self.heatmapLoader = HeatmapLoader(bunnyStreamAPI: .init(accessKey: accessKey))
@@ -110,12 +116,15 @@ public struct BunnyStreamPlayer: View {
         ProgressView()
           .frame(maxWidth: .infinity, maxHeight: .infinity)
       case .loaded(let mediaPlayer, let video, let heatmap):
-        BunnyStreamPlayerContainerView(player: mediaPlayer, video: video, heatmap: heatmap)
+        BunnyStreamPlayerContainerView(player: mediaPlayer, video: video, heatmap: heatmap) {
+          Task { await loadVideo() }
+        }
           .environment(\.videoPlayerTheme, theme)
           .environment(\.videoPlayerConfig, videoConfig)
+          .environment(\.playerWatermark, watermark)
           .onAppear {
+            // No autoplay: playback starts when the viewer taps the play button.
             setupAudioSession()
-            mediaPlayer.play()
           }
       case .failed:
         reloadButton()
@@ -136,13 +145,13 @@ public struct BunnyStreamPlayer: View {
   func loadVideo() async {
     loadingState = .loading
     do {
-      let videoConfigResponse = try await videoPlayerConfigLoader.load(libraryId: libraryId, videoId: videoId, token: token, expires: expires)
+      let videoConfigResponse = try await videoPlayerConfigLoader.load(libraryId: libraryId, videoId: videoId, accessKey: accessKey, token: token, expires: expires)
       var video = Video(response: videoConfigResponse)
       // If Public Video (no access key), heatmap is not loaded - heatmapLoader is nil
       let heatmap = try? await heatmapLoader?.loadHeatmap(videoId: videoId, libraryId: libraryId)
       
       VideoPlayerConfig(response: videoConfigResponse).map { self.videoConfig = $0 }
-      let player = MediaPlayer.make(video: video, headers: self.headers)
+      let player = MediaPlayer.make(video: video, token: token, expires: expires, headers: headers)
       self.player = player
       video.adjustLength(player.duration)
       self.theme = VideoPlayerTheme(config: videoConfigResponse) ?? theme
@@ -184,6 +193,8 @@ public struct BunnyStreamPlayer: View {
           .frame(width: 40, height: 40)
         Text(Lingua.Player.videoNotFound)
           .font(theme.font.size(11))
+      case .notAvailable:
+        VideoNotAvailableView()
       case .audioError:
         Text(Lingua.Error.audioError)
           .font(theme.font.size(13))

@@ -1124,6 +1124,573 @@ paths:
           description: Internal Server Error.
       security:
         - AccessKey: []
+  /library/{libraryId}/live:
+    get:
+      tags:
+        - Manage Live Streams
+      summary: List Live Streams
+      description: Retrieves a paginated list of live streams for the specified video library.
+      operationId: LiveStream_List
+      parameters:
+        - name: libraryId
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+          description: The ID of the video library.
+        - name: page
+          in: query
+          schema:
+            type: integer
+            format: int32
+            default: 1
+          description: The page number to retrieve.
+        - name: itemsPerPage
+          in: query
+          schema:
+            type: integer
+            format: int32
+            default: 100
+          description: The number of items per page.
+        - name: search
+          in: query
+          schema:
+            type: string
+            default: ''
+            nullable: true
+          description: A search term to filter live streams by name.
+        - name: orderBy
+          in: query
+          schema:
+            type: string
+            default: date
+            nullable: true
+          description: Specifies the field by which to order the results.
+      responses:
+        '200':
+          description: A paginated list of live streams matching the query parameters.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginationListOfLiveStreamModel'
+        '401':
+          description: The request authorization failed.
+        '500':
+          description: Internal Server Error.
+      security:
+        - AccessKey: []
+    post:
+      tags:
+        - Manage Live Streams
+      summary: Create Live Stream
+      description: Creates a new live stream in the specified video library.
+      operationId: LiveStream_Create
+      parameters:
+        - name: libraryId
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+          description: The ID of the video library where the live stream will be created.
+      requestBody:
+        description: Model containing the details for the new live stream.
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateLiveStreamModel'
+        required: true
+      responses:
+        '201':
+          description: The live stream was successfully created.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LiveStreamModel'
+        '401':
+          description: The request authorization failed.
+        '500':
+          description: Internal Server Error.
+      security:
+        - AccessKey: []
+  /library/{libraryId}/live/{streamId}:
+    get:
+      tags:
+        - Manage Live Streams
+      summary: Get Live Stream
+      description: Retrieves details of a specific live stream.
+      operationId: LiveStream_Get
+      parameters:
+        - name: libraryId
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+          description: The ID of the video library.
+        - name: streamId
+          in: path
+          required: true
+          schema:
+            type: string
+          description: The unique identifier of the live stream.
+      responses:
+        '200':
+          description: The details of the requested live stream.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LiveStreamModel'
+        '401':
+          description: The request authorization failed.
+        '404':
+          description: The requested live stream was not found.
+        '500':
+          description: Internal Server Error.
+      security:
+        - AccessKey: []
+    put:
+      tags:
+        - Manage Live Streams
+      summary: Update Live Stream
+      description: Updates an existing live stream with the provided details. Only the fields present in the request body are updated.
+      operationId: LiveStream_Update
+      parameters:
+        - name: libraryId
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+          description: The ID of the video library.
+        - name: streamId
+          in: path
+          required: true
+          schema:
+            type: string
+          description: The unique identifier of the live stream to update.
+      requestBody:
+        description: Model containing the fields to update.
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateLiveStreamModel'
+        required: true
+      responses:
+        '200':
+          description: The live stream was successfully updated. Returns the updated live stream.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LiveStreamModel'
+        '400':
+          description: The request was invalid.
+        '401':
+          description: The request authorization failed.
+        '404':
+          description: The requested live stream was not found.
+        '500':
+          description: Internal Server Error.
+      security:
+        - AccessKey: []
+    delete:
+      tags:
+        - Manage Live Streams
+      summary: Delete Live Stream
+      description: Deletes the specified live stream permanently.
+      operationId: LiveStream_Delete
+      parameters:
+        - name: libraryId
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+          description: The ID of the video library.
+        - name: streamId
+          in: path
+          required: true
+          schema:
+            type: string
+          description: The unique identifier of the live stream to delete.
+      responses:
+        '200':
+          description: The live stream was successfully deleted. The response body is empty.
+        '401':
+          description: The request authorization failed.
+        '404':
+          description: The requested live stream was not found.
+        '500':
+          description: Internal Server Error.
+      security:
+        - AccessKey: []
+  /library/{libraryId}/live/{streamId}/start:
+    put:
+      tags:
+        - Manage Live Streams
+      summary: Start Live Stream
+      description: Starts the specified live stream and makes it ready to accept an RTMP connection.
+      operationId: LiveStream_Activate
+      parameters:
+        - name: libraryId
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+          description: The ID of the video library.
+        - name: streamId
+          in: path
+          required: true
+          schema:
+            type: string
+          description: The unique identifier of the live stream to activate.
+      responses:
+        '200':
+          description: The live stream was successfully activated.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/StatusModel'
+        '401':
+          description: The request authorization failed.
+        '404':
+          description: The requested live stream was not found.
+        '500':
+          description: Internal Server Error.
+      security:
+        - AccessKey: []
+  /library/{libraryId}/live/{streamId}/stop:
+    put:
+      tags:
+        - Manage Live Streams
+      summary: Stop Live Stream
+      description: Stops the specified live stream.
+      operationId: LiveStream_Complete
+      parameters:
+        - name: libraryId
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+          description: The ID of the video library.
+        - name: streamId
+          in: path
+          required: true
+          schema:
+            type: string
+          description: The unique identifier of the live stream to stop.
+      responses:
+        '200':
+          description: The live stream was successfully stopped.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/StatusModel'
+        '401':
+          description: The request authorization failed.
+        '404':
+          description: The requested live stream was not found.
+        '500':
+          description: Internal Server Error.
+      security:
+        - AccessKey: []
+  /library/{libraryId}/live/{streamId}/regenerate-key:
+    put:
+      tags:
+        - Manage Live Streams
+      summary: Regenerate Stream Key
+      description: Regenerates the stream key for the live stream. This operation is not allowed for streams that ended.
+      operationId: LiveStream_RegenerateStreamKey
+      parameters:
+        - name: libraryId
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+          description: The ID of the video library.
+        - name: streamId
+          in: path
+          required: true
+          schema:
+            type: string
+          description: The unique identifier of the live stream.
+      responses:
+        '200':
+          description: The stream key was successfully regenerated. Returns the updated live stream.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LiveStreamModel'
+        '400':
+          description: The request was invalid, for example the stream has already ended.
+        '401':
+          description: The request authorization failed.
+        '404':
+          description: The requested live stream was not found.
+        '500':
+          description: Internal Server Error.
+      security:
+        - AccessKey: []
+  /library/{libraryId}/live/{streamId}/play:
+    get:
+      tags:
+        - Manage Live Streams
+      summary: Get Live Stream Play Data
+      description: Retrieves playback data for the specified live stream, including the HLS playback URL, DVR seekable window, and current live status.
+      operationId: LiveStream_GetStreamPlayData
+      parameters:
+        - name: libraryId
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+          description: The ID of the video library.
+        - name: streamId
+          in: path
+          required: true
+          schema:
+            type: string
+          description: The unique identifier of the live stream.
+        - name: token
+          in: query
+          schema:
+            type: string
+            default: ''
+            nullable: true
+          description: Authentication token for accessing the live stream playback data.
+        - name: expires
+          in: query
+          schema:
+            type: integer
+            format: int64
+            default: 0
+          description: Expiration timestamp for the provided token.
+      responses:
+        '200':
+          description: The playback data for the live stream.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LiveStreamPlayDataModel'
+        '401':
+          description: The request authorization failed.
+        '404':
+          description: The requested live stream was not found.
+        '500':
+          description: Internal Server Error.
+      security:
+        - AccessKey: []
+  /library/{libraryId}/live/{streamId}/status:
+    get:
+      tags:
+        - Manage Live Streams
+      summary: Get Live Stream Status
+      description: Retrieves the current ingest status of the specified live stream — a lightweight call suited for frequent polling.
+      operationId: LiveStream_GetStreamStatus
+      parameters:
+        - name: libraryId
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+          description: The ID of the video library.
+        - name: streamId
+          in: path
+          required: true
+          schema:
+            type: string
+          description: The unique identifier of the live stream.
+      responses:
+        '200':
+          description: The current status of the live stream.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LiveStreamStatusModel'
+        '400':
+          description: The request was invalid.
+        '401':
+          description: The request authorization failed.
+        '404':
+          description: The requested live stream was not found.
+        '500':
+          description: Internal Server Error.
+      security:
+        - AccessKey: []
+  /library/{libraryId}/live/{streamId}/thumbnail:
+    post:
+      tags:
+        - Manage Live Streams
+      summary: Set Live Stream Thumbnail
+      description: >-
+        Sets the offline thumbnail for a live stream, shown in the player before the stream
+        starts or when it encounters issues. Provide either a `thumbnailUrl` query parameter
+        (Bunny fetches the image) or upload the raw image bytes as an octet-stream request body.
+      operationId: LiveStream_SetThumbnail
+      parameters:
+        - name: libraryId
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+          description: The ID of the video library.
+        - name: streamId
+          in: path
+          required: true
+          schema:
+            type: string
+          description: The unique identifier of the live stream.
+        - name: thumbnailUrl
+          in: query
+          required: false
+          schema:
+            type: string
+          description: URL of the image to set as the thumbnail. Omit when uploading raw bytes in the request body.
+      requestBody:
+        required: false
+        description: >-
+          Raw image bytes to upload as the thumbnail. Send with the matching image Content-Type
+          (JPEG, PNG, WebP, or GIF) — the API rejects application/octet-stream. Omit when setting
+          the thumbnail via the thumbnailUrl query parameter.
+        content:
+          image/jpeg:
+            schema:
+              type: string
+              format: binary
+          image/png:
+            schema:
+              type: string
+              format: binary
+          image/webp:
+            schema:
+              type: string
+              format: binary
+          image/gif:
+            schema:
+              type: string
+              format: binary
+      responses:
+        '200':
+          description: The thumbnail was successfully set.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/StatusModel'
+        '400':
+          description: The request or URL was invalid.
+        '401':
+          description: The request authorization failed.
+        '404':
+          description: The requested live stream was not found.
+        '422':
+          description: Unable to fetch the thumbnail from the origin.
+        '500':
+          description: Internal Server Error.
+      security:
+        - AccessKey: []
+    delete:
+      tags:
+        - Manage Live Streams
+      summary: Delete Live Stream Thumbnail
+      description: Removes the offline thumbnail for a live stream.
+      operationId: LiveStream_DeleteThumbnail
+      parameters:
+        - name: libraryId
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+          description: The ID of the video library.
+        - name: streamId
+          in: path
+          required: true
+          schema:
+            type: string
+          description: The unique identifier of the live stream.
+        - name: restoreLibraryDefault
+          in: query
+          required: false
+          schema:
+            type: boolean
+          description: When true and the library has a default live thumbnail, that default is restored.
+      responses:
+        '204':
+          description: The thumbnail was successfully deleted.
+        '401':
+          description: The request authorization failed.
+        '404':
+          description: The requested live stream was not found.
+        '500':
+          description: Internal Server Error.
+      security:
+        - AccessKey: []
+  /library/{libraryId}/live/{streamId}/thumbnails:
+    get:
+      tags:
+        - Manage Live Streams
+      summary: Get Live Stream Thumbnails
+      description: Returns the list of captured thumbnails (URL and timestamp) for a live stream.
+      operationId: LiveStream_GetThumbnails
+      parameters:
+        - name: libraryId
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+          description: The ID of the video library.
+        - name: streamId
+          in: path
+          required: true
+          schema:
+            type: string
+          description: The unique identifier of the live stream.
+        - name: limit
+          in: query
+          required: false
+          schema:
+            type: integer
+            format: int32
+          description: 'The maximum number of thumbnails to return. Default: 5.'
+        - name: from
+          in: query
+          required: false
+          schema:
+            type: string
+          description: Filter thumbnails created at or after this UTC timestamp.
+        - name: to
+          in: query
+          required: false
+          schema:
+            type: string
+          description: Filter thumbnails created at or before this UTC timestamp.
+      responses:
+        '200':
+          description: A list of thumbnail objects.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/ThumbnailListResponseModel'
+        '400':
+          description: The request was invalid.
+        '401':
+          description: The request authorization failed.
+        '404':
+          description: The requested live stream was not found.
+        '500':
+          description: Internal Server Error.
+      security:
+        - AccessKey: []
   /OEmbed:
     get:
       tags:
@@ -2003,6 +2570,425 @@ components:
           type: string
           description: The URL of the provider's website.
           nullable: true
+    IngestEndpointConfig:
+      type: object
+      description: RTMP ingest endpoint URLs for a live stream. Combine the URL with the stream key to build the full publishing target.
+      additionalProperties: true
+      properties:
+        primaryIngestUrl:
+          type: string
+          description: The primary RTMP ingest URL of the live stream. Combine with the stream key to create the full publishing URL.
+          nullable: true
+        backupIngestUrl:
+          type: string
+          description: The backup RTMP ingest URL of the live stream. Combine with the stream key to create the full publishing URL.
+          nullable: true
+    IngestEndpoints:
+      type: object
+      description: The ingest endpoints available for publishing to a live stream.
+      additionalProperties: true
+      properties:
+        rtmp:
+          $ref: '#/components/schemas/IngestEndpointConfig'
+    LiveStreamModel:
+      type: object
+      description: Represents a live stream and its metadata including name, stream key, RTMP URL, playback URL, and current status.
+      additionalProperties: true
+      properties:
+        id:
+          type: string
+          description: The unique identifier of the live stream.
+          nullable: true
+        guid:
+          type: string
+          description: The GUID of the live stream (used in API responses).
+          nullable: true
+        videoLibraryId:
+          type: integer
+          description: The ID of the video library that contains the live stream.
+          format: int64
+        name:
+          type: string
+          description: The name of the live stream.
+          nullable: true
+        title:
+          type: string
+          description: The title of the live stream.
+          nullable: true
+        description:
+          type: string
+          description: The description of the live stream.
+          nullable: true
+        streamKey:
+          type: string
+          description: The stream key used for RTMP publishing.
+          nullable: true
+        playbackUrl:
+          type: string
+          description: The HLS playback URL for the live stream.
+          nullable: true
+        playbackUrlHls:
+          type: string
+          description: The HLS playback URL for the live stream (primary field returned by the API).
+          nullable: true
+        ingestEndpoints:
+          $ref: '#/components/schemas/IngestEndpoints'
+        status:
+          description: The current status of the live stream.
+          oneOf:
+            - $ref: '#/components/schemas/LiveStreamStatus'
+        hasArchive:
+          type: boolean
+          description: Indicates if the live stream is being archived for later playback.
+        recordVod:
+          type: boolean
+          description: Indicates whether a VOD recording will be available after the stream ends.
+        dvrEnabled:
+          type: boolean
+          description: Indicates whether DVR is enabled, allowing viewers to rewind the live stream.
+        dvrWindowSeconds:
+          type: integer
+          description: The DVR window size in seconds (how far back viewers can rewind).
+          format: int32
+        public:
+          type: boolean
+          description: Indicates whether the live stream is publicly accessible.
+        collectionId:
+          type: string
+          description: The ID of the collection the live stream belongs to.
+          nullable: true
+        scheduledEndTime:
+          type: string
+          description: The scheduled end time of the live stream in ISO 8601 format.
+          nullable: true
+        enableCountdown:
+          type: boolean
+          description: Indicates whether a countdown timer should be displayed before the scheduled start.
+        scheduledStartTime:
+          type: string
+          description: The scheduled start time of the live stream in ISO 8601 format.
+          nullable: true
+        preStreamTrailerVideoId:
+          type: string
+          description: The GUID of a VOD video to loop as a trailer before the stream starts.
+          nullable: true
+        startedAt:
+          type: string
+          description: The actual time the live stream started, in ISO 8601 format.
+          nullable: true
+        thumbnailUrl:
+          type: string
+          description: The URL of the thumbnail image to display when the stream is offline.
+          nullable: true
+        thumbnailFileName:
+          type: string
+          description: >-
+            The relative path of the offline thumbnail within the CDN zone. Combine with the
+            playback host and stream GUID to build the full URL:
+            https://{host}/{guid}/{thumbnailFileName}.
+          nullable: true
+        primaryLive:
+          type: boolean
+          description: Determines if the primary ingest is live.
+          nullable: true
+        backupLive:
+          type: boolean
+          description: Determines if the backup ingest is live.
+          nullable: true
+        ingestRegion:
+          type: string
+          description: The primary ingest region of the live stream.
+          nullable: true
+        rtmpOutputs:
+          type: array
+          description: The RTMP outputs the incoming stream is forwarded to (up to 4).
+          nullable: true
+          items:
+            $ref: '#/components/schemas/RtmpOutput'
+    LiveStreamStatus:
+      type: integer
+      description: 'The current status of the live stream: 0 = Unknown, 1 = Created, 2 = Scheduled, 3 = Preview, 4 = Running, 5 = Ended, 6 = VodProcessing, 7 = Error.'
+      x-enumNames:
+        - Unknown
+        - Created
+        - Scheduled
+        - Preview
+        - Running
+        - Ended
+        - VodProcessing
+        - Error
+      enum:
+        - 0
+        - 1
+        - 2
+        - 3
+        - 4
+        - 5
+        - 6
+        - 7
+    LiveStreamStatusModel:
+      type: object
+      description: The current ingest status of a live stream, returned by the /status endpoint. Lightweight and suited for frequent polling.
+      additionalProperties: true
+      properties:
+        readyToStart:
+          type: boolean
+          description: Determines if the stream is ready to start based on live ingest status.
+        primaryLive:
+          type: boolean
+          description: Determines if the primary ingest is live.
+        backupLive:
+          type: boolean
+          description: Determines if the backup ingest is live.
+        lastPingAgo:
+          type: integer
+          description: The number of milliseconds since the last ingest ping, if available.
+          format: int64
+          nullable: true
+        duration:
+          type: integer
+          description: The stream duration in seconds.
+          format: int32
+          nullable: true
+        statusTimeUtc:
+          type: string
+          description: The UTC time when the status was read, in ISO 8601 format.
+          nullable: true
+    ThumbnailListResponseModel:
+      type: object
+      description: A captured live stream thumbnail — its CDN URL and the moment it was taken.
+      additionalProperties: true
+      properties:
+        url:
+          type: string
+          description: The URL of the thumbnail image.
+          nullable: true
+        timestamp:
+          type: string
+          description: The UTC time the thumbnail was captured, in ISO 8601 format.
+          nullable: true
+    LiveStreamPlayDataModel:
+      type: object
+      description: Contains playback information returned by the live stream /play endpoint, including the nested live stream model and playback URLs.
+      additionalProperties: true
+      properties:
+        liveStream:
+          $ref: '#/components/schemas/LiveStreamModel'
+        libraryName:
+          type: string
+          description: The name of the video library that contains the live stream.
+          nullable: true
+        videoPlaylistUrl:
+          type: string
+          description: The HLS playlist (.m3u8) URL for the live stream.
+          nullable: true
+        fallbackUrl:
+          type: string
+          description: The fallback playback URL prefix used when the primary playlist is unavailable.
+          nullable: true
+        originalUrl:
+          type: string
+          description: The original source URL of the live stream, when available.
+          nullable: true
+        thumbnailUrl:
+          type: string
+          description: The URL of the thumbnail image to display when the stream is offline.
+          nullable: true
+        previewUrl:
+          type: string
+          description: The URL of the animated preview (WebP) for the live stream.
+          nullable: true
+        seekPath:
+          type: string
+          description: The base path for DVR seek thumbnails.
+          nullable: true
+        captionsPath:
+          type: string
+          description: The base path for caption files.
+          nullable: true
+        enableDRM:
+          type: boolean
+          description: Indicates whether DRM is enabled for the live stream.
+        playerKeyColor:
+          type: string
+          description: The primary player color (hex) configured for the library/stream.
+          nullable: true
+        fontFamily:
+          type: string
+          description: The player font family configured for the library/stream.
+          nullable: true
+        uiLanguage:
+          type: string
+          description: The player UI language configured for the library/stream.
+          nullable: true
+        showHeatmap:
+          type: boolean
+          description: Whether the watch-time heatmap should be shown in the player.
+        enableCompactControls:
+          type: boolean
+          description: Whether the player should use compact controls.
+        controls:
+          type: string
+          description: Comma-separated list of enabled player controls.
+          nullable: true
+    PaginationListOfLiveStreamModel:
+      type: object
+      description: A paginated list of live streams.
+      additionalProperties: true
+      properties:
+        totalItems:
+          type: integer
+          description: The total number of live streams available.
+          format: int64
+        currentPage:
+          type: integer
+          description: The current page number.
+          format: int64
+        itemsPerPage:
+          type: integer
+          description: The number of live streams per page.
+          format: int32
+        items:
+          type: array
+          description: The live streams returned on the current page.
+          nullable: true
+          items:
+            $ref: '#/components/schemas/LiveStreamModel'
+    CreateLiveStreamModel:
+      type: object
+      description: Schema for creating a new live stream. 'title' is required.
+      additionalProperties: true
+      required:
+        - title
+      properties:
+        title:
+          type: string
+          description: The title of the new live stream.
+          minLength: 1
+        description:
+          type: string
+          description: An optional description of the live stream.
+          nullable: true
+        collectionId:
+          type: string
+          description: The ID of the collection the live stream belongs to.
+          nullable: true
+        scheduledStartTime:
+          type: string
+          description: The scheduled start time in ISO 8601 format. When set, stream status becomes Scheduled (Upcoming).
+          format: date-time
+          nullable: true
+        scheduledEndTime:
+          type: string
+          description: The scheduled end time in ISO 8601 format.
+          format: date-time
+          nullable: true
+        public:
+          type: boolean
+          description: Determines if the live stream is publicly accessible.
+          nullable: true
+        dvrEnabled:
+          type: boolean
+          description: Enables DVR so viewers can rewind the live stream.
+          nullable: true
+        dvrWindowSeconds:
+          type: integer
+          description: DVR window size in seconds. Required when dvrEnabled is true. Maximum is 43200 (12 hours).
+          format: int32
+          maximum: 43200
+          minimum: 1
+          nullable: true
+        recordVod:
+          type: boolean
+          description: Create a VOD recording after the stream ends.
+          nullable: true
+        enableCountdown:
+          type: boolean
+          description: Show a countdown in the player before the stream starts (only applies when scheduledStartTime is set).
+          nullable: true
+        preStreamTrailerVideoId:
+          type: string
+          description: Video ID of the VOD to loop as a trailer before the live stream starts.
+          nullable: true
+        rtmpOutputs:
+          type: array
+          description: A list of up to 4 RTMP outputs that the incoming stream should be forwarded to.
+          nullable: true
+          items:
+            $ref: '#/components/schemas/RtmpOutput'
+    RtmpOutput:
+      type: object
+      description: An RTMP output endpoint that the incoming live stream is forwarded to.
+      additionalProperties: true
+      properties:
+        endpoint:
+          type: string
+          description: The RTMP output endpoint URL.
+          nullable: true
+        streamKey:
+          type: string
+          description: The stream key for the RTMP output endpoint.
+          nullable: true
+    UpdateLiveStreamModel:
+      type: object
+      description: Schema for updating live stream details. All fields are optional; only the fields present in the request are updated.
+      additionalProperties: true
+      properties:
+        title:
+          type: string
+          description: The updated title of the live stream.
+          nullable: true
+        description:
+          type: string
+          description: The updated description of the live stream.
+          nullable: true
+        collectionId:
+          type: string
+          description: The ID of the collection the live stream belongs to.
+          nullable: true
+        dvrEnabled:
+          type: boolean
+          description: Enables DVR so viewers can rewind the live stream.
+          nullable: true
+        dvrWindowSeconds:
+          type: integer
+          description: DVR window size in seconds. Required when dvrEnabled is true. Maximum is 43200 (12 hours).
+          format: int32
+          maximum: 43200
+          minimum: 1
+          nullable: true
+        recordVod:
+          type: boolean
+          description: Create a VOD recording after the stream ends.
+          nullable: true
+        scheduledStartTime:
+          type: string
+          description: The scheduled start time in ISO 8601 format. When set, stream status becomes Scheduled (Upcoming).
+          format: date-time
+          nullable: true
+        scheduledEndTime:
+          type: string
+          description: The scheduled end time in ISO 8601 format.
+          format: date-time
+          nullable: true
+        public:
+          type: boolean
+          description: Determines if the live stream is publicly accessible.
+          nullable: true
+        enableCountdown:
+          type: boolean
+          description: Show a countdown in the player before the stream starts (only applies when scheduledStartTime is set).
+          nullable: true
+        preStreamTrailerVideoId:
+          type: string
+          description: Video ID of the VOD to loop as a trailer before the live stream starts.
+          nullable: true
+        rtmpOutputs:
+          type: array
+          description: A list of up to 4 RTMP outputs that the incoming stream should be forwarded to.
+          nullable: true
+          items:
+            $ref: '#/components/schemas/RtmpOutput'
   securitySchemes:
     AccessKey:
       type: apiKey
@@ -2014,6 +3000,8 @@ tags:
     description: Endpoints for managing video collections including creation, retrieval, updating, and deletion.
   - name: Manage Videos
     description: Endpoints for managing videos including upload, update, deletion, fetching metadata, transcoding, and caption management.
+  - name: Manage Live Streams
+    description: Endpoints for managing live streams including creation, activation, completion, and playback data retrieval.
   - name: OEmbed
     description: Endpoint for retrieving OEmbed data for embedding videos.
 x-readme:

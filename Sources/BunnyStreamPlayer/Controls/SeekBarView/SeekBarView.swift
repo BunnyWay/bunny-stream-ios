@@ -206,7 +206,8 @@ private extension SeekBarView {
   }
   
   func activeLabel() -> String? {
-    if let moment = viewModel.video.moments.first(where: { isDragging && $0.contains(currentPosition, in: Int(viewModel.duration)) }) {
+    let durationInt = viewModel.duration.isFinite ? Int(viewModel.duration) : Int.max
+    if let moment = viewModel.video.moments.first(where: { isDragging && $0.contains(currentPosition, in: durationInt) }) {
       return moment.label
     } else if let chapter = viewModel.video.chaptersList?.first(where: { isDragging && $0.contains(currentPosition) }),
               case .regular(let title) = chapter.type {
@@ -219,9 +220,8 @@ private extension SeekBarView {
     let duration = viewModel.duration
     guard duration != .zero else { return }
     let percentage = Double(dragPosition / size.width)
-    let seekTimeSeconds = duration * percentage
-    viewModel.elapsedTime = seekTimeSeconds
-    viewModel.player.jump(to: seekTimeSeconds)
+    viewModel.elapsedTime = duration * percentage
+    viewModel.seek(to: percentage)
   }
   
   func updateSizeAndPosition(with newSize: CGSize) {

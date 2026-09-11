@@ -13,11 +13,12 @@ import AVFoundation
 struct VideoPicker: UIViewControllerRepresentable {
   @Environment(\.presentationMode) var presentationMode
   @Binding var selectedVideos: [Video]
+  var selectionLimit: Int = 5
   var onCompletion: ([Video]) -> Void
-  
+
   func makeUIViewController(context: Context) -> PHPickerViewController {
     var configuration = PHPickerConfiguration(photoLibrary: PHPhotoLibrary.shared())
-    configuration.selectionLimit = 5
+    configuration.selectionLimit = selectionLimit
     configuration.filter = .videos
     
     let picker = PHPickerViewController(configuration: configuration)

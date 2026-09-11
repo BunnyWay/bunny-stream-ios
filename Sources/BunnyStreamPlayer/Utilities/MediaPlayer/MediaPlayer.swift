@@ -35,7 +35,7 @@ extension MediaPlayerDelegate {
 }
 
 class MediaPlayer: AVPlayer {
-  private(set) lazy var playbackInterval: (startAt: Double, endAt: Double) = (0, duration)
+  var playbackInterval: (startAt: Double, endAt: Double) = (0, 0)
   
   /// A Boolean value that determines whether the media player should loop playback when it reaches the end of the media.
   ///
@@ -44,6 +44,8 @@ class MediaPlayer: AVPlayer {
   ///
   /// The default value is `false`.
   var allowsLooping = false
+
+  var kind: PlaybackKind = .vod
   
   /// The time interval in milliseconds at which the player observes the playback time.
   /// This property determines how often the player updates the playback progress.
@@ -59,6 +61,7 @@ class MediaPlayer: AVPlayer {
   
   /// The total duration of the current media item in seconds. This duration does not take into account any custom playback interval set.
   var duration: Double {
+    guard kind != .live else { return .infinity }
     guard let duration = currentItem?.asset.duration, duration.isValid, !duration.seconds.isNaN else { return 0 }
     return duration.seconds
   }
@@ -109,7 +112,22 @@ class MediaPlayer: AVPlayer {
   private var volumeObservation: NSKeyValueObservation?
   private var rateObservation: NSKeyValueObservation?
   private var fairPlayHandler: FairPlayStreamHandler?
-  
+  private var cmcdLoader: CMCDResourceLoader?
+  private var errorLogObserver: NSObjectProtocol?
+
+  /// Original (pre-CMCD-rewrite) URL for players backed by a CMCDResourceLoader.
+  var sourceURL: URL?
+
+  /// Whether playback was refused with HTTP 403 (geo-blocking, referrer protection, token auth),
+  /// so retrying can't help. A CMCD-backed (live) player reads its loader's latest status, which
+  /// any later success clears — a 403 the stream recovered from never counts. Otherwise only a
+  /// failed item counts.
+  var isRefusedAsForbidden: Bool {
+    if let cmcdLoader { return cmcdLoader.lastFailedStatusCode == 403 }
+    guard let currentItem, currentItem.status == .failed else { return false }
+    return (playbackError(for: currentItem) as? VideoPlayerError) == .notAvailable
+  }
+
   override init() {
     super.init()
     setupObservers()
@@ -132,12 +150,28 @@ class MediaPlayer: AVPlayer {
   
   convenience init(url: URL,
                    fairPlayHandler: FairPlayStreamHandler,
-                   subtitlesProvider: MediaPlayerSubtitlesProvider? = .none) {
-    let playerItem = fairPlayHandler.setupAssetPlayback(url: url)
+                   subtitlesProvider: MediaPlayerSubtitlesProvider? = .none,
+                   httpHeaders: [String: String] = [:]) {
+    let playerItem = fairPlayHandler.setupAssetPlayback(url: url, httpHeaders: httpHeaders)
     self.init(playerItem: playerItem)
     self.fairPlayHandler = fairPlayHandler
     self.subtitlesProvider = subtitlesProvider
     self.replaceCurrentItem(with: playerItem)
+  }
+
+  convenience init(liveURL url: URL, contentId: String, streamType: CMCDSession.StreamType) {
+    let cmcdSession = CMCDSession(contentId: contentId, streamType: streamType)
+    let loader = CMCDResourceLoader(session: cmcdSession)
+    let rewrittenURL = CMCDResourceLoader.rewrite(url)
+    let asset = AVURLAsset(url: rewrittenURL)
+    let loaderQueue = DispatchQueue(label: "net.bunny.cmcd", qos: .userInitiated)
+    asset.resourceLoader.setDelegate(loader, queue: loaderQueue)
+    let item = AVPlayerItem(asset: asset)
+    self.init(playerItem: item)
+    self.cmcdLoader = loader
+    self.sourceURL = url
+    cmcdSession.player = self
+    self.replaceCurrentItem(with: item)
   }
   
   // MARK: - methods
@@ -296,6 +330,14 @@ private extension MediaPlayer {
       case .readyToPlay:
         canPlayVideo = true
         state = .readyToPlay
+        // The asset is loaded now, so `duration` is valid. If the interval's end was captured
+        // before the asset resolved — a deferred-loading VOD asset reports `duration == 0` at
+        // init — it would still be 0 here, and the first time-observer tick would treat t≈0 as
+        // "ended" and freeze playback at 0:00. Backfill a missing end; only when it's unset, so a
+        // caller-supplied custom interval is preserved. (Live's end is `.infinity`, never <= 0.)
+        if playbackInterval.endAt <= 0 {
+          playbackInterval = (playbackInterval.startAt, duration)
+        }
         setupPeriodicTimeObserver()
         if playWhenReady {
           play()
@@ -305,14 +347,48 @@ private extension MediaPlayer {
         state = .failed(error: Error.undefinedState)
       case .failed:
         canPlayVideo = false
-        state = .failed(error: playerItem.error ?? Error.undefinedError)
+        state = .failed(error: playbackError(for: playerItem))
       @unknown default:
         canPlayVideo = false
         state = .failed(error: Error.undefinedState)
       }
     }
+    // The error log can land after the item has already failed. Once it shows a 403, upgrade the
+    // generic failure so the viewer gets "not available" instead of a retry that can't help.
+    errorLogObserver = NotificationCenter.default.addObserver(
+      forName: AVPlayerItem.newErrorLogEntryNotification,
+      object: currentItem,
+      queue: .main
+    ) { [weak self] _ in
+      guard let self, case .failed(let error) = state,
+            (error as? VideoPlayerError) != .notAvailable,
+            let currentItem else { return }
+      let resolved = playbackError(for: currentItem)
+      if (resolved as? VideoPlayerError) == .notAvailable {
+        state = .failed(error: resolved)
+      }
+    }
   }
-  
+
+  /// The error a failed item surfaces. Any HTTP 403 — from the CDN (manifest, segments, MP4) or
+  /// the FairPlay license server — becomes `VideoPlayerError.notAvailable`.
+  func playbackError(for item: AVPlayerItem) -> Swift.Error {
+    if let event = item.errorLog()?.events.last(where: { PlaybackForbiddenDetector.isForbidden($0) }) {
+      print("[BunnyStreamPlayer] playback HTTP 403 — \(event.uri ?? "unknown URI")")
+      return VideoPlayerError.notAvailable
+    }
+    if let error = item.error, PlaybackForbiddenDetector.isForbidden(error) {
+      print("[BunnyStreamPlayer] playback HTTP 403 — \(error)")
+      return VideoPlayerError.notAvailable
+    }
+    // Our own loaders' statuses never reach the item's error intact, so they keep them: the
+    // FairPlay license server, and the CMCD loader that fetches live manifests and segments.
+    if fairPlayHandler?.lastFailedStatusCode == 403 || cmcdLoader?.lastFailedStatusCode == 403 {
+      return VideoPlayerError.notAvailable
+    }
+    return item.error ?? Error.undefinedError
+  }
+
   func setupPeriodicTimeObserver() {
     guard periodicTimeObserver == nil else { return }
     periodicTimeObserver = addPeriodicTimeObserver(
@@ -321,8 +397,8 @@ private extension MediaPlayer {
     ) { [weak self] time in
       guard let self, time.isValid else { return }
       
-      if currentItem?.status == .failed, let error = currentItem?.error {
-        state = .failed(error: error)
+      if let currentItem, currentItem.status == .failed, currentItem.error != nil {
+        state = .failed(error: playbackError(for: currentItem))
         removePeriodicTimeObserver()
         return
       }
@@ -363,6 +439,9 @@ private extension MediaPlayer {
   }
   
   func timeObserverCallback(time: CMTime) {
+    // Never treat an unresolved interval (endAt == 0) as "ended": that would fire on the very
+    // first tick at t≈0 and freeze playback. A real VOD always has a positive end; live is .infinity.
+    guard playbackInterval.endAt > 0 else { return }
     guard (time.seconds + Double(timeObservingMiliseconds) / 1_000) >= playbackInterval.endAt else { return }
     
     // at this point, item has ended
@@ -379,6 +458,8 @@ private extension MediaPlayer {
   func removePlayerItemObserver() {
     playerItemObserver?.invalidate()
     playerItemObserver = nil
+    errorLogObserver.map(NotificationCenter.default.removeObserver)
+    errorLogObserver = nil
   }
   
   func removePeriodicTimeObserver() {

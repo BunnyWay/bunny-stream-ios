@@ -10,7 +10,7 @@ class PermissionsViewModel: ObservableObject {
   private var appStateSubscriber: AnyCancellable?
   
   var arePermissionsGranted: Bool {
-    cameraAccess != .authorized || microphoneAccess != .granted
+    cameraAccess == .authorized && microphoneAccess == .granted
   }
   
   var arePermissionsNotDetermined: Bool {

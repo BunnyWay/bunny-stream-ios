@@ -9,3 +9,7 @@
 "end_stream_alert_confirm_action" = "إنهاء البث";
 "indicator_live" = "مباشر";
 "indicator_offline" = "غير متصل";
+"stream_not_active" = "Live stream not active";
+"stream_ended" = "Live stream ended";
+"stream_error" = "Live stream error";
+"stream_starting_soon" = "Starting soon…";

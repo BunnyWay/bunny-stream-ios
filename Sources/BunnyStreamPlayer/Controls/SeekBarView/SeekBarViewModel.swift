@@ -5,6 +5,7 @@ class SeekBarViewModel: ObservableObject {
   @Published var heatmap: Heatmap
   @Published var elapsedTime: Double = .zero
   @Published var thumbnailSize: CGSize = .zero
+  @Published var seekableRange: ClosedRange<Double>? = nil
   let player: MediaPlayer
   
   init(player: MediaPlayer, video: Video, heatmap: Heatmap) {
@@ -14,12 +15,20 @@ class SeekBarViewModel: ObservableObject {
   }
   
   func seek(to percentage: Double) {
-    let seekTimeSeconds = duration * percentage
-    player.jump(to: seekTimeSeconds)
+    let seekTime: Double
+    if let range = seekableRange {
+      seekTime = range.lowerBound + (range.upperBound - range.lowerBound) * percentage
+    } else {
+      seekTime = duration * percentage
+    }
+    player.jump(to: seekTime)
   }
-  
+
   var duration: Double {
-    ceil(player.duration)
+    if let range = seekableRange {
+      return ceil(range.upperBound - range.lowerBound)
+    }
+    return ceil(player.duration)
   }
   
   var thumbnailYOffset: CGFloat {

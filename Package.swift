@@ -38,6 +38,7 @@ let package = Package(
         ),
       ],
       path: "Sources/BunnyStreamAPI",
+      exclude: ["GeneratedSources"],
       plugins: [
         .plugin(name: "OpenAPIGenerator", package: "swift-openapi-generator"),
       ]
@@ -78,6 +79,11 @@ let package = Package(
       name: "BunnyStreamUploaderTests",
       dependencies: ["BunnyStreamUploader"],
       path: "Tests/BunnyStreamUploaderTests"
+    ),
+    .testTarget(
+      name: "BunnyStreamPlayerTests",
+      dependencies: ["BunnyStreamPlayer"],
+      path: "Tests/BunnyStreamPlayerTests"
     ),
   ]
 )

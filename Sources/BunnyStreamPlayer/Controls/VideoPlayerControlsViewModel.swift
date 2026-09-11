@@ -17,6 +17,7 @@ class VideoPlayerControlsViewModel: ObservableObject {
   @Published var isOptionsMenuActive = false
   @Published var captions: String?
   @Published var isAdPlaying: Bool = false
+  @Published var isAtLiveEdge: Bool = true
   private var cancellables = Set<AnyCancellable>()
   
   
@@ -34,6 +35,22 @@ class VideoPlayerControlsViewModel: ObservableObject {
 extension VideoPlayerControlsViewModel {
   var duration: Double {
     ceil(player.duration)
+  }
+
+  var isLive: Bool {
+    player.kind == .live || player.kind == .event
+  }
+
+  /// A live stream without a DVR window (`.live`, not `.event`): its timeline slides against the
+  /// HLS live window, so the VOD-style scrubber and skip buttons are meaningless and are hidden.
+  /// `.event` (DVR live) and `.vod` (ended-stream recording) stay `false` and keep those controls.
+  /// Mirrors Android's `liveControlsFor(dvrEnabled:)`.
+  var isLiveWithoutDVR: Bool {
+    player.kind == .live
+  }
+
+  func snapToLiveEdge() {
+    player.snapToLiveEdge()
   }
   
   var currentFormattedTime: String {
@@ -121,7 +138,16 @@ extension VideoPlayerControlsViewModel: MediaPlayerDelegate {
   }
   
   func mediaPlayer(_ player: MediaPlayer, didProgressToTime seconds: Double) {
-    seekBarViewModel.elapsedTime = seconds
+    isAtLiveEdge = player.isAtLiveEdge
+    if player.kind == .event,
+       let range = player.currentItem?.seekableTimeRanges.last?.timeRangeValue,
+       range.duration.seconds > 0 {
+      seekBarViewModel.seekableRange = range.start.seconds...range.end.seconds
+      seekBarViewModel.elapsedTime = max(0, seconds - range.start.seconds)
+    } else {
+      seekBarViewModel.seekableRange = nil
+      seekBarViewModel.elapsedTime = seconds
+    }
   }
   
   func mediaPlayer(_ player: MediaPlayer, didFailWithError error: Error) {
@@ -133,8 +159,11 @@ extension VideoPlayerControlsViewModel: MediaPlayerDelegate {
   }
   
   func mediaPlayer(_ player: MediaPlayer, didChangeVolume volume: Float) {
-    isMuted = volume.isZero
-    player.isMuted = isMuted
+    // Reflect a hardware mute (volume → 0) in the icon, but never force-UNMUTE the player just
+    // because the system volume is non-zero — that would silently undo the user's mute-button tap.
+    guard volume.isZero else { return }
+    isMuted = true
+    player.isMuted = true
   }
   
   func mediaPlayer(_ player: MediaPlayer, didChangeRate rate: Float) {

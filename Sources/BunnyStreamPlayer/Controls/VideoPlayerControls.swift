@@ -1,33 +1,45 @@
 import SwiftUI
 import AVKit
 import Combine
+#if canImport(UIKit)
+import UIKit
+#endif
 
 struct VideoPlayerControls: View {
   @Environment(\.videoPlayerTheme) var theme: VideoPlayerTheme
   @Environment(\.videoPlayerConfig) var videoPlayerConfig: VideoPlayerConfig
   @ObservedObject private var viewModel: VideoPlayerControlsViewModel
+  @ObservedObject private var pipManager: PictureInPictureManager
   @State private var airPlayView = AirPlayView()
-  
-  init(viewModel: VideoPlayerControlsViewModel) {
+
+  init(viewModel: VideoPlayerControlsViewModel, pipManager: PictureInPictureManager) {
     self.viewModel = viewModel
+    self.pipManager = pipManager
   }
   
   var body: some View {
+    GeometryReader { proxy in
     VStack {
       topControlsView()
         .padding(.vertical, 4)
         .padding(.horizontal, 8)
         .opacity(viewModel.isDraggingSeekBar ? 0 : 1)
-      
+
       Spacer()
-      
+
       centerControlsView()
         .opacity(viewModel.isDraggingSeekBar ? 0 : 1)
-      
+
       Spacer()
-      
+
       bottomControlsView()
     }
+    // Keep controls clear of the notch / home-indicator when the player is edge-to-edge (fullscreen
+    // or full-screen presented). `proxy.safeAreaInsets` reads 0 here because the underlying video
+    // layer ignores the safe area, so we read the real window insets and apply them only on the
+    // edges the player actually reaches — an embedded, inset player gets no extra padding.
+    .frame(maxWidth: .infinity, maxHeight: .infinity)
+    .padding(edgeSafeAreaPadding(in: proxy))
     .confirmationDialog(Lingua.Settings.actionsTitle, isPresented: $viewModel.isOptionsMenuActive) {
       mainOptionsDialog()
     }
@@ -56,6 +68,7 @@ struct VideoPlayerControls: View {
         .environment(\.videoPlayerTheme, theme)
       }
     .foregroundColor(theme.tintColor)
+    }
   }
 }
 
@@ -63,9 +76,11 @@ struct VideoPlayerControls: View {
 extension VideoPlayerControls {
   func topControlsView() -> some View {
     HStack {
+      liveBadgeView()
+        .shouldAddView(viewModel.isLive)
       Spacer()
       fullScreenButton()
-        .shouldAddView(controlsToCheck: .fullScreen, in: videoPlayerConfig.controls)
+        .shouldAddView(controlsToCheck: .fullScreen, in: videoPlayerConfig)
     }
   }
   
@@ -82,7 +97,8 @@ extension VideoPlayerControls {
       }
       .frame(minWidth: 44, minHeight: 44)
       .contentShape(Rectangle())
-      .shouldAddView(controlsToCheck: .rewind, in: videoPlayerConfig.controls)
+      .shouldAddView(controlsToCheck: .rewind, in: videoPlayerConfig)
+      .shouldAddView(!viewModel.isLiveWithoutDVR)
 
       Spacer()
 
@@ -95,7 +111,7 @@ extension VideoPlayerControls {
       }
       .frame(minWidth: 44, minHeight: 44)
       .contentShape(Rectangle())
-      .shouldAddView(controlsToCheck: .play, in: videoPlayerConfig.controls)
+      .shouldAddView(controlsToCheck: .play, in: videoPlayerConfig)
 
       Spacer()
 
@@ -108,7 +124,8 @@ extension VideoPlayerControls {
       }
       .frame(minWidth: 44, minHeight: 44)
       .contentShape(Rectangle())
-      .shouldAddView(controlsToCheck: .fastForward, in: videoPlayerConfig.controls)
+      .shouldAddView(controlsToCheck: .fastForward, in: videoPlayerConfig)
+      .shouldAddView(!viewModel.isLiveWithoutDVR)
 
       Spacer()
     }
@@ -117,21 +134,29 @@ extension VideoPlayerControls {
   func bottomControlsView() -> some View {
     VStack {
       seekBarView()
-        .shouldAddView(controlsToCheck: .progress, in: videoPlayerConfig.controls)
+        .shouldAddView(controlsToCheck: .progress, in: videoPlayerConfig)
+        .shouldAddView(!viewModel.isLiveWithoutDVR)
 
       HStack {
         timeView()
+          .shouldAddView(!viewModel.isLive)
+          .shouldAddView(controlsToCheck: .currentTime, in: videoPlayerConfig)
+        goToLiveButton()
+          .shouldAddView(viewModel.isLive && !viewModel.isAtLiveEdge)
         Spacer()
         captionsButton()
           .shouldAddView(!viewModel.captionsMenuViewModel.captions.isEmpty)
-          .shouldAddView(controlsToCheck: .captions, in: videoPlayerConfig.controls)
+          .shouldAddView(controlsToCheck: .captions, in: videoPlayerConfig)
 
         optionsButton()
-          .shouldAddView(controlsToCheck: .settings, in: videoPlayerConfig.controls)
+          .shouldAddView(controlsToCheck: .settings, in: videoPlayerConfig)
+        pipButton()
+          .shouldAddView(pipManager.isSupported)
+          .shouldAddView(controlsToCheck: .pip, in: videoPlayerConfig)
         airplayButton()
-          .shouldAddView(controlsToCheck: .airplay, in: videoPlayerConfig.controls)
+          .shouldAddView(controlsToCheck: .airplay, in: videoPlayerConfig)
         volumeButton()
-          .shouldAddView(controlsToCheck: .mute, in: videoPlayerConfig.controls)
+          .shouldAddView(controlsToCheck: .mute, in: videoPlayerConfig)
       }
       .padding(.horizontal, 8)
     }
@@ -141,6 +166,17 @@ extension VideoPlayerControls {
   func fullScreenButton() -> some View {
     Button(action: viewModel.toggleFullScreenMode) {
       (viewModel.isFullScreen ? theme.images.fullscreenExpanded : theme.images.fullscreenCollapsed)
+        .aspectRatio(contentMode: .fit)
+        .frame(width: 30, height: 30)
+        .foregroundColor(.white)
+    }
+    .frame(minWidth: 44, minHeight: 44)
+    .contentShape(Rectangle())
+  }
+
+  func pipButton() -> some View {
+    Button(action: pipManager.toggle) {
+      (pipManager.isActive ? theme.images.pictureInPictureActive : theme.images.pictureInPicture)
         .aspectRatio(contentMode: .fit)
         .frame(width: 30, height: 30)
         .foregroundColor(.white)
@@ -188,7 +224,7 @@ extension VideoPlayerControls {
       viewModel.captionsMenuViewModel.showCaptions = true
     }
     .shouldAddView(!viewModel.captionsMenuViewModel.captions.isEmpty)
-    .shouldAddView(controlsToCheck: .captions, in: videoPlayerConfig.controls)
+    .shouldAddView(controlsToCheck: .captions, in: videoPlayerConfig)
     .foregroundColor(theme.tintColor)
     
     Button(Lingua.Settings.qualityMenuTitle) {
@@ -233,6 +269,31 @@ extension VideoPlayerControls {
     .contentShape(Rectangle())
   }
   
+  func liveBadgeView() -> some View {
+    HStack(spacing: 4) {
+      Circle()
+        .fill(viewModel.isAtLiveEdge ? Color.red : Color.gray)
+        .frame(width: 8, height: 8)
+      Text(Lingua.LiveStream.indicatorLive)
+        .font(.caption.bold())
+        .foregroundColor(.white)
+    }
+    .padding(.horizontal, 8)
+    .padding(.vertical, 4)
+    .background(Capsule().fill(Color.black.opacity(0.5)))
+  }
+
+  func goToLiveButton() -> some View {
+    Button(action: viewModel.snapToLiveEdge) {
+      Text(Lingua.LiveStream.indicatorLive)
+        .font(.caption.bold())
+        .foregroundColor(.white)
+        .padding(.horizontal, 8)
+        .padding(.vertical, 4)
+        .background(Capsule().fill(Color.red))
+    }
+  }
+
   func seekBarView() -> some View {
     SeekBarView(viewModel: viewModel.seekBarViewModel, isDraggingOutside: $viewModel.isDraggingSeekBar)
       .environment(\.videoPlayerConfig, videoPlayerConfig)
@@ -243,17 +304,51 @@ extension VideoPlayerControls {
       Text(viewModel.currentFormattedTime)
         .font(theme.font.size(11))
         .foregroundColor(.white)
-        .shouldAddView(controlsToCheck: .currentTime, in: videoPlayerConfig.controls)
+        .shouldAddView(controlsToCheck: .currentTime, in: videoPlayerConfig)
       
       Text(" / ")
         .font(.caption)
         .foregroundColor(.white)
-        .shouldAddView(controlsToCheck: .currentTime, .duration, in: videoPlayerConfig.controls)
+        .shouldAddView(controlsToCheck: .currentTime, .duration, in: videoPlayerConfig)
       
       Text(viewModel.totalFormattedTime)
         .font(theme.font.size(11))
         .foregroundColor(.white)
-        .shouldAddView(controlsToCheck: .duration, in: videoPlayerConfig.controls)
+        .shouldAddView(controlsToCheck: .duration, in: videoPlayerConfig)
     }
   }
+}
+
+// MARK: - Safe-area padding for edge-to-edge playback
+
+private extension VideoPlayerControls {
+  /// Window insets applied only on the edges the controls overlay actually reaches, so an
+  /// edge-to-edge (fullscreen / full-screen presented) player keeps its controls off the notch and
+  /// home-indicator, while an embedded, already-inset player is left untouched.
+  func edgeSafeAreaPadding(in proxy: GeometryProxy) -> EdgeInsets {
+    #if os(iOS)
+    guard let window = keyWindow else { return EdgeInsets() }
+    let insets = window.safeAreaInsets
+    let frame = proxy.frame(in: .global)
+    let bounds = window.bounds
+    let tolerance: CGFloat = 1
+    return EdgeInsets(
+      top: frame.minY <= bounds.minY + tolerance ? insets.top : 0,
+      leading: frame.minX <= bounds.minX + tolerance ? insets.left : 0,
+      bottom: frame.maxY >= bounds.maxY - tolerance ? insets.bottom : 0,
+      trailing: frame.maxX >= bounds.maxX - tolerance ? insets.right : 0
+    )
+    #else
+    return EdgeInsets()
+    #endif
+  }
+
+  #if os(iOS)
+  var keyWindow: UIWindow? {
+    UIApplication.shared.connectedScenes
+      .compactMap { $0 as? UIWindowScene }
+      .flatMap { $0.windows }
+      .first { $0.isKeyWindow }
+  }
+  #endif
 }

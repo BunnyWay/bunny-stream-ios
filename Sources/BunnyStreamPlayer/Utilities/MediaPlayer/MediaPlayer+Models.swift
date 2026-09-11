@@ -1,6 +1,14 @@
 import Foundation
 
 extension MediaPlayer {
+  enum PlaybackKind {
+    case vod
+    case event  // HLS EVENT — known duration, DVR window available
+    case live   // HLS LIVE — indefinite duration, no DVR
+  }
+}
+
+extension MediaPlayer {
   enum Error: Swift.Error {
     case undefinedState
     case undefinedError

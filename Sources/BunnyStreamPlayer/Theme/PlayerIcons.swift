@@ -35,6 +35,10 @@ public struct PlayerIcons {
   public var captions: Image
   /// Icon indicating captions or subtitles are enabled.
   public var captionsEnabled: Image
+  /// Icon for entering Picture in Picture mode.
+  public var pictureInPicture: Image
+  /// Icon for exiting Picture in Picture mode.
+  public var pictureInPictureActive: Image
 
   /// Initializes a new `PlayerIcons` instance with customizable icons for video player controls.
   ///
@@ -69,7 +73,9 @@ public struct PlayerIcons {
     videoNotFound: Image = Image(systemName: "play.slash.fill"),
     reload: Image = Image(systemName: "arrow.counterclockwise.circle"),
     captions: Image = Image(systemName: "captions.bubble"),
-    captionsEnabled: Image = Image(systemName: "captions.bubble.fill")
+    captionsEnabled: Image = Image(systemName: "captions.bubble.fill"),
+    pictureInPicture: Image = Image(systemName: "pip.enter"),
+    pictureInPictureActive: Image = Image(systemName: "pip.exit")
   ) {
     self.play = play
     self.pause = pause
@@ -86,5 +92,7 @@ public struct PlayerIcons {
     self.reload = reload
     self.captions = captions
     self.captionsEnabled = captionsEnabled
+    self.pictureInPicture = pictureInPicture
+    self.pictureInPictureActive = pictureInPictureActive
   }
 }

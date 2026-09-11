@@ -31,7 +31,7 @@ struct VideoListView: View {
               } label: {
                 VideoListRow(
                   video: videoInfo,
-                  thumbnailURL: viewModel.thumbnails[videoInfo]
+                  thumbnail: viewModel.thumbnailState(for: videoInfo)
                 )
               }
               .task {
@@ -42,6 +42,9 @@ struct VideoListView: View {
           }
           .padding(.vertical, 12)
         }
+        .refreshable {
+          await viewModel.loadVideos(libraryId: Int64(dependenciesManager.libraryId), showLoadingState: false)
+        }
       case .failed(let string):
         Text(string)
       }
@@ -49,6 +52,9 @@ struct VideoListView: View {
     .navigationTitle("Video List")
     .task {
       await viewModel.loadVideos(libraryId: Int64(dependenciesManager.libraryId))
+    }
+    .onDisappear {
+      viewModel.stopPolling()
     }
     .sheet(item: $selectedVideoInfo) { videoInfo in
       VideoPlayerDemoView(

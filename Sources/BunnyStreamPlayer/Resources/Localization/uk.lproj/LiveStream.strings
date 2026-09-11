@@ -9,3 +9,7 @@
 "end_stream_alert_confirm_action" = "Завершити трансляцію";
 "indicator_live" = "ПРЯМИЙ ЕФІР";
 "indicator_offline" = "НЕ В МЕРЕЖІ";
+"stream_not_active" = "Live stream not active";
+"stream_ended" = "Live stream ended";
+"stream_error" = "Live stream error";
+"stream_starting_soon" = "Starting soon…";

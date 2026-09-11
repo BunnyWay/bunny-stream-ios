@@ -30,9 +30,20 @@ public class BunnyStreamAPI {
 
   /// The main API client interface for accessing Bunny Stream services.
   ///
-  /// Use this property to access all available API endpoints and operations.
-  /// The client is configured with proper authentication and date handling.
+  /// This is the generated client, so its types change whenever the OpenAPI document is
+  /// regenerated. For live streams prefer ``liveStreams``, which speaks in domain types.
   public let client: Client
+
+  /// Live stream operations, expressed in domain types rather than generated ones.
+  ///
+  /// ```swift
+  /// let stream = try await BunnyStreamAPI(accessKey: key)
+  ///   .liveStreams
+  ///   .getLiveStream(libraryId: 123, streamId: "stream-guid")
+  /// ```
+  public var liveStreams: DefaultLiveStreamRepository {
+    DefaultLiveStreamRepository(client: client)
+  }
 
   /// Creates a new instance of the Bunny Stream SDK.
   ///

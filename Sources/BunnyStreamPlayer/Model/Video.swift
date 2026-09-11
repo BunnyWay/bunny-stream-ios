@@ -19,7 +19,7 @@ extension Video {
   var seekThumbnail: SeekThumbnail {
     let thumbnailsPerImage = 36
     let urls = seekThumbnailURLs(thumbnailsPerImage: thumbnailsPerImage)
-    let frameDurationPerThumbnail = Int(floor(length / Double(thumbnailCount)))
+    let frameDurationPerThumbnail = thumbnailCount > 0 ? Int(floor(length / Double(thumbnailCount))) : 0
     
     return SeekThumbnail(
       thumbnailUrls: urls,

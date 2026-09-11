@@ -1,3 +1,4 @@
+import BunnyStreamAPI
 import HaishinKit
 import SwiftUI
 
@@ -37,8 +38,14 @@ public struct BunnyStreamCameraUploadView: View {
 
   /// Creates a new camera upload view with the specified stream view model.
   /// - Parameter streamViewModel: The view model that manages streaming functionality.
-  init(streamViewModel: BunnyStreamCameraUploadViewModel) {
+  init(
+    streamViewModel: BunnyStreamCameraUploadViewModel,
+    controller: BunnyBroadcastController? = nil
+  ) {
     self.streamViewModel = streamViewModel
+    // Link both ways: the controller drives the view model, the view model reports back.
+    streamViewModel.broadcastController = controller
+    controller?.viewModel = streamViewModel
     streamViewModel.configureStream()
     lfView = MTHKSwiftUiView(rtmpStream: $streamViewModel.rtmpStream)
     controlsView = ControlsView(viewModel: streamViewModel)
@@ -52,6 +59,9 @@ public struct BunnyStreamCameraUploadView: View {
   /// - Parameters:
   ///   - accessKey: The access key for authentication.
   ///   - libraryId: The ID of the video library.
+  ///   - quality: The encoder configuration (resolution, frame rate, bitrates). Defaults to `.default` (1080p30).
+  ///   - controller: An optional handle for starting/stopping the broadcast and observing it
+  ///     from outside the view. The view works without one, using its built-in controls.
   ///
   /// Usage Example:
   /// ```
@@ -62,7 +72,8 @@ public struct BunnyStreamCameraUploadView: View {
   ///                      content: {
   ///      BunnyStreamCameraUploadView(
   ///       accessKey: "<access_key>",
-  ///       libraryId: <library_id>
+  ///       libraryId: <library_id>,
+  ///       quality: .fullHd1080
   ///      )
   ///   })
   ///  }
@@ -70,13 +81,46 @@ public struct BunnyStreamCameraUploadView: View {
   /// ```
   public init(
     accessKey: String,
-    libraryId: Int
+    libraryId: Int,
+    quality: BroadcastQuality = .default,
+    controller: BunnyBroadcastController? = nil
   ) {
-    let config = StreamConfig(accessKey: accessKey, libraryId: libraryId)
+    let config = StreamConfig(accessKey: accessKey, libraryId: libraryId, quality: quality)
     let videoCreator = VideoCreator(bunnyStreamAPI: .init(accessKey: accessKey), libraryId: libraryId)
     let streamViewModel = BunnyStreamCameraUploadViewModel(streamConfig: config, videoCreator: videoCreator)
-    self.init(streamViewModel: streamViewModel)
+    self.init(streamViewModel: streamViewModel, controller: controller)
   }
+
+  /// Initializes the broadcaster directly from an existing live stream.
+  /// Uses the primary RTMP ingest endpoint and `streamKey` from the stream — no video creation step needed.
+  /// - Parameters:
+  ///   - liveStream: The live stream to publish to. Build it from an API response with
+  ///     `BunnyLiveStream(from:)`.
+  ///   - quality: The encoder configuration (resolution, frame rate, bitrates). Defaults to `.default` (1080p30).
+  ///   - controller: An optional handle for starting/stopping the broadcast and observing it
+  ///     from outside the view.
+  public init(
+    liveStream: BunnyLiveStream,
+    accessKey: String,
+    libraryId: Int,
+    quality: BroadcastQuality = .default,
+    controller: BunnyBroadcastController? = nil
+  ) {
+    let config = StreamConfig(
+      rtmpUrl: liveStream.primaryIngestUrl ?? BunnyStreamCameraUploadView.bunnyFallbackRtmpUrl,
+      streamKey: liveStream.streamKey ?? "",
+      backupRtmpUrl: liveStream.backupIngestUrl,
+      accessKey: accessKey,
+      libraryId: libraryId,
+      streamId: liveStream.id,
+      quality: quality
+    )
+    let streamViewModel = BunnyStreamCameraUploadViewModel(streamConfig: config)
+    self.init(streamViewModel: streamViewModel, controller: controller)
+  }
+
+  /// Bunny global RTMP ingest URL — used when the stream model doesn't include an ingest endpoint.
+  static let bunnyFallbackRtmpUrl = "rtmp://global.rtmp.mediadelivery.net/live"
 
   /// The body of the view that handles different states:
   /// - Loading state while checking permissions
@@ -88,9 +132,9 @@ public struct BunnyStreamCameraUploadView: View {
         ProgressView()
           .frame(maxWidth: .infinity)
       } else if permissionsViewModel.arePermissionsGranted {
-        permissionsView()
-      } else {
         liveStreamView()
+      } else {
+        permissionsView()
       }
     }
     .overlay(alignment: .bottom) {
