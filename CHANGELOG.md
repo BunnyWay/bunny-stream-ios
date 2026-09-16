@@ -20,7 +20,7 @@ This project follows semantic versioning where possible:
 
 ### Fixed
 
-- Nothing yet.
+- Fix FairPlay license requests failing with HTTP 500 by sending the raw SPC with `Content-Type: application/octet-stream`.
 
 ### Deprecated
 

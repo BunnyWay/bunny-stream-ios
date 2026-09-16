@@ -88,13 +88,7 @@ private extension FairPlayStreamHandler {
   /// and answers with the raw CKC bytes — a JSON wrapper (as used by the retired
   /// `/FairPlayLicense/{libraryId}/{videoId}` endpoint) makes it fail.
   private func fetchCKC(spcData: Data) async throws -> Data {
-    var request = URLRequest(url: licenseURL)
-    request.httpMethod = "POST"
-    request.setValue(SDKInfo.userAgent, forHTTPHeaderField: SDKInfo.userAgentHeaderField)
-    request.setValue(BunnyCDN.referer, forHTTPHeaderField: "Referer")
-    request.httpBody = spcData
-    
-    let data = try await send(request, endpoint: "license")
+    let data = try await send(makeLicenseRequest(spcData: spcData), endpoint: "license")
     guard !data.isEmpty else {
       throw FairPlayHandlerError.invalidCKCData
     }
@@ -118,8 +112,10 @@ private extension FairPlayStreamHandler {
     
     return data
   }
-  
-  private static func makeURL(path: String, queryItems: [URLQueryItem]) -> URL {
+}
+
+private extension FairPlayStreamHandler {
+  static func makeURL(path: String, queryItems: [URLQueryItem]) -> URL {
     var components = URLComponents(string: Constants.fairPlayBaseUrlString)!
     components.path = path
     if !queryItems.isEmpty {
@@ -127,5 +123,22 @@ private extension FairPlayStreamHandler {
     }
     
     return components.url!
+  }
+}
+
+extension FairPlayStreamHandler {
+  /// Builds the license POST. The body is the raw SPC and must be declared as binary: a POST
+  /// without an explicit Content-Type goes out as `application/x-www-form-urlencoded`, and the
+  /// license server then tries to parse the SPC as form fields and answers HTTP 500 before the
+  /// license handler even runs.
+  func makeLicenseRequest(spcData: Data) -> URLRequest {
+    var request = URLRequest(url: licenseURL)
+    request.httpMethod = "POST"
+    request.setValue(SDKInfo.userAgent, forHTTPHeaderField: SDKInfo.userAgentHeaderField)
+    request.setValue(BunnyCDN.referer, forHTTPHeaderField: "Referer")
+    request.setValue("application/octet-stream", forHTTPHeaderField: "Content-Type")
+    request.httpBody = spcData
+
+    return request
   }
 }
