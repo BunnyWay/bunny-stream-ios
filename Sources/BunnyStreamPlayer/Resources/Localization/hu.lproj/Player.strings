@@ -1,5 +1,6 @@
 // This file was generated with Lingua command line tool. Please do not change it!
 // Source: https://github.com/poviolabs/Lingua
 
+"no_internet_connection" = "Nincs internetkapcsolat";
 "video_not_available" = "A videó nem érhető el";
 "video_not_found" = "A videó nem található!";

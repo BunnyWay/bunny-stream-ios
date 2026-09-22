@@ -118,11 +118,28 @@ class MediaPlayer: AVPlayer {
   /// Original (pre-CMCD-rewrite) URL for players backed by a CMCDResourceLoader.
   var sourceURL: URL?
 
-  /// Whether playback was refused with HTTP 403 (geo-blocking, referrer protection, token auth),
-  /// so retrying can't help. A CMCD-backed (live) player reads its loader's latest status, which
-  /// any later success clears — a 403 the stream recovered from never counts. Otherwise only a
-  /// failed item counts.
+  /// Set once a host check has come back saying the CDN host resolves to a sinkhole — Bunny's
+  /// DNS-level country block. Unlike a 403 this leaves no trace on the item, so it is remembered
+  /// here. Cleared whenever a new item is observed, so a later success is not held against.
+  private var isBlockedByDNS = false
+
+  /// The host a check is already running for, so a failure that keeps repeating — every segment
+  /// of a blocked stream fails — resolves it once rather than once per event.
+  private var hostCheckInFlight: String?
+
+  /// Called on the main actor once a host check concludes the CDN host is sinkholed.
+  ///
+  /// The check is asynchronous, so a caller that reacts to failure immediately — live playback
+  /// re-polls on any failure it thinks is transient — has already moved on by the time the
+  /// verdict lands. This is how it learns to stop.
+  var onBlockedByDNS: (() -> Void)?
+
+  /// Whether playback was refused for good: an HTTP 403 (geo-blocking, referrer protection,
+  /// token auth) or a CDN host that DNS answered with a sinkhole. Either way retrying can't help.
+  /// A CMCD-backed (live) player reads its loader's latest status, which any later success
+  /// clears — a 403 the stream recovered from never counts. Otherwise only a failed item counts.
   var isRefusedAsForbidden: Bool {
+    if isBlockedByDNS { return true }
     if let cmcdLoader { return cmcdLoader.lastFailedStatusCode == 403 }
     guard let currentItem, currentItem.status == .failed else { return false }
     return (playbackError(for: currentItem) as? VideoPlayerError) == .notAvailable
@@ -329,6 +346,9 @@ private extension MediaPlayer {
       switch playerItem.status {
       case .readyToPlay:
         canPlayVideo = true
+        // Playback works, so an earlier sinkhole verdict no longer applies (the viewer moved
+        // network, or the block was lifted).
+        isBlockedByDNS = false
         state = .readyToPlay
         // The asset is loaded now, so `duration` is valid. If the interval's end was captured
         // before the asset resolved — a deferred-loading VOD asset reports `duration == 0` at
@@ -348,6 +368,9 @@ private extension MediaPlayer {
       case .failed:
         canPlayVideo = false
         state = .failed(error: playbackError(for: playerItem))
+        // A refused connection may still turn out to be a DNS-level geo-block; settle it off
+        // this path and upgrade the failure if so.
+        checkHostForSinkholeIfNeeded(for: playerItem)
       @unknown default:
         canPlayVideo = false
         state = .failed(error: Error.undefinedState)
@@ -371,7 +394,12 @@ private extension MediaPlayer {
   }
 
   /// The error a failed item surfaces. Any HTTP 403 — from the CDN (manifest, segments, MP4) or
-  /// the FairPlay license server — becomes `VideoPlayerError.notAvailable`.
+  /// the FairPlay license server — becomes `VideoPlayerError.notAvailable`, and a device that
+  /// plainly has no connection becomes `VideoPlayerError.noInternetConnection`.
+  ///
+  /// A refused connection is left as-is here and settled asynchronously by
+  /// ``checkHostForSinkholeIfNeeded(for:)`` — telling a geo-block apart from an outage needs a
+  /// DNS lookup, which must not block this call.
   func playbackError(for item: AVPlayerItem) -> Swift.Error {
     if let event = item.errorLog()?.events.last(where: { PlaybackForbiddenDetector.isForbidden($0) }) {
       print("[BunnyStreamPlayer] playback HTTP 403 — \(event.uri ?? "unknown URI")")
@@ -386,7 +414,58 @@ private extension MediaPlayer {
     if fairPlayHandler?.lastFailedStatusCode == 403 || cmcdLoader?.lastFailedStatusCode == 403 {
       return VideoPlayerError.notAvailable
     }
+    if isBlockedByDNS { return VideoPlayerError.notAvailable }
+    if let error = item.error, PlaybackFailureClassifier.classify(error) == .noConnection {
+      return VideoPlayerError.noInternetConnection
+    }
     return item.error ?? Error.undefinedError
+  }
+
+  /// Resolves the CDN host behind a refused connection, and upgrades the failure once it answers.
+  ///
+  /// Bunny's "Blocked countries" block happens in DNS — the host resolves to a loopback sinkhole,
+  /// so the connection is refused and no 403 is ever returned. That is indistinguishable from an
+  /// outage until the host is resolved, which is why this runs off the failure path rather than
+  /// inside ``playbackError(for:)``: `getaddrinfo` blocks.
+  func checkHostForSinkholeIfNeeded(for item: AVPlayerItem) {
+    guard !isBlockedByDNS,
+          let error = item.error,
+          PlaybackFailureClassifier.classify(error) == .unreachable,
+          let host = failedHost(for: item),
+          hostCheckInFlight != host
+    else { return }
+
+    hostCheckInFlight = host
+    DispatchQueue.global(qos: .utility).async {
+      let outcome = SinkholeDetector.resolve(host: host)
+      DispatchQueue.main.async { [weak self] in
+        guard let self else { return }
+        self.applyHostCheck(outcome, host: host)
+      }
+    }
+  }
+
+  /// Applies a finished host check on the main actor.
+  private func applyHostCheck(_ outcome: SinkholeDetector.Outcome, host: String) {
+    hostCheckInFlight = nil
+    guard let resolved = PlaybackFailureClassifier.error(for: outcome) else { return }
+    if resolved == .notAvailable {
+      isBlockedByDNS = true
+      print("[BunnyStreamPlayer] playback blocked — \(host) resolves to a sinkhole")
+    }
+    // Only upgrade a failure that is still on screen, and never downgrade a 403.
+    if case .failed(let current) = state,
+       (current as? VideoPlayerError) != .notAvailable {
+      state = .failed(error: resolved)
+    }
+    // Told last, so a listener that tears this player down sees the final state first.
+    if resolved == .notAvailable { onBlockedByDNS?() }
+  }
+
+  /// The host playback was refused from: the item's own URL, falling back to the pre-CMCD URL for
+  /// a live player whose item is backed by a custom scheme.
+  private func failedHost(for item: AVPlayerItem) -> String? {
+    (item.asset as? AVURLAsset)?.url.host ?? sourceURL?.host
   }
 
   func setupPeriodicTimeObserver() {

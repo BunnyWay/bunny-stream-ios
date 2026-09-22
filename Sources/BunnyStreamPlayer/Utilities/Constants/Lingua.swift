@@ -38,6 +38,8 @@ public enum Lingua {
 	}
 
 	public enum Player {
+		/// No internet connection
+		public static let noInternetConnection = tr("Player", "no_internet_connection")
 		/// Video is not available
 		public static let videoNotAvailable = tr("Player", "video_not_available")
 		/// Video not found!
