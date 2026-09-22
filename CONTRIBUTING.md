@@ -28,11 +28,11 @@ Useful commands:
 
 ```bash
 swift package clean
-swift build
-swift test
 xcodebuild build-for-testing -destination 'name=iPhone 16 Pro' -scheme 'Bunny-Package' -skipPackagePluginValidation
 xcodebuild test-without-building -destination 'name=iPhone 16 Pro' -scheme 'Bunny-Package' -skipPackagePluginValidation
 ```
+
+Build and test against an **iOS destination**. Plain `swift build` / `swift test` target macOS and fail on the Google Interactive Media Ads dependency, which ships an iOS-only `.xcframework`.
 
 If Xcode asks you to trust the OpenAPI Generator plugin, approve it before building. In CI, use `-skipPackagePluginValidation` as the existing workflows do.
 
@@ -41,10 +41,12 @@ If Xcode asks you to trust the OpenAPI Generator plugin, approve it before build
 - `BunnyStreamAPI`: Swift OpenAPI client and authentication
 - `BunnyStreamUploader`: TUS and URLSession upload flows, progress tracking, pause/resume, background handling
 - `BunnyStreamPlayer`: SwiftUI video player, AVKit/AVFoundation integration, captions, audio tracks, AirPlay, FairPlay-related playback utilities
-- `BunnyStreamCameraUpload`: camera recording and direct upload UI/components
+- `BunnyStreamCameraUpload`: camera recording, direct upload, and live RTMP broadcasting UI/components
 - `Example-App`: integration examples
 
 Try to keep changes scoped to the package they affect.
+
+Live streaming spans three of them — playback in `BunnyStreamPlayer`, broadcasting in `BunnyStreamCameraUpload`, and management in `BunnyStreamAPI` — so a live streaming change usually touches more than one.
 
 ## Pull Request Guidelines
 
@@ -63,6 +65,33 @@ Pull requests should include:
 - Why the change is needed
 - How it was tested
 - Any migration notes for SDK users
+- A `CHANGELOG.md` entry under `[Unreleased]`, unless the change is invisible to SDK users (CI, tests, internal refactors with no behavior change)
+
+Adding the changelog entry in the PR that makes the change is what keeps releases cheap. Reconstructing one afterwards from a long branch is guesswork.
+
+## Releasing
+
+This package is consumed over Swift Package Manager, which resolves versions from **git tags**. An untagged commit on `main` cannot be depended on by version, so a change is not released until it is tagged.
+
+1. Decide the version. The public Swift API is the contract:
+   - **MAJOR** — a public symbol is renamed or removed, a signature changes in a source-breaking way, the minimum platform or Swift version rises, or documented behavior changes in a way that breaks integrations.
+   - **MINOR** — new public API or new capability, with everything that compiled before still compiling. Adding a parameter *with a default value* is minor, not major.
+   - **PATCH** — bug fixes and maintenance only.
+2. In one commit:
+   - move the `[Unreleased]` items into a `## [X.Y.Z] - YYYY-MM-DD` section in `CHANGELOG.md`, and leave a fresh empty `[Unreleased]` above it;
+   - bump `SDKInfo.version` to match — it feeds the `User-Agent`, so a stale value misattributes traffic in Bunny's logs;
+   - update the version in the README installation snippet if the major changed.
+3. Verify the package builds and tests pass (see [Development Setup](#development-setup)).
+4. Merge to `main`, then tag that commit and push the tag:
+
+   ```bash
+   git tag -a X.Y.Z -m "X.Y.Z"
+   git push origin X.Y.Z
+   ```
+
+5. Create the GitHub release from the tag, using the changelog section as its notes.
+
+Tags are what SDK users depend on, so treat a pushed tag as immutable: never move or delete one. If a release is wrong, publish the fix as a new patch version.
 
 ## API and Compatibility
 
