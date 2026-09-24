@@ -22,6 +22,10 @@
 
 Bunny Stream is a comprehensive Swift Package Manager (SPM) package designed to seamlessly integrate Bunny's powerful video streaming capabilities into your iOS applications. The package provides a robust set of tools for video management, playback, uploading, live streaming, and camera-based video uploads, all through an intuitive Swift API.
 
+> [!TIP]
+> **Using React Native or Expo?** [Bunny Stream React Native](https://github.com/BunnyWay/bunny-stream-react-native) brings
+> Bunny Stream to iOS and Android apps with one TypeScript API.
+
 ### Key Features
 
 - **Complete API Integration**: Full support for Bunny REST Stream API
