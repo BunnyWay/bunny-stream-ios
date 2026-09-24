@@ -13,7 +13,10 @@ permissions:
   contents: read
 
 env:
-  XCODE_VERSION: '26.6'
+  # DocC builds for the host (macOS). HaishinKit 1.7.3 fails to compile its
+  # macOS-only ScreenCaptureKit code with Xcode 26.6 (26.3 works), so stay on
+  # 26.3 until HaishinKit is upgraded. iOS builds are unaffected.
+  XCODE_VERSION: '26.3'
 
 jobs:
   build:
