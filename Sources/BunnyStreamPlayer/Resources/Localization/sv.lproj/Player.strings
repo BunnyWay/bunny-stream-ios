@@ -1,5 +1,6 @@
 // This file was generated with Lingua command line tool. Please do not change it!
 // Source: https://github.com/poviolabs/Lingua
 
+"no_internet_connection" = "Ingen internetanslutning";
 "video_not_available" = "Videon är inte tillgänglig";
 "video_not_found" = "Video hittades inte!";

@@ -195,6 +195,8 @@ public struct BunnyStreamPlayer: View {
           .font(theme.font.size(11))
       case .notAvailable:
         VideoNotAvailableView()
+      case .noInternetConnection:
+        NoInternetConnectionView { Task { await loadVideo() } }
       case .audioError:
         Text(Lingua.Error.audioError)
           .font(theme.font.size(13))

@@ -1,5 +1,6 @@
 // This file was generated with Lingua command line tool. Please do not change it!
 // Source: https://github.com/poviolabs/Lingua
 
+"no_internet_connection" = "インターネットに接続されていません";
 "video_not_available" = "このビデオは利用できません";
 "video_not_found" = "ビデオが見つかりません！";

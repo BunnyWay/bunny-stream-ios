@@ -346,6 +346,13 @@ private extension LivePlaybackController {
             guard item.status == .failed else { return }
             Task { @MainActor [weak self] in self?.handlePlayerFailure() }
         }
+
+        // Telling a DNS-level country block apart from an outage needs a host lookup, which
+        // lands after `handlePlayerFailure` has already decided the failure looked transient
+        // and resumed polling. This is the verdict arriving late; stop for good.
+        player.onBlockedByDNS = { [weak self] in
+            MainActor.assumeIsolated { self?.settleOnNotAvailable() }
+        }
     }
 
     func handlePlayerFailure() {
