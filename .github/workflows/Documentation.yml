@@ -11,29 +11,34 @@ on:
 
 permissions:
   contents: read
-  pages: write
-  id-token: write
 
-concurrency:
-  group: pages
-  cancel-in-progress: false
+env:
+  # DocC builds for the host (macOS). HaishinKit 1.7.3 fails to compile its
+  # macOS-only ScreenCaptureKit code with Xcode 26.6 (26.3 works), so stay on
+  # 26.3 until HaishinKit is upgraded. iOS builds are unaffected.
+  XCODE_VERSION: '26.3'
 
 jobs:
   build:
-    runs-on: macos-15
+    runs-on: macos-26
+    timeout-minutes: 30
+    # Supersede in-flight PR builds on new pushes; let every main build finish.
+    concurrency:
+      group: ${{ github.workflow }}-build-${{ github.ref }}
+      cancel-in-progress: ${{ github.event_name == 'pull_request' }}
     steps:
       - name: Checkout Repository
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
 
       - name: Update Xcode Settings
         run: |
           set -euo pipefail
           defaults write com.apple.dt.Xcode IDESkipPackagePluginFingerprintValidatation -bool YES
 
-      - name: Load Latest Xcode
+      - name: Load Xcode
         uses: maxim-lobanov/setup-xcode@v1
         with:
-          xcode-version: latest-stable
+          xcode-version: ${{ env.XCODE_VERSION }}
 
       - name: Generate DocC documentation
         run: |
@@ -59,15 +64,24 @@ jobs:
           <link rel="canonical" href="./documentation/">
           EOF
 
+      # PR builds only validate that the documentation generates.
       - name: Upload Pages artifact
+        if: github.event_name != 'pull_request' && github.ref == 'refs/heads/main'
         uses: actions/upload-pages-artifact@v5
         with:
           path: ./docs
 
   deploy:
     needs: build
-    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    if: github.event_name != 'pull_request' && github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      pages: write
+      id-token: write
+    concurrency:
+      group: pages
+      cancel-in-progress: false
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}

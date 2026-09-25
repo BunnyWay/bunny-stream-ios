@@ -4,35 +4,104 @@ name: BuildAndTest
 
 on:
   push:
+    branches:
+      - main
   pull_request:
     types: [opened, synchronize, reopened]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+# Supersede in-flight PR runs on new pushes; let every main run finish.
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+env:
+  # Xcode and simulator are pinned together: the simulator must exist in the
+  # runner image for this Xcode. See the runner image README when bumping:
+  # https://github.com/actions/runner-images/blob/main/images/macos/macos-26-arm64-Readme.md
+  XCODE_VERSION: '26.6'
+  DESTINATION: 'platform=iOS Simulator,name=iPhone 17 Pro'
+  SPM_DIR: .spm
 
 jobs:
   build:
 
-    runs-on: macos-15
+    runs-on: macos-26
+    timeout-minutes: 45
 
     steps:
-      
+
     - name: Checkout Repository
-      uses: actions/checkout@v6
-      
+      uses: actions/checkout@v7
+
     - name: Update Xcode Settings
       run: |
         set -euo pipefail
         defaults write com.apple.dt.Xcode IDESkipPackagePluginFingerprintValidatation -bool YES
         defaults write com.apple.dt.Xcode IDESkipMacroFingerprintValidation -bool YES
-      
-    - name: Load Latest Xcode
+
+    - name: Load Xcode
       uses: maxim-lobanov/setup-xcode@v1
       with:
-        xcode-version: latest-stable
-        
-    - name: Clean project
-      run: swift package clean
+        xcode-version: ${{ env.XCODE_VERSION }}
+
+    - name: Cache Swift packages
+      uses: actions/cache@v6
+      with:
+        path: ${{ env.SPM_DIR }}
+        key: spm-${{ runner.os }}-xcode${{ env.XCODE_VERSION }}-${{ hashFiles('Package.resolved', 'Example-App/**/Package.resolved') }}
+        restore-keys: |
+          spm-${{ runner.os }}-xcode${{ env.XCODE_VERSION }}-
 
     - name: Build project
-      run: set -o pipefail && env NSUnbufferedIO=YES xcodebuild build-for-testing -destination 'name=iPhone 16 Pro' -scheme 'Bunny-Package' -skipPackagePluginValidation | xcpretty
+      run: |
+        set -o pipefail
+        env NSUnbufferedIO=YES xcodebuild build-for-testing \
+          -scheme 'Bunny-Package' \
+          -destination "$DESTINATION" \
+          -clonedSourcePackagesDirPath "$SPM_DIR" \
+          -derivedDataPath DerivedData \
+          -skipPackagePluginValidation \
+          -skipMacroValidation \
+          | xcbeautify --renderer github-actions
 
     - name: Run tests
-      run: set -o pipefail && env NSUnbufferedIO=YES xcodebuild test-without-building -destination 'name=iPhone 16 Pro' -scheme 'Bunny-Package' -skipPackagePluginValidation | xcpretty
+      run: |
+        set -o pipefail
+        env NSUnbufferedIO=YES xcodebuild test-without-building \
+          -scheme 'Bunny-Package' \
+          -destination "$DESTINATION" \
+          -clonedSourcePackagesDirPath "$SPM_DIR" \
+          -derivedDataPath DerivedData \
+          -resultBundlePath TestResults.xcresult \
+          -skipPackagePluginValidation \
+          -skipMacroValidation \
+          | xcbeautify --renderer github-actions
+
+    - name: Upload test results
+      if: failure()
+      uses: actions/upload-artifact@v7
+      with:
+        name: TestResults
+        path: TestResults.xcresult
+        if-no-files-found: ignore
+
+    # Catches public API changes that break the SDK's integration example.
+    # Runs even when tests fail so both signals are reported in one run.
+    - name: Build Example App
+      if: ${{ !cancelled() }}
+      run: |
+        set -o pipefail
+        env NSUnbufferedIO=YES xcodebuild build \
+          -project Example-App/Example-App.xcodeproj \
+          -scheme 'Example-App' \
+          -destination 'generic/platform=iOS Simulator' \
+          -clonedSourcePackagesDirPath "$SPM_DIR" \
+          -derivedDataPath DerivedData \
+          -skipPackagePluginValidation \
+          -skipMacroValidation \
+          CODE_SIGNING_ALLOWED=NO \
+          | xcbeautify --renderer github-actions
