@@ -8,7 +8,7 @@
         <img src="https://img.shields.io/badge/Swift-5.9-orange.svg" />
     </a>
     <a href="./LICENSE" alt="License">
-        <img src="https://img.shields.io/badge/Licence-MIT-green.svg" />
+        <img src="https://img.shields.io/badge/License-MIT-green.svg" />
     </a>
     <a href="https://github.com/BunnyWay/bunny-stream-ios/actions/workflows/BuildAndTest.yml" alt="Tests Status">
         <img src="https://github.com/BunnyWay/bunny-stream-ios/actions/workflows/BuildAndTest.yml/badge.svg" />
@@ -67,32 +67,27 @@ Bunny Stream can be integrated into your project using Swift Package Manager (SP
 
 ### Swift Package Manager
 
-1. In Xcode, select File > Swift Packages > Add Package Dependency
+1. In Xcode, select **File > Add Package Dependencies…**
 2. Enter the package repository URL:
    
    ```
    https://github.com/BunnyWay/bunny-stream-ios.git
    ```
-3. Select the version you want to use:
-   
-   ```swift
-   dependencies: [
+3. Choose a version rule, then add the libraries your target needs (`BunnyStreamAPI`, `BunnyStreamUploader`, `BunnyStreamPlayer`, `BunnyStreamCameraUpload`).
+
+In a `Package.swift` manifest, add the dependency instead:
+
+```swift
+dependencies: [
     .package(url: "https://github.com/BunnyWay/bunny-stream-ios.git", .upToNextMajor(from: "1.0.0"))
-   ]
-   ```
+]
+```
 
 ### Required Permissions
 
 Add the following entries to your Info.plist file:
 
 ```xml
-<!-- For video upload and download -->
-<key>NSAppTransportSecurity</key>
-<dict>
-    <key>NSAllowsArbitraryLoads</key>
-    <true/>
-</dict>
-
 <!-- For camera upload and live broadcasting -->
 <key>NSCameraUsageDescription</key>
 <string>Camera access is required for video recording</string>
@@ -111,6 +106,8 @@ Add the following entries to your Info.plist file:
 
 > **Picture in Picture** additionally requires the *Audio, AirPlay, and Picture in Picture* background mode to be enabled under **Signing & Capabilities → Background Modes** in your app target. Without it, iOS refuses to start a PiP session.
 
+No App Transport Security exceptions are needed: the SDK talks to Bunny over HTTPS only.
+
 ### Initialization
 
 After installation, you'll need to configure the package with your Bunny credentials:
@@ -119,13 +116,14 @@ After installation, you'll need to configure the package with your Bunny credent
 import BunnyStreamAPI
 
 // Initialize with your access key
-let BunnyStreamAPI = BunnyStreamAPI(accessKey: "your_access_key")
+let bunnyStreamAPI = BunnyStreamAPI(accessKey: "your_access_key")
 ```
 
 ## Documentation and Examples
 
 - **API reference** — [generated DocC documentation](https://bunnyway.github.io/bunny-stream-ios/documentation/), published from CI for every package.
-- **Example App** — [`Example-App/`](Example-App) is a working SwiftUI integration covering video management, uploads, on-demand playback, live playback, live stream creation and scheduling, and broadcasting from the camera. Open it in Xcode and fill in your own library id and access key.
+- **Example App** — [`Example-App/`](Example-App) is a working SwiftUI integration covering video management, uploads, on-demand playback, live playback, live stream creation and scheduling, and broadcasting from the camera. Open it in Xcode and fill in your own library id and access key; see its [README](Example-App/README.md) for setup.
+- **Changelog** — [CHANGELOG.md](CHANGELOG.md) lists the changes in every release.
 
 ## Getting Started
 
@@ -148,45 +146,82 @@ let videoInfo = try await bunnyStreamAPI.client.getVideo(
 
 ### 2. BunnyStreamUploader - File Upload
 
+The uploader sends a file into an existing video object, so create the video through `BunnyStreamAPI` first and pass its GUID as `videoId`:
+
 ```swift
+import BunnyStreamAPI
 import BunnyStreamUploader
 
-// Create uploader instance
+let bunnyStreamAPI = BunnyStreamAPI(accessKey: "your_access_key")
 let videoUploader = TUSVideoUploader.make(accessKey: "your_access_key")
 
-// Prepare video info
-VideoInfo(content: .data(video.data),
-                     title: video.name,
-                     fileType: video.type,
-                     videoId: videoId,
-                     libraryId: libraryId)
-
-// Start upload with progress tracking
 Task {
     do {
-        try await videoUploader.uploadVideos(with: [videoInfo]) { progress in
-            print("Upload progress: \(progress.fractionCompleted)")
-        }
-        print("Upload completed successfully!")
+        // 1. Create the video object that the file will be uploaded into.
+        let output = try await bunnyStreamAPI.client.createVideo(
+            path: .init(libraryId: 12345),
+            body: .json(.CreateVideoModel(.init(title: "My video")))
+        )
+        guard case .ok(let response) = output,
+              case .json(let video) = response.body,
+              let videoId = video.guid else { return }
+
+        // 2. Describe the file. `content` is `.data(Data)` or `.url(URL)` for a local file.
+        let videoInfo = VideoInfo(
+            content: .url(localFileURL),
+            title: "My video",
+            fileType: "video/mp4",
+            videoId: videoId,
+            libraryId: 12345
+        )
+
+        // 3. Upload. This returns once the uploads have been started;
+        //    follow their progress through `uploadTracker` (below).
+        try await videoUploader.uploadVideos(with: [videoInfo])
     } catch {
         print("Upload error: \(error)")
     }
 }
 ```
 
+#### Tracking Progress
+
+Every upload is tracked by `videoUploader.uploadTracker`, keyed by `UploadVideoInfo`, with an `UploadStatus` of `.uploading(progress:)`, `.paused(progress:)`, `.uploaded(url:)`, `.failed(error:)` or `.removed`. In SwiftUI, wrap the tracker in `UploadTrackerObservable`:
+
+```swift
+struct UploadsView: View {
+    @StateObject private var tracker: UploadTrackerObservable
+
+    init(videoUploader: TUSVideoUploader) {
+        _tracker = StateObject(wrappedValue: UploadTrackerObservable(tracker: videoUploader.uploadTracker))
+    }
+
+    var body: some View {
+        List(Array(tracker.uploads.keys), id: \.uuid) { upload in
+            switch tracker.uploads[upload] {
+            case .uploading(let progress), .paused(let progress):
+                ProgressView(upload.info.title, value: progress.fractionCompleted)
+            case .uploaded:
+                Text("\(upload.info.title): done")
+            case .failed(let error):
+                Text("\(upload.info.title): \(error)")
+            case .removed, nil:
+                EmptyView()
+            }
+        }
+    }
+}
+```
+
 #### Pause, Resume, and Remove Uploads
 
-For these actions, you'll be using methods from the `VideoUploaderActions` protocol.
-
-This ensures that when the background upload completes, or if there's an error, the `completionHandler` will be called. This will allow the app to update its UI or notify the user, among other possible actions.
-
-In summary, the `TUSVideoUploader` provides an all-in-one solution for robust video uploading, supporting features like pausing, resuming, canceling, and background uploads.
+`TUSVideoUploader` conforms to `VideoUploaderActions`. Each action takes the `UploadVideoInfo` of an upload, as found in `uploadTracker.uploads`:
 
 ```swift
 do {
-    try videoUploader.pauseUpload(for: specificUploadInfo)
-    try videoUploader.resumeUpload(for: specificUploadInfo)
-    try videoUploader.removeUpload(for: specificUploadInfo)
+    try videoUploader.pauseUpload(for: upload)
+    try videoUploader.resumeUpload(for: upload)
+    try videoUploader.removeUpload(for: upload)
 } catch {
     print("Error performing action: \(error)")
 }
@@ -261,8 +296,10 @@ extension BunnyStreamPlayer {
 
 // Example view
 struct VideoPlayerDemoView: View {
+    let videoId: String
+
     var body: some View {
-       BunnyStreamPlayer.make(videoId: videoInfo.id)
+       BunnyStreamPlayer.make(videoId: videoId)
        .navigationBarTitle(Text("Video Player"), displayMode: .inline)
     }
 }
@@ -281,8 +318,8 @@ struct VideoStreamDemoView: View {
       .fullScreenCover(isPresented: $isStreamingPresented,
                        content: {
         BunnyStreamCameraUploadView(
-          accessKey: "<access_key>",
-          libraryId: <library_id>
+          accessKey: "your_access_key",
+          libraryId: 12345
         )
       })
   }
@@ -593,13 +630,11 @@ do {
 
 ### Uploads
 
-`TUSVideoUploader` throws `VideoUploaderError`:
+`TUSVideoUploader` throws `VideoUploaderError` when an upload cannot be started. A failure after the upload has started is reported as `.failed(error:)` in `uploadTracker` — see [Tracking Progress](#tracking-progress).
 
 ```swift
 do {
-    try await videoUploader.uploadVideos(with: [videoInfo]) { progress in
-        print("Upload progress: \(progress.fractionCompleted)")
-    }
+    try await videoUploader.uploadVideos(with: [videoInfo])
 } catch let error as VideoUploaderError {
     switch error {
     case .failedToCreateVideoWithReason(let message):
@@ -647,6 +682,12 @@ xcodebuild build -scheme Bunny-Package \
   -skipPackagePluginValidation
 ```
 
+**For CI/CD Environments:**
+
+Add the `-skipPackagePluginValidation` flag to your build commands. See our [GitHub Actions workflows](.github/workflows/BuildAndTest.yml) for reference implementation.
+
+This is a security feature in Xcode that requires manual approval for build plugins. Once trusted locally, you won't see this error again on your machine.
+
 ### `swift build` fails on the Google IMA framework
 
 Building from the command line with plain `swift build` targets macOS, and the Google Interactive Media Ads dependency ships an iOS-only `.xcframework`:
@@ -658,11 +699,11 @@ no library for this platform was found
 
 This is expected — build against an iOS destination with `xcodebuild` instead, as shown above and as the [CI workflows](.github/workflows/BuildAndTest.yml) do.
 
-**For CI/CD Environments:**
+## Security Notes
 
-Add the `-skipPackagePluginValidation` flag to your build commands. See our [GitHub Actions workflows](.github/workflows/BuildAndTest.yml) for reference implementation.
-
-This is a security feature in Xcode that requires manual approval for build plugins. Once trusted locally, you won't see this error again on your machine.
+- **Keep the access key off shipped apps where you can.** The library API key grants full management access to the library. For on-demand playback of public videos, pass `accessKey: nil` to `BunnyStreamPlayer`; for management, uploads and live streams, prefer calling Bunny from your own backend.
+- **Sign playback tokens on your server.** For token-authenticated libraries, generate `token`/`expires` server-side and pass them to the players — never embed the token security key in the app.
+- **Hotlink protection.** When the library blocks direct URL access, pass the allowed `Referer` through the player's `headers`, and send the same header when loading Bunny-hosted images with your own image loader.
 
 ## License
 
