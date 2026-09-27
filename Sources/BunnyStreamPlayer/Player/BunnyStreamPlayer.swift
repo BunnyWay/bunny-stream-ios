@@ -26,6 +26,9 @@ public struct BunnyStreamPlayer: View {
   /// Optional HTTP headers to be passed to the underlying video player's network requests.
   /// Useful for bypassing CDN restrictions, such as passing a `Referer`
   let headers: [String: String]?
+  let controller: BunnyStreamPlayerController?
+  let autoPlay: Bool
+  let controlsEnabled: Bool
 
   /// The loading state of the video player.
   @State private var loadingState: VideoLoadingState = .loading
@@ -89,7 +92,10 @@ public struct BunnyStreamPlayer: View {
     expires: Int64? = nil,
     playerIcons: PlayerIcons? = nil,
     watermark: PlayerWatermark? = nil,
-    headers: [String: String]? = nil
+    headers: [String: String]? = nil,
+    controller: BunnyStreamPlayerController? = nil,
+    autoPlay: Bool = false,
+    controlsEnabled: Bool = true
   ) {
     self.accessKey = accessKey
     self.videoId = videoId
@@ -98,6 +104,9 @@ public struct BunnyStreamPlayer: View {
     self.expires = expires
     self.watermark = watermark
     self.headers = headers
+    self.controller = controller
+    self.autoPlay = autoPlay
+    self.controlsEnabled = controlsEnabled
     if let accessKey {
       self.heatmapLoader = HeatmapLoader(bunnyStreamAPI: .init(accessKey: accessKey))
     }
@@ -116,14 +125,18 @@ public struct BunnyStreamPlayer: View {
         ProgressView()
           .frame(maxWidth: .infinity, maxHeight: .infinity)
       case .loaded(let mediaPlayer, let video, let heatmap):
-        BunnyStreamPlayerContainerView(player: mediaPlayer, video: video, heatmap: heatmap) {
+        BunnyStreamPlayerContainerView(
+          player: mediaPlayer,
+          video: video,
+          heatmap: heatmap,
+          controlsEnabled: controlsEnabled
+        ) {
           Task { await loadVideo() }
         }
           .environment(\.videoPlayerTheme, theme)
           .environment(\.videoPlayerConfig, videoConfig)
           .environment(\.playerWatermark, watermark)
           .onAppear {
-            // No autoplay: playback starts when the viewer taps the play button.
             setupAudioSession()
           }
       case .failed:
@@ -134,6 +147,9 @@ public struct BunnyStreamPlayer: View {
     }
     .task {
       await loadVideo()
+    }
+    .onChange(of: autoPlay) { enabled in
+      if enabled { player?.play() }
     }
     .onDisappear {
       player?.pause()
@@ -153,6 +169,8 @@ public struct BunnyStreamPlayer: View {
       VideoPlayerConfig(response: videoConfigResponse).map { self.videoConfig = $0 }
       let player = MediaPlayer.make(video: video, token: token, expires: expires, headers: headers)
       self.player = player
+      controller?.attach(to: player)
+      if autoPlay { player.play() }
       video.adjustLength(player.duration)
       self.theme = VideoPlayerTheme(config: videoConfigResponse) ?? theme
       if let playerIcons {
@@ -162,9 +180,11 @@ public struct BunnyStreamPlayer: View {
       loadingState = .loaded(player, video, heatmap ?? Heatmap(data: [:]))
     } catch let error as VideoPlayerError {
       print("[BunnyStreamPlayer Error]: \(error)")
+      controller?.report(error)
       loadingState = .loaderFailed(error)
     } catch {
       print("[BunnyStreamPlayer Error]: \(error)")
+      controller?.report(error)
       loadingState = .failed
     }
   }

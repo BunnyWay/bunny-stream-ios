@@ -10,17 +10,20 @@ struct VideoPlayerView: View {
   @StateObject private var pipManager = PictureInPictureManager()
   private var adComponent: MediaPlayerAdComponent
   private let video: Video
+  private let controlsEnabled: Bool
   private let onRetry: (() -> Void)?
 
   init(controlsViewModel: VideoPlayerControlsViewModel,
        viewModel: VideoPlayerViewModel,
        adComponent: MediaPlayerAdComponent,
        video: Video,
+       controlsEnabled: Bool = true,
        onRetry: (() -> Void)? = nil) {
     self.controlsViewModel = controlsViewModel
     self.viewModel = viewModel
     self.adComponent = adComponent
     self.video = video
+    self.controlsEnabled = controlsEnabled
     self.onRetry = onRetry
   }
 
@@ -38,7 +41,7 @@ struct VideoPlayerView: View {
         adComponent.setupAdsInController(controller)
       }
       .overlay {
-        if !controlsViewModel.isAdPlaying, playbackFailure == nil {
+        if controlsEnabled, !controlsViewModel.isAdPlaying, playbackFailure == nil {
           ZStack {
             VStack {
               Spacer()
