@@ -20,6 +20,7 @@ public struct BunnyStreamLivePlayer: View {
     private let libraryId: Int
     private let streamId: String
     private let watermark: PlayerWatermark?
+    private let controlsEnabled: Bool
     private let onStateChange: ((BunnyLiveStreamPlaybackState) -> Void)?
     private let onPlaybackError: ((Error) -> Void)?
     @State private var isTrailerMuted = true
@@ -31,6 +32,7 @@ public struct BunnyStreamLivePlayer: View {
     ///   - watermark: Optional client-side watermark rendered on top of the live video.
     ///   - token: Optional playback token, required when the library enforces token authentication.
     ///   - expires: Expiration timestamp that `token` was signed with.
+    ///   - controlsEnabled: Whether the native transport controls are visible.
     ///   - onStateChange: Called on the main actor whenever what the player is showing changes —
     ///     use it to keep surrounding UI or analytics in step. Not called for changes that don't
     ///     alter the public state.
@@ -47,6 +49,7 @@ public struct BunnyStreamLivePlayer: View {
         watermark: PlayerWatermark? = nil,
         token: String? = nil,
         expires: Int64? = nil,
+        controlsEnabled: Bool = true,
         onStateChange: ((BunnyLiveStreamPlaybackState) -> Void)? = nil,
         onPlaybackError: ((Error) -> Void)? = nil
     ) {
@@ -54,6 +57,7 @@ public struct BunnyStreamLivePlayer: View {
         self.libraryId = libraryId
         self.streamId = streamId
         self.watermark = watermark
+        self.controlsEnabled = controlsEnabled
         self.onStateChange = onStateChange
         self.onPlaybackError = onPlaybackError
         self._controller = StateObject(wrappedValue: LivePlaybackController(
@@ -151,7 +155,12 @@ private extension BunnyStreamLivePlayer {
     func liveContainerView(_ player: MediaPlayer, video: Video) -> some View {
         // `video` carries real resolutions/captions for an ended-live recording (so the quality
         // menu offers actual renditions); for the live edge it's a minimal "Auto-only" stub.
-        BunnyStreamPlayerContainerView(player: player, video: video, heatmap: Heatmap(data: [:]))
+        BunnyStreamPlayerContainerView(
+            player: player,
+            video: video,
+            heatmap: Heatmap(data: [:]),
+            controlsEnabled: controlsEnabled
+        )
             .environment(\.playerWatermark, watermark)
             .environment(\.videoPlayerTheme, resolvedTheme)
             .environment(\.videoPlayerConfig, resolvedConfig)
