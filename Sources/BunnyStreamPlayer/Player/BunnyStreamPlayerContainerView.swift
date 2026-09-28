@@ -8,13 +8,21 @@ struct BunnyStreamPlayerContainerView: View {
   @StateObject var videoPlayerViewModel: VideoPlayerViewModel
   private var adComponent: MediaPlayerAdComponent
   private let video: Video
+  private let controlsEnabled: Bool
   /// Rebuilds playback after a failure. When `nil` (live), no failure overlay is shown — the live
   /// controller recovers on its own.
   private let onRetry: (() -> Void)?
 
-  init(player: MediaPlayer, video: Video, heatmap: Heatmap, onRetry: (() -> Void)? = nil) {
+  init(
+    player: MediaPlayer,
+    video: Video,
+    heatmap: Heatmap,
+    controlsEnabled: Bool = true,
+    onRetry: (() -> Void)? = nil
+  ) {
     self.player = player
     self.video = video
+    self.controlsEnabled = controlsEnabled
     self.onRetry = onRetry
     self._controlsViewModel = StateObject(wrappedValue: VideoPlayerControlsViewModel(player: player,
                                                                                      video: video,
@@ -45,6 +53,7 @@ private extension BunnyStreamPlayerContainerView {
                     viewModel: videoPlayerViewModel,
                     adComponent: adComponent,
                     video: video,
+                    controlsEnabled: controlsEnabled,
                     onRetry: onRetry)
     .environment(\.videoPlayerTheme, theme)
     .environment(\.videoPlayerConfig, videoPlayerConfig)

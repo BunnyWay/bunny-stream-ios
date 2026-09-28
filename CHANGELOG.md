@@ -53,6 +53,20 @@ and live stream management.
 - **Client-side watermark** — `PlayerWatermark`, rendered over on-demand and live video.
 - `headers` on `BunnyStreamPlayer`, applied to manifest and segment requests — lets a library with
   "Block direct URL file access" enabled play by supplying an allowed `Referer`.
+- **Programmatic player control** — `BunnyStreamPlayerController`, an `@MainActor`
+  `ObservableObject` that attaches to `BunnyStreamPlayer` and drives playback from outside the
+  view: `play()`, `pause()`, `seek(to:)`, `setVolume(_:)`, `mute()`, `unmute()` and
+  `setPlaybackRate(_:)`.
+  - Published `snapshot` (`BunnyStreamPlaybackSnapshot`) exposes `state`
+    (`BunnyStreamPlaybackState`), `position`, `duration`, `volume`, `isMuted`, `playbackRate`
+    and `videoSize`, alongside callbacks `onReady`, `onStateChange`, `onProgress`,
+    `onBufferingChange`, `onPlay`, `onPause`, `onEnd`, `onVolumeChange`,
+    `onPlaybackRateChange`, `onVideoSizeChange` and `onError`.
+  - Commands issued before the controller attaches are queued and applied in order once the
+    video loads; `dispose()` detaches and ignores further commands.
+  - `BunnyStreamPlayer` gains `controller:`, `autoPlay:` and `controlsEnabled:` init
+    parameters — all optional and defaulting to previous behavior. Hiding the built-in
+    controls enables headless/embedded use cases such as React Native bridging.
 - HTTP 403 handling in the player: geo-blocking, referrer protection and token failures all surface
   as a generic "Video is not available" with no retry, in all 31 supported languages. The cause is
   deliberately not distinguished for viewers.
