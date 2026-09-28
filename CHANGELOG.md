@@ -67,10 +67,12 @@ and live stream management.
   - `BunnyStreamPlayer` gains `controller:`, `autoPlay:` and `controlsEnabled:` init
     parameters — all optional and defaulting to previous behavior. Hiding the built-in
     controls enables headless/embedded use cases such as React Native bridging.
+- `BunnyStreamLivePlayer` gains `controlsEnabled:` to hide native transport controls while
+  preserving live video and state overlays.
 - HTTP 403 handling in the player: geo-blocking, referrer protection and token failures all surface
   as a generic "Video is not available" with no retry, in all 31 supported languages. The cause is
   deliberately not distinguished for viewers.
-- `SDKInfo` — the `BunnyStream-iOS/<version>` User-Agent sent on every SDK HTTP request.
+- `SDKInfo` — the `BunnyStream-iOS/<version>` User-Agent sent on every SDK HTTP request, with optional thread-safe integrator name/version configuration appended for wrapper diagnostics.
 - Live-stream overlay strings (`LiveStream.strings`) across all 31 supported languages.
 - Example App: live stream demo covering creation, scheduling, stream settings, broadcasting and
   playback.

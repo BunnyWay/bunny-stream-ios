@@ -1,3 +1,4 @@
+import BunnyStreamAPI
 import Foundation
 
 /// A helper structure that constructs HTTP headers for video upload requests.
@@ -26,6 +27,7 @@ struct VideoRequestHeaderBuilder {
       "AuthorizationExpire": info.expirationTimeString,
       "VideoId": info.videoId,
       "LibraryId": "\(info.libraryId)",
+      SDKInfo.userAgentHeaderField: SDKInfo.userAgent,
       "Upload-Metadata": "filename \(filenameBase64),filetype \(filetypeBase64)"
     ]
     
