@@ -23,8 +23,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/onevcat/Kingfisher.git",
       "state" : {
-        "branch" : "master",
-        "revision" : "277f1ab2c6664b19b4a412e32b094b201e2d5757"
+        "revision" : "8648fe649c5d62be38721110f835821906e9242a",
+        "version" : "8.13.0"
       }
     },
     {
@@ -140,8 +140,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/googleads/swift-package-manager-google-interactive-media-ads-ios.git",
       "state" : {
-        "revision" : "fed61380cddcc0e39709357418822e9e88ea07ae",
-        "version" : "3.18.4"
+        "revision" : "fdf54991c74edc228b59592a44f33c564abafcc0",
+        "version" : "3.32.0"
       }
     },
     {
@@ -149,8 +149,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/dagronf/SwiftSubtitles.git",
       "state" : {
-        "branch" : "main",
-        "revision" : "9610acc4a62f0b274f4fc62c4d600da098fe5892"
+        "revision" : "2c3d282cda97ce49adb196700404d8e46df9778c",
+        "version" : "1.9.0"
       }
     },
     {
@@ -158,8 +158,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/dagronf/TinyCSV",
       "state" : {
-        "revision" : "63f30830cd986de84cd844d59926cf1aa2009f0b",
-        "version" : "0.5.3"
+        "revision" : "05d691ee7bab64f5ff075b97f47ef41d36a81f6f",
+        "version" : "1.0.1"
       }
     },
     {
@@ -167,8 +167,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/tus/TUSKit.git",
       "state" : {
-        "branch" : "main",
-        "revision" : "3afde4888638e434392a60f9cf6363244351b352"
+        "revision" : "167938293923b5c31ba1255da5aada8e67533984",
+        "version" : "3.7.1"
       }
     },
     {

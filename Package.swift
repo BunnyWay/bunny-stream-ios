@@ -17,9 +17,9 @@ let package = Package(
     .package(url: "https://github.com/apple/swift-openapi-generator", exact: "1.7.0"),
     .package(url: "https://github.com/apple/swift-openapi-runtime", exact: "1.8.0"),
     .package(url: "https://github.com/apple/swift-openapi-urlsession", exact: "1.0.2"),
-    .package(url: "https://github.com/tus/TUSKit.git", branch: "main"),
-    .package(url: "https://github.com/onevcat/Kingfisher.git", branch: "master"),
-    .package(url: "https://github.com/dagronf/SwiftSubtitles.git", branch: "main"),
+    .package(url: "https://github.com/tus/TUSKit.git", from: "3.4.3"),
+    .package(url: "https://github.com/onevcat/Kingfisher.git", from: "8.2.0"),
+    .package(url: "https://github.com/dagronf/SwiftSubtitles.git", from: "1.8.2"),
     .package(url: "https://github.com/googleads/swift-package-manager-google-interactive-media-ads-ios.git", exact: "3.32.0"),
     .package(url: "https://github.com/shogo4405/HaishinKit.swift", exact: "1.7.3"),
     .package(url: "https://github.com/apple/swift-docc-plugin", from: "1.4.0")
