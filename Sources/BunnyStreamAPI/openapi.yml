@@ -2069,7 +2069,7 @@ components:
         - 3
     IssueCodes:
       type: integer
-      description: 'The issue code representing a specific transcoding problem. Codes: 0 = Undefined, 1 = StreamLengthsDifference, 2 = TranscodingWarnings, 3 = IncompatibleResolution, 4 = InvalidFramerate, 5 = VideoExceededMaxDuration, 6 = AudioExceededMaxDuration, 7 = OriginalCorrupted, 8 = TranscriptionFailed, 9 = JitIncompatible, 10 = JitFailed.'
+      description: 'The issue code representing a specific transcoding problem. Codes: 0 = Undefined, 1 = StreamLengthsDifference, 2 = TranscodingWarnings, 3 = IncompatibleResolution, 4 = InvalidFramerate, 5 = VideoExceededMaxDuration, 6 = AudioExceededMaxDuration, 7 = OriginalCorrupted, 8 = TranscriptionFailed, 9 = JitIncompatible, 10 = JitFailed, 11 = CaptionGenerationFailed.'
       x-enumNames:
         - Undefined
         - StreamLengthsDifference
@@ -2082,6 +2082,7 @@ components:
         - TranscriptionFailed
         - JitIncompatible
         - JitFailed
+        - CaptionGenerationFailed
       enum:
         - 0
         - 1
@@ -2094,6 +2095,7 @@ components:
         - 8
         - 9
         - 10
+        - 11
     VideoHeatmapModel:
       type: object
       description: Represents the heatmap data for a video. Each key represents a time segment and its corresponding watch percentage.
