@@ -7,6 +7,18 @@ All notable changes to Bunny Stream iOS are documented in this file. The format 
 - `MINOR` versions add functionality in a backward-compatible way.
 - `PATCH` versions include backward-compatible bug fixes and maintenance updates.
 
+## [Unreleased]
+
+### Fixed
+
+- Fix FairPlay playback freezing at 0:00 for videos whose key ID contains `/` in base64. The
+  content ID was read from the `skd://` URI's host, which stops at the first `/`, so the license
+  was requested for a truncated ID. The whole URI payload is now decoded, including URL-safe
+  base64 and unpadded IDs, and an unrecognised key URI is logged instead of failing silently.
+- Fix the package not resolving when pinned to an exact version: TUSKit, Kingfisher and
+  SwiftSubtitles were branch dependencies, which SwiftPM rejects under a version pin. They now use
+  version ranges (`from: "3.4.3"`, `from: "8.2.0"` and `from: "1.8.2"`).
+
 ## [1.0.0] - Unreleased
 
 The first tagged release of Bunny Stream iOS. Until now the package could only be consumed from a

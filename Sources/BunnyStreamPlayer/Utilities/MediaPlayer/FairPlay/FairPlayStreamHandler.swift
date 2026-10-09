@@ -45,16 +45,50 @@ class FairPlayStreamHandler: NSObject, AVAssetResourceLoaderDelegate {
   }
   
   func resourceLoader(_ resourceLoader: AVAssetResourceLoader, shouldWaitForLoadingOfRequestedResource loadingRequest: AVAssetResourceLoadingRequest) -> Bool {
-    if let url = loadingRequest.request.url,
-       url.scheme == "skd",
-       let host = url.host,
-       let contentIdentifier = Data(base64Encoded: host) {
-      Task {
-        await handleFairPlayRequest(loadingRequest: loadingRequest, contentIdentifier: contentIdentifier)
-      }
-      return true
+    guard let url = loadingRequest.request.url, url.scheme == "skd" else {
+      return false
     }
-    return false
+    guard let contentIdentifier = Self.contentIdentifier(fromKeyURL: url) else {
+      // Without a content ID there is no SPC to send, so the key never arrives and playback sits
+      // at 0:00. Say so — this is otherwise the one DRM failure that leaves no trace.
+      print("[BunnyStreamPlayer] FairPlay key URI not recognised — \(url.absoluteString)")
+      return false
+    }
+    Task {
+      await handleFairPlayRequest(loadingRequest: loadingRequest, contentIdentifier: contentIdentifier)
+    }
+    return true
+  }
+}
+
+extension FairPlayStreamHandler {
+  /// The content ID carried by an `skd://` key URI: everything after the scheme, base64-decoded.
+  ///
+  /// It must not be read from `url.host`. Standard base64 may contain `/`, which URL parsing takes
+  /// as the start of a path: the host is then a truncated prefix that often still decodes, so the
+  /// SPC is built for the wrong content ID and the key never unlocks — playback freezes at 0:00
+  /// for exactly the videos whose key ID happens to contain `/`. URL-safe base64 (`-`, `_`) and
+  /// missing `=` padding are accepted as well.
+  static func contentIdentifier(fromKeyURL url: URL) -> Data? {
+    let prefix = "skd://"
+    let uri = url.absoluteString
+    guard uri.lowercased().hasPrefix(prefix) else { return nil }
+
+    var encoded = String(uri.dropFirst(prefix.count))
+    // A query or fragment is not part of the ID; `/` is, so it is kept.
+    if let end = encoded.firstIndex(where: { $0 == "?" || $0 == "#" }) {
+      encoded = String(encoded[..<end])
+    }
+    encoded = (encoded.removingPercentEncoding ?? encoded)
+      .replacingOccurrences(of: "-", with: "+")
+      .replacingOccurrences(of: "_", with: "/")
+    guard !encoded.isEmpty else { return nil }
+    let remainder = encoded.count % 4
+    if remainder != 0 {
+      encoded += String(repeating: "=", count: 4 - remainder)
+    }
+
+    return Data(base64Encoded: encoded)
   }
 }
 
