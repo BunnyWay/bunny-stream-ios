@@ -72,7 +72,9 @@ and live stream management.
 - HTTP 403 handling in the player: geo-blocking, referrer protection and token failures all surface
   as a generic "Video is not available" with no retry, in all 31 supported languages. The cause is
   deliberately not distinguished for viewers.
-- `SDKInfo` — the `BunnyStream-iOS/<version>` User-Agent sent on every SDK HTTP request, with optional thread-safe integrator name/version configuration appended for wrapper diagnostics.
+- `SDKInfo` — the User-Agent sent on every SDK HTTP request: the platform's default User-Agent,
+  then `bunny-stream-ios/<version> (<device type>)` (`mobile`, `tablet`, `tv` or `desktop`), with
+  optional thread-safe integrator name/version configuration appended for wrapper diagnostics.
 - Live-stream overlay strings (`LiveStream.strings`) across all 31 supported languages.
 - Example App: live stream demo covering creation, scheduling, stream settings, broadcasting and
   playback.

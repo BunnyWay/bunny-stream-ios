@@ -53,9 +53,9 @@ final class VideoRequestHeaderBuilderTests: XCTestCase {
 
     let headers = headerBuilder.buildHeaders(for: info, signature: "signature")
 
-    XCTAssertEqual(
-      headers[SDKInfo.userAgentHeaderField],
-      "BunnyStream-iOS/1.0.0 bunny-stream-react-native/0.1.1"
+    XCTAssertEqual(headers[SDKInfo.userAgentHeaderField], SDKInfo.userAgent)
+    XCTAssertTrue(
+      headers[SDKInfo.userAgentHeaderField]?.hasSuffix("bunny-stream-react-native/0.1.1") == true
     )
   }
 }
