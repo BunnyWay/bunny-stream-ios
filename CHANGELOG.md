@@ -11,6 +11,9 @@ All notable changes to Bunny Stream iOS are documented in this file. The format 
 
 ### Fixed
 
+- Fix the playback speed menu ignoring the library's Player > Playback speed setting. It was
+  hardcoded to 0.5x–2x; it now lists the speeds the `/play` endpoint returns, as the web embed
+  does (e.g. including 4x when enabled), and falls back to 0.5x–2x when the setting is missing.
 - Fix FairPlay playback freezing at 0:00 for videos whose key ID contains `/` in base64. The
   content ID was read from the `skd://` URI's host, which stops at the first `/`, so the license
   was requested for a truncated ID. The whole URI payload is now decoded, including URL-safe

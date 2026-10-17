@@ -23,7 +23,7 @@ class VideoPlayerControlsViewModel: ObservableObject {
   
   init(player: MediaPlayer, video: Video, heatmap: Heatmap) {
     self.player = player
-    playbackSpeedViewModel = PlaybackSpeedViewModel(player: player)
+    playbackSpeedViewModel = PlaybackSpeedViewModel(player: player, playbackSpeeds: video.playbackSpeeds)
     seekBarViewModel = SeekBarViewModel(player: player, video: video, heatmap: heatmap)
     captionsMenuViewModel = CaptionsMenuViewModel(player: player, captions: video.captions)
     resolutionsViewModel = ResolutionsViewModel(player: player, video: video)

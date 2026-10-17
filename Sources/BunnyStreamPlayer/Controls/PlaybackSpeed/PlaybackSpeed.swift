@@ -25,4 +25,13 @@ extension [PlaybackSpeed] {
     
     return stride(from: startSpeed, through: endSpeed, by: step).map(PlaybackSpeed.init)
   }
+
+  init(librarySetting: String?) {
+    let speeds = (librarySetting ?? "")
+      .split(separator: ",")
+      .compactMap { Float($0.trimmingCharacters(in: .whitespaces)) }
+      .filter { $0.isFinite && $0 > 0 }
+    let unique = Set(speeds).sorted()
+    self = unique.isEmpty ? .playbackSpeeds : unique.map(PlaybackSpeed.init)
+  }
 }
