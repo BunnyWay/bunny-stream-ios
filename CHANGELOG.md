@@ -11,6 +11,11 @@ All notable changes to Bunny Stream iOS are documented in this file. The format 
 
 ### Fixed
 
+- Fix the Quality menu playing a lower rendition than the one selected (e.g. 1080p played 720p).
+  Each entry capped the bitrate at a fixed per-resolution value that sat below the peak bandwidth
+  Bunny measures per video. Caps are now derived from the stream's own variants. 1440p and 2160p
+  renditions are now listed instead of being dropped. Switching to a lower quality mid-playback
+  still takes effect only after AVPlayer plays out what it has already buffered.
 - Fix FairPlay playback freezing at 0:00 for videos whose key ID contains `/` in base64. The
   content ID was read from the `skd://` URI's host, which stops at the first `/`, so the license
   was requested for a truncated ID. The whole URI payload is now decoded, including URL-safe
