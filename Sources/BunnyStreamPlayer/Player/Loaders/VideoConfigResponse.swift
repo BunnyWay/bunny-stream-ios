@@ -15,6 +15,7 @@ struct VideoConfigResponse: Decodable {
   var videoPlaylistUrl: String
   var captionsPath: String?
   var seekPath: String?
+  var playbackSpeeds: String?
 }
 
 extension VideoConfigResponse {

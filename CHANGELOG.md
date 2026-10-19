@@ -11,6 +11,9 @@ All notable changes to Bunny Stream iOS are documented in this file. The format 
 
 ### Fixed
 
+- Fix the playback speed menu ignoring the library's Player > Playback speed setting. It was
+  hardcoded to 0.5x–2x; it now lists the speeds the `/play` endpoint returns, as the web embed
+  does (e.g. including 4x when enabled), and falls back to 0.5x–2x when the setting is missing.
 - Fix the Quality menu playing a lower rendition than the one selected (e.g. 1080p played 720p).
   Each entry capped the bitrate at a fixed per-resolution value that sat below the peak bandwidth
   Bunny measures per video. Caps are now derived from the stream's own variants. 1440p and 2160p

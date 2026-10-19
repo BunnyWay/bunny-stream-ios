@@ -13,6 +13,7 @@ struct Video {
   let resolutions: [Resolution]
   var seekPath: String?
   var playlistUrl: String?
+  var playbackSpeeds: [PlaybackSpeed] = .playbackSpeeds
 }
 
 extension Video {
@@ -68,7 +69,8 @@ extension Video {
       libraryId: videoConfigResponse.videoLibraryId,
       resolutions: computedResolutions,
       seekPath: response.seekPath,
-      playlistUrl: response.videoPlaylistUrl
+      playlistUrl: response.videoPlaylistUrl,
+      playbackSpeeds: .init(librarySetting: response.playbackSpeeds)
     )
   }
 
