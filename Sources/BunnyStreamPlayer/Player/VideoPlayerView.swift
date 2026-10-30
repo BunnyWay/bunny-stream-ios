@@ -12,19 +12,23 @@ struct VideoPlayerView: View {
   private let video: Video
   private let controlsEnabled: Bool
   private let onRetry: (() -> Void)?
+  /// Whether this is the instance inside the fullscreen cover, not the embedded one.
+  private let isFullScreenPresentation: Bool
 
   init(controlsViewModel: VideoPlayerControlsViewModel,
        viewModel: VideoPlayerViewModel,
        adComponent: MediaPlayerAdComponent,
        video: Video,
        controlsEnabled: Bool = true,
-       onRetry: (() -> Void)? = nil) {
+       onRetry: (() -> Void)? = nil,
+       isFullScreenPresentation: Bool = false) {
     self.controlsViewModel = controlsViewModel
     self.viewModel = viewModel
     self.adComponent = adComponent
     self.video = video
     self.controlsEnabled = controlsEnabled
     self.onRetry = onRetry
+    self.isFullScreenPresentation = isFullScreenPresentation
   }
 
   /// The playback error to show over the player, if any. Only when a retry path exists (VOD) —
@@ -51,7 +55,9 @@ struct VideoPlayerView: View {
                            font: theme.font.size(theme.caption.fontSize))
                 .padding(.bottom, viewModel.isVisible ? 50 : 0)
             }
-            VideoPlayerControls(viewModel: controlsViewModel, pipManager: pipManager)
+            VideoPlayerControls(viewModel: controlsViewModel,
+                                pipManager: pipManager,
+                                isFullScreenPresentation: isFullScreenPresentation)
               .opacity(viewModel.isVisible ? 1 : 0)
               .background(Color.black.opacity(viewModel.isVisible ? 0.3 : 0.001))
               .environment(\.videoPlayerTheme, theme)
