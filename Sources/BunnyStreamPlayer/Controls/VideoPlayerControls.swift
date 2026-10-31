@@ -11,10 +11,14 @@ struct VideoPlayerControls: View {
   @ObservedObject private var viewModel: VideoPlayerControlsViewModel
   @ObservedObject private var pipManager: PictureInPictureManager
   @State private var airPlayView = AirPlayView()
+  private let isFullScreenPresentation: Bool
 
-  init(viewModel: VideoPlayerControlsViewModel, pipManager: PictureInPictureManager) {
+  init(viewModel: VideoPlayerControlsViewModel,
+       pipManager: PictureInPictureManager,
+       isFullScreenPresentation: Bool = false) {
     self.viewModel = viewModel
     self.pipManager = pipManager
+    self.isFullScreenPresentation = isFullScreenPresentation
   }
   
   var body: some View {
@@ -40,35 +44,43 @@ struct VideoPlayerControls: View {
     // edges the player actually reaches — an embedded, inset player gets no extra padding.
     .frame(maxWidth: .infinity, maxHeight: .infinity)
     .padding(edgeSafeAreaPadding(in: proxy))
-    .confirmationDialog(Lingua.Settings.actionsTitle, isPresented: $viewModel.isOptionsMenuActive) {
+    .confirmationDialog(Lingua.Settings.actionsTitle,
+                        isPresented: dialogBinding($viewModel.isOptionsMenuActive)) {
       mainOptionsDialog()
     }
     .confirmationDialog(Lingua.Settings.captionMenuTitle,
-                        isPresented: $viewModel.captionsMenuViewModel.showCaptions,
+                        isPresented: dialogBinding($viewModel.captionsMenuViewModel.showCaptions),
                         titleVisibility: .visible) {
       CaptionsMenuView(viewModel: viewModel.captionsMenuViewModel)
         .environment(\.videoPlayerTheme, theme)
     }
     .confirmationDialog(Lingua.Settings.playbackSpeedMenuTitle,
-                        isPresented: $viewModel.playbackSpeedViewModel.showPlaybackSpeed,
+                        isPresented: dialogBinding($viewModel.playbackSpeedViewModel.showPlaybackSpeed),
                         titleVisibility: .visible) {
       PlaybackSpeedView(viewModel: viewModel.playbackSpeedViewModel)
         .environment(\.videoPlayerTheme, theme)
     }
     .confirmationDialog(Lingua.Settings.qualityMenuTitle,
-                        isPresented: $viewModel.resolutionsViewModel.showResolutions,
+                        isPresented: dialogBinding($viewModel.resolutionsViewModel.showResolutions),
                         titleVisibility: .visible) {
       ResolutionsView(viewModel: viewModel.resolutionsViewModel)
         .environment(\.videoPlayerTheme, theme)
     }
     .confirmationDialog(Lingua.Settings.audioTrackMenuTitle,
-                        isPresented: $viewModel.audioTracksViewModel.showAudioTracks,
+                        isPresented: dialogBinding($viewModel.audioTracksViewModel.showAudioTracks),
                         titleVisibility: .visible) {
       AudioTracksView(viewModel: viewModel.audioTracksViewModel)
         .environment(\.videoPlayerTheme, theme)
       }
     .foregroundColor(theme.tintColor)
     }
+  }
+}
+
+// MARK: - Dialogs
+private extension VideoPlayerControls {
+  func dialogBinding(_ isPresented: Binding<Bool>) -> Binding<Bool> {
+    viewModel.dialogBinding(isPresented, inFullScreenPresentation: isFullScreenPresentation)
   }
 }
 

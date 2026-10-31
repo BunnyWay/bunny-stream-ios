@@ -91,6 +91,20 @@ extension VideoPlayerControlsViewModel {
       isFullScreen.toggle()
     }
   }
+
+  /// `isPresented` for a settings dialog of the player in or out of fullscreen. In fullscreen the
+  /// embedded player stays mounted under the cover and shares this view model; if it presented the
+  /// dialog too, it would do so from the controller already presenting the cover, and SwiftUI would
+  /// dismiss the cover. Only the player on screen presents the dialog and changes its state.
+  func dialogBinding(_ isPresented: Binding<Bool>, inFullScreenPresentation: Bool) -> Binding<Bool> {
+    Binding(
+      get: { isPresented.wrappedValue && self.isFullScreen == inFullScreenPresentation },
+      set: { newValue in
+        guard self.isFullScreen == inFullScreenPresentation else { return }
+        isPresented.wrappedValue = newValue
+      }
+    )
+  }
   
   func toggleMute() {
     isMuted.toggle()

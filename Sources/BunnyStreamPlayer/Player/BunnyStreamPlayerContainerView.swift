@@ -33,28 +33,29 @@ struct BunnyStreamPlayerContainerView: View {
   
   var body: some View {
 #if os(iOS)
-    videoPlayerView()
+    videoPlayerView(isFullScreenPresentation: false)
       .fullScreenCover(isPresented: $controlsViewModel.isFullScreen) {
-        videoPlayerView()
+        videoPlayerView(isFullScreenPresentation: true)
           .background(Color.black.scaleEffect(controlsViewModel.isFullScreen ? 2 : 0))
       }
 #elseif os(macOS)
-    videoPlayerView()
+    videoPlayerView(isFullScreenPresentation: false)
       .sheet(isPresented: $controlsViewModel.isFullScreen) {
-        videoPlayerView()
+        videoPlayerView(isFullScreenPresentation: true)
       }
 #endif
   }
 }
 
 private extension BunnyStreamPlayerContainerView {
-  func videoPlayerView() -> some View {
+  func videoPlayerView(isFullScreenPresentation: Bool) -> some View {
     VideoPlayerView(controlsViewModel: controlsViewModel,
                     viewModel: videoPlayerViewModel,
                     adComponent: adComponent,
                     video: video,
                     controlsEnabled: controlsEnabled,
-                    onRetry: onRetry)
+                    onRetry: onRetry,
+                    isFullScreenPresentation: isFullScreenPresentation)
     .environment(\.videoPlayerTheme, theme)
     .environment(\.videoPlayerConfig, videoPlayerConfig)
   }
