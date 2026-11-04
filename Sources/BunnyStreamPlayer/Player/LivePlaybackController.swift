@@ -264,7 +264,7 @@ private extension LivePlaybackController {
             let player: MediaPlayer
             let video: Video
             do {
-                let config = try await VideoPlayerConfigLoader().load(libraryId: libraryId, videoId: streamId, accessKey: accessKey)
+                let config = try await VideoPlayerConfigLoader().load(libraryId: libraryId, videoId: streamId, accessKey: accessKey, token: token, expires: expires)
                 // The real Video carries the recording's resolutions/captions so the quality menu
                 // offers actual renditions instead of only "Auto".
                 video = Video(response: config)
@@ -275,7 +275,11 @@ private extension LivePlaybackController {
                 return
             } catch {
                 video = Self.liveStubVideo(streamId: streamId, libraryId: libraryId)
-                player = MediaPlayer(url: fallbackURL)
+                player = MediaPlayer(
+                    liveURL: fallbackURL,
+                    contentId: streamId,
+                    streamType: .vod
+                )
             }
             observeItem(player)
             if userWantsPlay { player.play() }
