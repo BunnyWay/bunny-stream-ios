@@ -2,9 +2,9 @@ import Foundation
 
 /// How the SDK transmits CMCD (Common Media Client Data) telemetry on media requests.
 public enum CMCDTransmissionMode {
-  /// Send CMCD as `CMCD-*` HTTP request headers. Default. Keeps CDN cache keys clean.
+  /// Send CMCD as `CMCD-*` HTTP request headers.
   case header
-  /// Send CMCD as a single percent-encoded `CMCD` query parameter.
+  /// Send CMCD as a single percent-encoded `CMCD` query parameter. Default.
   /// - Warning: Query data becomes part of the CDN cache key and can reduce cache hit ratio.
   case query
   /// Send CMCD both as HTTP headers and as a `CMCD` query parameter.
@@ -18,12 +18,12 @@ public enum CMCDTransmissionMode {
 /// Process-wide CMCD configuration. Set this once (e.g. at app launch) before playback starts.
 ///
 /// ```swift
-/// CMCDConfiguration.transmissionMode = .both
+/// CMCDConfiguration.transmissionMode = .header
 /// ```
 public enum CMCDConfiguration {
-  /// The transmission mode used for CMCD on streaming requests. Defaults to ``CMCDTransmissionMode/header``.
+  /// The transmission mode used for CMCD on streaming requests. Defaults to ``CMCDTransmissionMode/query``.
   ///
   /// - Note: Applies to the live / non-DRM streaming path that goes through the SDK's resource
   ///   loader. FairPlay-protected VOD always sends the static `CMCD-Session` header only.
-  public static var transmissionMode: CMCDTransmissionMode = .header
+  public static var transmissionMode: CMCDTransmissionMode = .query
 }
